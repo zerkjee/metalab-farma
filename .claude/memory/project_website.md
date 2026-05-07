@@ -1,38 +1,26 @@
 ---
 name: Website project
-description: Projeto de site em C:\Users\Windows 11\meu-site — setup em andamento, skills instaladas, dotclaude pendente
+description: Loja Metalab Farma em C:\Users\Windows 11\meu-site — Next.js, no GitHub em zerkjee/metalab-farma, branch main
 type: project
 originSessionId: 683fec53-3ff3-4477-bdaf-b0bfaed2e8e6
 ---
-Usuário está montando um site. Pasta do projeto criada em `C:\Users\Windows 11\meu-site`.
+Projeto da loja Metalab Farma. Pasta do projeto: `C:\Users\Windows 11\meu-site`.
 
-**Why:** Projeto frontend/web pessoal.
+**Why:** Loja e-commerce de suplementos farmacêuticos (Metalab Farma).
 
-**How to apply:** Ao trabalhar no site, acionar as skills de design listadas abaixo. O próximo passo é abrir a pasta no Claude Code e rodar `/setupdotclaude:setupdotclaude`.
+**How to apply:** Ao trabalhar no site, acionar as skills de design listadas abaixo. Sempre commitar e fazer push para `origin main`.
 
-## Próximo passo pendente
+## Repositório GitHub
 
-Abrir `C:\Users\Windows 11\meu-site` no Claude Code e rodar `/setupdotclaude:setupdotclaude` para configurar o `.claude/` do projeto (CLAUDE.md, regras, hooks, agentes).
+- URL: https://github.com/zerkjee/metalab-farma
+- Branch principal: `main` (não `master`)
+- Push: `git push origin HEAD:main`
 
-Comando para abrir:
-```
-claude "C:\Users\Windows 11\meu-site"
-```
+## Stack
 
-## Skills de design instaladas globalmente e prontas
+- Next.js 16 + TypeScript + Tailwind CSS v4
+- pnpm como package manager (`pnpm dev`, `pnpm build`, `pnpm lint`)
 
-| Skill | Função |
-|-------|--------|
-| `frontend-design` | Interfaces production-grade, evita visual genérico de IA (Anthropic) |
-| `ui-ux-pro-max` | 67 estilos UI, 161 paletas, 57 pares de fontes, 99 guidelines UX |
-| `emil-design-eng` | Polish de UI, animações, detalhes invisíveis que fazem o produto parecer premium |
-| `web-design-guidelines` | Auditoria de acessibilidade, UX e boas práticas |
-| `vercel-react-best-practices` | Performance React/Next.js |
-| `vercel-composition-patterns` | Padrões de composição de componentes React escaláveis |
-| `vercel-react-view-transitions` | Animações e transições de página com React View Transitions API |
-| `vercel-react-native-skills` | React Native / Expo se for mobile |
-| `deploy-to-vercel` | Deploy do site na Vercel |
+## Cor principal
 
-## Plugin instalado
-
-`dotclaude` (poshan0126/dotclaude) instalado via `/plugin marketplace add`. Skill `setupdotclaude` disponível via `/setupdotclaude:setupdotclaude`.
+Azul-violeta Metalab: `#6b5bf0` (brand-500). Paleta brand-50 → brand-950 definida em `src/app/globals.css`.

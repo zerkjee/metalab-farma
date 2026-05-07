@@ -36,9 +36,10 @@ O `@next/swc-win32-x64-msvc` falha ao baixar por instabilidade de rede IPv6. Sol
 - `src/data/` — products.ts (8 produtos), categories.ts (5 cat), testimonials.ts (6 dep)
 
 ## Design system
-- Verde institucional: `#2d7a4f` (brand-500), `#1a4a32` (brand-800)
-- Navy (confiança): `#0f1c2e` (navy-900)
+- Azul-violeta Metalab: `#6b5bf0` (brand-500) — cor retirada da logo da Metalab design agency
+- Navy (confiança): `#0f1230` (navy-900)
 - Fontes custom: `.font-500`, `.font-600`, `.font-700` em globals.css (não são classes Tailwind padrão)
+- Logo mark: estrela SVG de 4 pontas + 4 pontos angulares no Header (inspirada na logo Metalab)
 
 ## Configuração Claude Code no repo
 O `.claude/` completo está versionado no repositório (não no .gitignore):
