@@ -29,7 +29,7 @@ export const products: Product[] = [
     badge: "bestseller",
     inStock: true,
     capsules: "60 cápsulas",
-    color: "#2d7a4f",
+    color: "#6b5bf0",
   },
   {
     id: "omega-3-1000",

@@ -64,7 +64,13 @@ export function Header() {
             {/* Logo */}
             <a href="#inicio" className="flex items-center gap-2.5 shrink-0 group">
               <div className="w-9 h-9 rounded-lg bg-brand-500 flex items-center justify-center shadow-sm group-hover:bg-brand-600 transition-colors duration-200">
-                <span className="font-display text-xl font-700 text-white leading-none">M</span>
+                <svg viewBox="0 0 36 36" fill="none" className="w-5 h-5">
+                  <path d="M18 2C18.5 7 20.5 11 24 14C27.5 17 33 18 33 18C33 18 27.5 19 24 22C20.5 25 18.5 29 18 34C17.5 29 15.5 25 12 22C8.5 19 3 18 3 18C3 18 8.5 17 12 14C15.5 11 17.5 7 18 2Z" fill="white"/>
+                  <circle cx="25" cy="11" r="2.2" fill="white" opacity="0.7"/>
+                  <circle cx="25" cy="25" r="2.2" fill="white" opacity="0.7"/>
+                  <circle cx="11" cy="11" r="2.2" fill="white" opacity="0.7"/>
+                  <circle cx="11" cy="25" r="2.2" fill="white" opacity="0.7"/>
+                </svg>
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-display text-[17px] font-700 tracking-widest text-gray-900">

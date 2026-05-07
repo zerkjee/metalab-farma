@@ -39,7 +39,7 @@ export function HeroSection() {
           className="absolute top-0 right-0 w-full h-full rounded-bl-[120px]"
           style={{
             background:
-              "radial-gradient(ellipse 70% 80% at 80% 30%, rgba(45,122,79,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 60% at 100% 80%, rgba(45,122,79,0.05) 0%, transparent 50%)",
+              "radial-gradient(ellipse 70% 80% at 80% 30%, rgba(107,91,240,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 60% at 100% 80%, rgba(107,91,240,0.05) 0%, transparent 50%)",
           }}
         />
       </div>
@@ -159,7 +159,7 @@ export function HeroSection() {
                       key={i}
                       className="absolute w-3 h-3 rounded-full"
                       style={{
-                        background: i % 2 === 0 ? "#2d7a4f" : "#86caa9",
+                        background: i % 2 === 0 ? "#6b5bf0" : "#b8a9ff",
                         top: "50%",
                         left: "50%",
                         transform: `rotate(${deg}deg) translateX(46px) translateY(-50%)`,

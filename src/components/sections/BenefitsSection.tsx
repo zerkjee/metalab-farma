@@ -8,7 +8,7 @@ const BENEFITS = [
     icon: Microscope,
     title: "Matérias-primas Certificadas",
     description: "Insumos selecionados com certificações internacionais — COA, GMP e GRAS — garantindo pureza comprovada em cada lote.",
-    color: "#2d7a4f",
+    color: "#6b5bf0",
     bg: "#f0faf4",
   },
   {

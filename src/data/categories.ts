@@ -13,7 +13,7 @@ export const categories: Category[] = [
     name: "Vitaminas",
     description: "Suplementação essencial para o dia a dia",
     productCount: 14,
-    color: "#2d7a4f",
+    color: "#6b5bf0",
     bgColor: "#f0faf4",
   },
   {
