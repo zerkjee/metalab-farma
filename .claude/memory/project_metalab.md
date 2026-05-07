@@ -39,3 +39,23 @@ O `@next/swc-win32-x64-msvc` falha ao baixar por instabilidade de rede IPv6. Sol
 - Verde institucional: `#2d7a4f` (brand-500), `#1a4a32` (brand-800)
 - Navy (confiança): `#0f1c2e` (navy-900)
 - Fontes custom: `.font-500`, `.font-600`, `.font-700` em globals.css (não são classes Tailwind padrão)
+
+## Configuração Claude Code no repo
+O `.claude/` completo está versionado no repositório (não no .gitignore):
+- `skills/` — 53 skills (projeto + globais copiadas de `~/.claude/skills/`)
+- `agents/` — 4 agents (code-reviewer, frontend-designer, performance-reviewer, security-reviewer)
+- `hooks/` — 8 hooks (protect-files, scan-secrets, format-on-save, etc.)
+- `rules/` — 5 regras de qualidade
+- `settings.json` — modelo sonnet, tema dark, marketplace dotclaude, permissões Bash/PowerShell/WebFetch
+- `memory/` — arquivos de memória copiados para o repo
+
+Apenas `.claude/projects/` está no .gitignore (histórico de sessões e memória dinâmica).
+
+## Ao clonar em outro dispositivo
+```bash
+git clone https://github.com/zerkjee/metalab-farma.git
+cd metalab-farma
+pnpm install --ignore-scripts
+pnpm dev
+```
+Na primeira sessão pedir ao Claude para copiar `.claude/memory/` para o lugar certo (`~/.claude/projects/...`).
