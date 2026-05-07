@@ -1,6 +1,23 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
 
+  "model": "sonnet",
+  "theme": "dark",
+  "skipDangerousModePermissionPrompt": true,
+
+  "extraKnownMarketplaces": {
+    "dotclaude": {
+      "source": {
+        "source": "github",
+        "repo": "poshan0126/dotclaude"
+      }
+    }
+  },
+
+  "enabledPlugins": {
+    "setupdotclaude@dotclaude": true
+  },
+
   "permissions": {
     "allow": [
       "Bash(pnpm lint)",
@@ -22,7 +39,13 @@
       "Bash(git switch *)",
       "Bash(gh pr *)",
       "Bash(gh issue *)",
-      "Bash(gh run *)"
+      "Bash(gh run *)",
+      "PowerShell(npm *)",
+      "PowerShell(claude *)",
+      "PowerShell(winget install *)",
+      "PowerShell(Set-ExecutionPolicy *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [
       "Read(**/.env)",
