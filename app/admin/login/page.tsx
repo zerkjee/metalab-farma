@@ -3,27 +3,36 @@
 import { Eye, EyeOff, LockKeyhole, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-import { setMockAdminSession } from '@/utils/adminAuth';
+import { signIn } from 'next-auth/react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('admin@metalab.com.br');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus('loading');
+    setErrorMsg('');
 
-    window.setTimeout(() => {
-      setMockAdminSession();
-      setStatus('success');
+    const result = await signIn('credentials', {
+      email,
+      senha: password,
+      redirect: false,
+    });
 
-      window.setTimeout(() => {
-        router.replace('/admin');
-      }, 550);
-    }, 850);
+    if (result?.error) {
+      setStatus('error');
+      setErrorMsg('Email ou senha inválidos. Verifique e tente novamente.');
+      return;
+    }
+
+    setStatus('success');
+    router.replace('/admin');
+    router.refresh();
   }
 
   const loading = status === 'loading';
@@ -63,7 +72,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              {['Sessão visual', 'Permissões futuras', 'Middleware pronto'].map((item) => (
+              {['Autenticação real', 'Sessão segura JWT', 'Acesso por papel'].map((item) => (
                 <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                   <ShieldCheck className="mb-3 h-5 w-5 text-purple-300" strokeWidth={1.8} />
                   <p className="text-xs font-semibold text-slate-300">{item}</p>
@@ -91,10 +100,16 @@ export default function AdminLoginPage() {
                   <div>
                     <p className="text-sm font-bold text-white">Entrada administrativa</p>
                     <p className="mt-1 text-xs leading-5 text-slate-400">
-                      Ambiente mockado. A autenticação real será conectada ao backend posteriormente.
+                      Autenticação real com NextAuth. Apenas administradores têm acesso.
                     </p>
                   </div>
                 </div>
+
+                {status === 'error' && (
+                  <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                    {errorMsg}
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
@@ -109,6 +124,7 @@ export default function AdminLoginPage() {
                       className="h-12 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/10"
                       placeholder="admin@metalab.com.br"
                       autoComplete="email"
+                      required
                     />
                   </div>
 
@@ -125,6 +141,8 @@ export default function AdminLoginPage() {
                         className="h-12 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 pr-12 text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/10"
                         placeholder="Digite sua senha"
                         autoComplete="current-password"
+                        required
+                        minLength={6}
                       />
                       <button
                         type="button"
@@ -143,7 +161,7 @@ export default function AdminLoginPage() {
                     className="flex h-12 w-full items-center justify-center rounded-2xl px-4 text-sm font-bold text-white shadow-lg shadow-purple-950/30 transition-all duration-300 hover:brightness-110 active:scale-[0.99] disabled:cursor-wait disabled:opacity-80"
                     style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
                   >
-                    {loading ? 'Verificando acesso...' : success ? 'Acesso liberado' : 'Entrar no painel'}
+                    {loading ? 'Verificando acesso...' : success ? 'Acesso liberado ✓' : 'Entrar no painel'}
                   </button>
                 </form>
               </div>

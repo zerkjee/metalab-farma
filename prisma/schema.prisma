@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── AUTENTICAÇÃO (NextAuth) ──────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── USUÁRIOS ────────────────────────────────────────────────────────────────
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nome      String
+  senha     String?
+  papel     Papel    @default(CLIENTE)
+  ativo     Boolean  @default(true)
+  telefone  String?
+  cpf       String?  @unique
+  criadoEm DateTime @default(now())
+
+  accounts   Account[]
+  sessions   Session[]
+  enderecos  Endereco[]
+  pedidos    Pedido[]
+  avaliacoes Avaliacao[]
+
+  @@map("usuarios")
+}
+
+enum Papel {
+  CLIENTE
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ─── PRODUTOS ────────────────────────────────────────────────────────────────
+
+model Categoria {
+  id       String    @id @default(cuid())
+  nome     String
+  slug     String    @unique
+  ordem    Int       @default(0)
+  produtos Produto[]
+
+  @@map("categorias")
+}
+
+model Produto {
+  id            String  @id @default(cuid())
+  nome          String
+  slug          String  @unique
+  sku           String  @unique
+  ean           String?
+  marca         String  @default("Metalab")
+  subtitulo     String?
+  descricaoHtml String  @db.Text
+  descricaoCurta String?
+
+  preco         Decimal  @db.Decimal(10, 2)
+  precoOriginal Decimal? @db.Decimal(10, 2)
+
+  estoque    Int @default(0)
+  estoqueMin Int @default(5)
+
+  categoriaId String?
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+
+  corPrincipal  String?
+  corSecundaria String?
+  imagemUrl     String?
+
+  metaTitulo    String?
+  metaDescricao String?
+  palavrasChave String?
+
+  ativo    Boolean @default(true)
+  destaque Boolean @default(false)
+
+  imagens   ImagemProduto[]
+  atributos AtributoProduto[]
+  avaliacoes Avaliacao[]
+  itens     ItemPedido[]
+
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("produtos")
+}
+
+model ImagemProduto {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String?
+  ordem     Int     @default(0)
+  produtoId String
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@map("imagens_produto")
+}
+
+model AtributoProduto {
+  id        String  @id @default(cuid())
+  chave     String
+  valor     String
+  produtoId String
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@map("atributos_produto")
+}
+
+// ─── ENDEREÇOS ────────────────────────────────────────────────────────────────
+
+model Endereco {
+  id          String  @id @default(cuid())
+  cep         String
+  logradouro  String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  estado      String  @db.Char(2)
+  principal   Boolean @default(false)
+
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  pedidos   Pedido[]
+
+  @@map("enderecos")
+}
+
+// ─── PEDIDOS ─────────────────────────────────────────────────────────────────
+
+model Pedido {
+  id     String       @id @default(cuid())
+  numero String       @unique
+  status StatusPedido @default(AGUARDANDO_PAGAMENTO)
+
+  subtotal Decimal @db.Decimal(10, 2)
+  desconto Decimal @default(0) @db.Decimal(10, 2)
+  frete    Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
+
+  metodoPagamento MetodoPagamento?
+  pagamentoId     String?
+  pixQrCode       String?          @db.Text
+  pixQrCodeBase64 String?          @db.Text
+  pago            Boolean          @default(false)
+  pagoEm          DateTime?
+
+  codigoRastreio String?
+  enviadoEm      DateTime?
+
+  usuarioId  String?
+  usuario    Usuario?  @relation(fields: [usuarioId], references: [id])
+  enderecoId String?
+  endereco   Endereco? @relation(fields: [enderecoId], references: [id])
+  cupomId    String?
+  cupom      Cupom?    @relation(fields: [cupomId], references: [id])
+  itens      ItemPedido[]
+
+  compradorNome     String
+  compradorEmail    String
+  compradorCpf      String
+  compradorTelefone String?
+  enderecoSnap      String? @db.Text
+
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("pedidos")
+}
+
+enum StatusPedido {
+  AGUARDANDO_PAGAMENTO
+  PAGAMENTO_APROVADO
+  EM_SEPARACAO
+  ENVIADO
+  ENTREGUE
+  CANCELADO
+  REEMBOLSADO
+}
+
+enum MetodoPagamento {
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  BOLETO
+}
+
+model ItemPedido {
+  id         String  @id @default(cuid())
+  quantidade Int
+  precoUnit  Decimal @db.Decimal(10, 2)
+  subtotal   Decimal @db.Decimal(10, 2)
+
+  pedidoId      String
+  pedido        Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produtoId     String
+  produto       Produto @relation(fields: [produtoId], references: [id])
+  produtoNome   String
+  produtoSku    String
+  produtoImagem String?
+
+  @@map("itens_pedido")
+}
+
+// ─── CUPONS ───────────────────────────────────────────────────────────────────
+
+model Cupom {
+  id        String    @id @default(cuid())
+  codigo    String    @unique
+  tipo      TipoCupom
+  valor     Decimal   @db.Decimal(10, 2)
+  usoMaximo Int?
+  usoAtual  Int       @default(0)
+  validade  DateTime?
+  ativo     Boolean   @default(true)
+  pedidos   Pedido[]
+
+  @@map("cupons")
+}
+
+enum TipoCupom {
+  PERCENTUAL
+  VALOR_FIXO
+  FRETE_GRATIS
+}
+
+// ─── AVALIAÇÕES ───────────────────────────────────────────────────────────────
+
+model Avaliacao {
+  id       String  @id @default(cuid())
+  nota     Int
+  titulo   String?
+  texto    String?
+  aprovada Boolean @default(false)
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  produtoId String
+  produto   Produto @relation(fields: [produtoId], references: [id])
+
+  criadoEm DateTime @default(now())
+
+  @@map("avaliacoes")
+}
+
+// ─── BANNERS ─────────────────────────────────────────────────────────────────
+
+model Banner {
+  id        String  @id @default(cuid())
+  titulo    String?
+  subtitulo String?
+  imagemUrl String
+  linkUrl   String?
+  ordem     Int     @default(0)
+  ativo     Boolean @default(true)
+
+  @@map("banners")
+}
