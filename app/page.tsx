@@ -14,7 +14,36 @@ import { products as localProducts } from "@/data/products";
 import { categorizeProducts } from "@/utils/categorizeProducts";
 
 async function getProducts(): Promise<Product[]> {
-  return localProducts;
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000"
+    const res = await fetch(`${baseUrl}/api/produtos?por_pagina=200`, {
+      next: { revalidate: 60 },
+    })
+    if (res.ok) {
+      const data = await res.json()
+      const apiProducts: Product[] = (data.produtos ?? []).map((p: Record<string, unknown>) => ({
+        id: String(p.id),
+        slug: String(p.slug),
+        sku: p.sku ? String(p.sku) : undefined,
+        nome: String(p.nome),
+        marca: String(p.marca ?? "Metalab"),
+        preco: Number(p.preco),
+        precoOriginal: p.precoOriginal ? Number(p.precoOriginal) : null,
+        estoque: Number(p.estoque ?? 0),
+        descricaoCurta: p.descricaoCurta ? String(p.descricaoCurta) : null,
+        descricaoHtml: p.descricaoHtml ? String(p.descricaoHtml) : null,
+        imagemUrl: p.imagemUrl ? String(p.imagemUrl) : null,
+        ativo: Boolean(p.ativo),
+        destaque: Boolean(p.destaque),
+        corPrincipal: p.corPrincipal ? String(p.corPrincipal) : null,
+        criadoEm: p.criadoEm ? String(p.criadoEm) : undefined,
+      }))
+      if (apiProducts.length > 0) return apiProducts
+    }
+  } catch {
+    // fallback to local data
+  }
+  return localProducts
 }
 
 export default async function Home() {
