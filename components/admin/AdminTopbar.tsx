@@ -1,9 +1,9 @@
 'use client';
 
 import { LogOut } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { clearMockAdminSession } from '@/utils/adminAuth';
+import { signOut, useSession } from 'next-auth/react';
 
 const titles: Record<string, string> = {
   '/admin':            'Dashboard',
@@ -17,23 +17,23 @@ const titles: Record<string, string> = {
 
 export default function AdminTopbar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const { data: session } = useSession();
   const [notifOpen, setNotifOpen] = useState(false);
   const title = titles[pathname] ?? 'Admin';
 
+  const userName = session?.user?.name ?? 'Admin';
+  const userInitial = userName.charAt(0).toUpperCase();
+
   function handleLogout() {
-    clearMockAdminSession();
-    router.replace('/admin/login');
+    signOut({ callbackUrl: '/admin/login' });
   }
 
   return (
     <header className="h-16 border-b border-slate-800 flex items-center px-6 gap-4 flex-shrink-0"
       style={{ background: '#0f172a' }}>
 
-      {/* Title */}
       <h1 className="text-white font-bold text-lg flex-1">{title}</h1>
 
-      {/* Search */}
       <div className="hidden sm:flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 w-56">
         <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -44,7 +44,6 @@ export default function AdminTopbar() {
         />
       </div>
 
-      {/* Notificações */}
       <div className="relative">
         <button
           onClick={() => setNotifOpen(v => !v)}
@@ -82,14 +81,13 @@ export default function AdminTopbar() {
         )}
       </div>
 
-      {/* Avatar */}
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold"
           style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}>
-          A
+          {userInitial}
         </div>
         <div className="hidden sm:block">
-          <p className="text-white text-xs font-bold leading-none">Admin</p>
+          <p className="text-white text-xs font-bold leading-none">{userName}</p>
           <p className="text-slate-500 text-[10px]">Metalab Store</p>
         </div>
       </div>
