@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/context/CartContext';
 
 const navItems = [
@@ -26,6 +27,9 @@ export default function Header() {
   const isAdminActive = pathname?.startsWith(adminAccess.href);
   const { hydrated, totals, toggleCart } = useCart();
   const cartCount = hydrated ? totals.itemCount : 0;
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
+  const userInitial = session?.user?.name?.[0]?.toUpperCase() ?? '?';
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
@@ -83,6 +87,28 @@ export default function Header() {
                 {adminAccess.label}
               </span>
             </Link>
+
+            {isLoggedIn ? (
+              <div className="relative group hidden md:block">
+                <button className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-purple-600/10 text-purple-700 text-sm font-black hover:bg-purple-600/20 transition-all">
+                  {userInitial}
+                </button>
+                <div className="pointer-events-none absolute right-0 top-12 w-44 rounded-2xl border border-gray-100 bg-white shadow-xl opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all z-50 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-xs font-semibold text-gray-900 truncate">{session?.user?.name}</p>
+                    <p className="text-[11px] text-gray-400 truncate">{session?.user?.email}</p>
+                  </div>
+                  <button onClick={() => signOut({ callbackUrl: '/' })}
+                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-red-500 hover:bg-red-50 transition-colors">
+                    <LogOut size={14} /> Sair
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link href="/login" className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-semibold text-gray-700 hover:border-[#6b21a8]/30 hover:text-[#6b21a8] transition-all">
+                <User size={14} /> Entrar
+              </Link>
+            )}
 
             <button
               onClick={toggleCart}
@@ -142,6 +168,21 @@ export default function Header() {
               <Settings className="h-4 w-4" strokeWidth={1.8} />
               {adminAccess.label}
             </Link>
+            {isLoggedIn ? (
+              <button
+                onClick={() => { setMenuOpen(false); void signOut({ callbackUrl: '/' }); }}
+                className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
+              >
+                <LogOut className="h-4 w-4" strokeWidth={1.8} />
+                Sair ({session?.user?.name?.split(' ')[0]})
+              </button>
+            ) : (
+              <Link href="/login" onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-[#6b21a8] hover:bg-purple-50 transition-all">
+                <User className="h-4 w-4" strokeWidth={1.8} />
+                Entrar / Criar conta
+              </Link>
+            )}
           </div>
         )}
       </nav>
