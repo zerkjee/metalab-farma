@@ -9,6 +9,7 @@ import OrderSummary from '@/components/checkout/OrderSummary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { calculateCartTotals } from '@/services/cartTotals';
 import { createMockOrder } from '@/services/orders';
 import type {
   CheckoutForm as CheckoutFormValues,
@@ -71,8 +72,17 @@ const paymentMethods: PaymentMethod[] = [
 ];
 
 export default function CheckoutPage() {
-  const { items, totals, hydrated, clearCart } = useCart();
+  const {
+    items,
+    coupons,
+    hydrated,
+    applyCoupon,
+    removeCoupon,
+    clearCart,
+  } = useCart();
   const [form, setForm] = useState<CheckoutFormValues>(initialForm);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedShippingId, setSelectedShippingId] = useState<ShippingMethodId>('standard');
   const [selectedPaymentId, setSelectedPaymentId] = useState<PaymentMethodId>('pix');
   const [order, setOrder] = useState<MockOrder | null>(null);
@@ -85,7 +95,15 @@ export default function CheckoutPage() {
     () => paymentMethods.find((method) => method.id === selectedPaymentId) ?? paymentMethods[0],
     [selectedPaymentId],
   );
-  const total = totals.subtotal + selectedShipping.price;
+  const totals = useMemo(() => calculateCartTotals({
+    items,
+    coupons,
+    shippingPrice: selectedShipping.price,
+  }), [coupons, items, selectedShipping.price]);
+  const appliedCoupons = useMemo(
+    () => [coupons.discount, coupons.freeShipping].filter((coupon) => coupon !== null),
+    [coupons.discount, coupons.freeShipping],
+  );
 
   function updateForm<K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -98,10 +116,23 @@ export default function CheckoutPage() {
       shipping: selectedShipping,
       payment: selectedPayment,
       subtotal: totals.subtotal,
+      discountTotal: totals.discountTotal,
+      shippingDiscountTotal: totals.shippingDiscountTotal,
+      payableShippingTotal: totals.payableShippingTotal,
+      total: totals.total,
+      coupons: appliedCoupons,
     });
 
     setOrder(mockOrder);
     clearCart();
+  }
+
+  function handleApplyCoupon() {
+    const result = applyCoupon(couponCode);
+    setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
+    if (result.ok) {
+      setCouponCode('');
+    }
   }
 
   if (order) {
@@ -177,24 +208,76 @@ export default function CheckoutPage() {
         </section>
 
         <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
-          <CheckoutForm
-            formId={checkoutFormId}
-            values={form}
-            shippingMethods={shippingMethods}
-            paymentMethods={paymentMethods}
-            selectedShippingId={selectedShippingId}
-            selectedPaymentId={selectedPaymentId}
-            onChange={updateForm}
-            onShippingChange={setSelectedShippingId}
-            onPaymentChange={setSelectedPaymentId}
-            onSubmit={finishOrder}
-          />
+          <div className="flex flex-col gap-6">
+            <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+              <div className="mb-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Cupons</p>
+                <h2 className="mt-1 text-xl font-black text-gray-950">Aplique seus beneficios</h2>
+                <p className="mt-1 text-sm text-gray-500">Permitido 1 cupom de desconto + 1 cupom de frete gratis.</p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <input
+                  value={couponCode}
+                  onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+                  placeholder="PRIMEIRA30"
+                  className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8] focus:bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  className="rounded-xl bg-[#6b21a8] px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90"
+                >
+                  Aplicar cupom
+                </button>
+              </div>
+              {couponMessage && (
+                <p className={`mt-3 text-sm font-semibold ${
+                  couponMessage.type === 'success' ? 'text-emerald-600' : 'text-red-500'
+                }`}>
+                  {couponMessage.text}
+                </p>
+              )}
+              {(coupons.discount || coupons.freeShipping) && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {coupons.discount && (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                      {coupons.discount.code}
+                      <button type="button" onClick={() => removeCoupon('discount')} className="text-red-500">remover</button>
+                    </span>
+                  )}
+                  {coupons.freeShipping && (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                      {coupons.freeShipping.code}
+                      <button type="button" onClick={() => removeCoupon('free_shipping')} className="text-red-500">remover</button>
+                    </span>
+                  )}
+                </div>
+              )}
+            </section>
+
+            <CheckoutForm
+              formId={checkoutFormId}
+              values={form}
+              shippingMethods={shippingMethods}
+              paymentMethods={paymentMethods}
+              selectedShippingId={selectedShippingId}
+              selectedPaymentId={selectedPaymentId}
+              onChange={updateForm}
+              onShippingChange={setSelectedShippingId}
+              onPaymentChange={setSelectedPaymentId}
+              onSubmit={finishOrder}
+            />
+          </div>
           <OrderSummary
             formId={checkoutFormId}
             items={items}
             subtotal={totals.subtotal}
             shippingTotal={selectedShipping.price}
-            total={total}
+            discountTotal={totals.discountTotal}
+            shippingDiscountTotal={totals.shippingDiscountTotal}
+            payableShippingTotal={totals.payableShippingTotal}
+            total={totals.total}
+            coupons={coupons}
           />
         </section>
       </main>

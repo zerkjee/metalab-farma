@@ -1,0 +1,48 @@
+import type { Coupon } from '@/types/coupon';
+
+export const mockCoupons: Coupon[] = [
+  {
+    id: 'coupon-primeira30',
+    code: 'PRIMEIRA30',
+    name: 'Primeira compra 30% OFF',
+    type: 'discount',
+    discountMode: 'percent',
+    value: 30,
+    minimumSubtotal: 0,
+    active: true,
+    validUntil: '2026-12-31',
+  },
+  {
+    id: 'coupon-fretegratis',
+    code: 'FRETEGRATIS',
+    name: 'Frete gratis',
+    type: 'free_shipping',
+    discountMode: 'shipping',
+    value: 0,
+    minimumSubtotal: 0,
+    active: true,
+    validUntil: '2026-12-31',
+  },
+  {
+    id: 'coupon-vip20',
+    code: 'VIP20',
+    name: 'VIP 20% OFF',
+    type: 'discount',
+    discountMode: 'percent',
+    value: 20,
+    minimumSubtotal: 0,
+    active: true,
+    validUntil: '2026-12-31',
+  },
+  {
+    id: 'coupon-metalab10',
+    code: 'METALAB10',
+    name: 'Metalab 10% OFF',
+    type: 'discount',
+    discountMode: 'percent',
+    value: 10,
+    minimumSubtotal: 0,
+    active: true,
+    validUntil: '2026-12-31',
+  },
+];

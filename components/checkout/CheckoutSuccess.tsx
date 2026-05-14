@@ -53,6 +53,49 @@ export default function CheckoutSuccess({ order }: { order: MockOrder }) {
             <p className="mt-1 text-sm font-bold text-gray-950">{order.payment.label}</p>
           </div>
         </div>
+
+        <div className="mt-5 rounded-2xl bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Resumo financeiro</p>
+          <div className="mt-3 space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Subtotal</span>
+              <span className="font-bold text-gray-950">{formatCurrency(order.subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Desconto</span>
+              <span className="font-bold text-emerald-600">- {formatCurrency(order.discountTotal)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Frete</span>
+              <span className="font-bold text-gray-950">{formatCurrency(order.shippingTotal)}</span>
+            </div>
+            {order.shippingDiscountTotal > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Desconto no frete</span>
+                <span className="font-bold text-emerald-600">- {formatCurrency(order.shippingDiscountTotal)}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-gray-100 pt-2">
+              <span className="font-black text-gray-950">Total</span>
+              <span className="text-lg font-black text-[#6b21a8]">{formatCurrency(order.total)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-2xl bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Cupons usados</p>
+          {order.coupons.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {order.coupons.map((coupon) => (
+                <span key={coupon.id} className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                  {coupon.code}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-gray-500">Nenhum cupom aplicado.</p>
+          )}
+        </div>
       </div>
 
       <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">

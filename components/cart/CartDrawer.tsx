@@ -2,6 +2,7 @@
 
 import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 
 function formatCurrency(value: number) {
@@ -12,15 +13,28 @@ function formatCurrency(value: number) {
 }
 
 export default function CartDrawer() {
+  const [couponCode, setCouponCode] = useState('');
+  const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const {
     items,
+    coupons,
     totals,
     isOpen,
     closeCart,
     increaseItem,
     decreaseItem,
     removeItem,
+    applyCoupon,
+    removeCoupon,
   } = useCart();
+
+  function handleApplyCoupon() {
+    const result = applyCoupon(couponCode);
+    setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
+    if (result.ok) {
+      setCouponCode('');
+    }
+  }
 
   return (
     <>
@@ -146,10 +160,51 @@ export default function CartDrawer() {
 
             <div className="border-t border-gray-100 bg-white px-5 py-5">
               <div className="mb-4 rounded-2xl border border-dashed border-[#6b21a8]/30 bg-[#6b21a8]/5 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#6b21a8]">Cupons em breve</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#6b21a8]">Cupons</p>
                 <p className="mt-1 text-sm text-gray-600">
-                  Estrutura pronta para 1 cupom de desconto + 1 frete gratis.
+                  Use 1 cupom de desconto + 1 cupom de frete gratis.
                 </p>
+                <div className="mt-3 flex gap-2">
+                  <input
+                    value={couponCode}
+                    onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+                    placeholder="PRIMEIRA30"
+                    className="min-w-0 flex-1 rounded-xl border border-purple-200 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8]"
+                  />
+                  <button
+                    onClick={handleApplyCoupon}
+                    className="rounded-xl bg-[#6b21a8] px-3 py-2 text-xs font-black text-white transition-all hover:opacity-90"
+                  >
+                    Aplicar
+                  </button>
+                </div>
+                {couponMessage && (
+                  <p className={`mt-2 text-xs font-semibold ${
+                    couponMessage.type === 'success' ? 'text-emerald-600' : 'text-red-500'
+                  }`}>
+                    {couponMessage.text}
+                  </p>
+                )}
+                {(coupons.discount || coupons.freeShipping) && (
+                  <div className="mt-3 flex flex-col gap-2">
+                    {coupons.discount && (
+                      <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs">
+                        <span className="font-bold text-gray-700">{coupons.discount.code}</span>
+                        <button onClick={() => removeCoupon('discount')} className="font-bold text-red-500 hover:text-red-600">
+                          Remover
+                        </button>
+                      </div>
+                    )}
+                    {coupons.freeShipping && (
+                      <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs">
+                        <span className="font-bold text-gray-700">{coupons.freeShipping.code}</span>
+                        <button onClick={() => removeCoupon('free_shipping')} className="font-bold text-red-500 hover:text-red-600">
+                          Remover
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -157,9 +212,25 @@ export default function CartDrawer() {
                   <span className="text-gray-500">Itens</span>
                   <span className="font-bold text-gray-950">{totals.itemCount}</span>
                 </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Subtotal</span>
+                  <span className="font-bold text-gray-950">{formatCurrency(totals.subtotal)}</span>
+                </div>
+                {totals.discountTotal > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-emerald-600">Desconto</span>
+                    <span className="font-bold text-emerald-600">- {formatCurrency(totals.discountTotal)}</span>
+                  </div>
+                )}
+                {coupons.freeShipping && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-emerald-600">Frete gratis</span>
+                    <span className="font-bold text-emerald-600">Aplicado no checkout</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                  <span className="text-base font-bold text-gray-950">Subtotal</span>
-                  <span className="text-2xl font-black text-[#6b21a8]">{formatCurrency(totals.subtotal)}</span>
+                  <span className="text-base font-bold text-gray-950">Total parcial</span>
+                  <span className="text-2xl font-black text-[#6b21a8]">{formatCurrency(totals.total)}</span>
                 </div>
               </div>
 

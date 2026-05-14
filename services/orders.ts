@@ -1,4 +1,5 @@
 import type { CartItem } from '@/types/cart';
+import type { AppliedCoupon } from '@/types/coupon';
 import type { CheckoutForm, MockOrder, PaymentMethod, ShippingMethod } from '@/types/checkout';
 
 interface CreateMockOrderInput {
@@ -7,6 +8,11 @@ interface CreateMockOrderInput {
   shipping: ShippingMethod;
   payment: PaymentMethod;
   subtotal: number;
+  discountTotal: number;
+  shippingDiscountTotal: number;
+  payableShippingTotal: number;
+  total: number;
+  coupons: AppliedCoupon[];
 }
 
 function createMockOrderId() {
@@ -27,6 +33,11 @@ export function createMockOrder({
   shipping,
   payment,
   subtotal,
+  discountTotal,
+  shippingDiscountTotal,
+  payableShippingTotal,
+  total,
+  coupons,
 }: CreateMockOrderInput): MockOrder {
   const shippingTotal = shipping.price;
 
@@ -39,7 +50,11 @@ export function createMockOrder({
     payment,
     subtotal,
     shippingTotal,
-    total: subtotal + shippingTotal,
+    discountTotal,
+    shippingDiscountTotal,
+    payableShippingTotal,
+    total,
+    coupons: coupons.map((coupon) => ({ ...coupon })),
     status: 'mock_created',
   };
 }

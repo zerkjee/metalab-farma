@@ -8,16 +8,23 @@ import {
   useMemo,
   useState,
 } from 'react';
-import type { AddCartProductInput, CartItem, CartState, CartTotals } from '@/types/cart';
+import { calculateCartTotals } from '@/services/cartTotals';
+import { couponSlot, emptyCouponState, validateCoupon } from '@/services/coupons';
+import type {
+  AddCartProductInput,
+  ApplyCouponFn,
+  CartItem,
+  CartState,
+  CartTotals,
+  RemoveCouponFn,
+} from '@/types/cart';
+import type { AppliedCoupon, CouponState } from '@/types/coupon';
 
 const CART_STORAGE_KEY = 'metalab_cart_state_v1';
 
 const initialCartState: CartState = {
   items: [],
-  coupons: {
-    discountCouponCode: null,
-    freeShippingCouponCode: null,
-  },
+  coupons: emptyCouponState,
 };
 
 interface CartContextValue {
@@ -33,6 +40,8 @@ interface CartContextValue {
   increaseItem: (productId: number) => void;
   decreaseItem: (productId: number) => void;
   removeItem: (productId: number) => void;
+  applyCoupon: ApplyCouponFn;
+  removeCoupon: RemoveCouponFn;
   clearCart: () => void;
 }
 
@@ -68,6 +77,19 @@ function sanitizeCartState(value: unknown): CartState {
     })
     : [];
 
+  const maybeCoupons = maybeState.coupons as Partial<CouponState> & {
+    discountCouponCode?: string | null;
+    freeShippingCouponCode?: string | null;
+  } | undefined;
+
+  const isAppliedCoupon = (coupon: unknown): coupon is AppliedCoupon => {
+    if (!coupon || typeof coupon !== 'object') return false;
+    const maybeCoupon = coupon as Partial<AppliedCoupon>;
+    return typeof maybeCoupon.code === 'string'
+      && (maybeCoupon.type === 'discount' || maybeCoupon.type === 'free_shipping')
+      && typeof maybeCoupon.name === 'string';
+  };
+
   return {
     items: items.map((item) => ({
       ...item,
@@ -75,8 +97,8 @@ function sanitizeCartState(value: unknown): CartState {
       color: item.color || '#6b21a8',
     })),
     coupons: {
-      discountCouponCode: maybeState.coupons?.discountCouponCode ?? null,
-      freeShippingCouponCode: maybeState.coupons?.freeShippingCouponCode ?? null,
+      discount: isAppliedCoupon(maybeCoupons?.discount) ? maybeCoupons.discount : null,
+      freeShipping: isAppliedCoupon(maybeCoupons?.freeShipping) ? maybeCoupons.freeShipping : null,
     },
   };
 }
@@ -108,15 +130,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart, hydrated]);
 
-  const totals = useMemo<CartTotals>(() => {
-    return cart.items.reduce(
-      (acc, item) => ({
-        itemCount: acc.itemCount + item.quantity,
-        subtotal: acc.subtotal + item.unitPrice * item.quantity,
-      }),
-      { itemCount: 0, subtotal: 0 },
-    );
-  }, [cart.items]);
+  const totals = useMemo<CartTotals>(() => calculateCartTotals({
+    items: cart.items,
+    coupons: cart.coupons,
+  }), [cart.coupons, cart.items]);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
@@ -173,6 +190,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const applyCoupon = useCallback<ApplyCouponFn>((code) => {
+    const subtotal = calculateCartTotals({
+      items: cart.items,
+      coupons: cart.coupons,
+    }).subtotal;
+    const result = validateCoupon({ code, coupons: cart.coupons, subtotal });
+
+    if (result.ok && result.coupon) {
+      const slot = couponSlot(result.coupon.type);
+      setCart((current) => ({
+        ...current,
+        coupons: {
+          ...current.coupons,
+          [slot]: result.coupon ?? null,
+        },
+      }));
+    }
+
+    return result;
+  }, [cart.coupons, cart.items]);
+
+  const removeCoupon = useCallback<RemoveCouponFn>((type) => {
+    const slot = couponSlot(type);
+    setCart((current) => ({
+      ...current,
+      coupons: {
+        ...current.coupons,
+        [slot]: null,
+      },
+    }));
+  }, []);
+
   const clearCart = useCallback(() => {
     setCart(initialCartState);
   }, []);
@@ -190,9 +239,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     increaseItem,
     decreaseItem,
     removeItem,
+    applyCoupon,
+    removeCoupon,
     clearCart,
   }), [
     addItem,
+    applyCoupon,
     cart.coupons,
     cart.items,
     clearCart,
@@ -202,6 +254,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     increaseItem,
     isOpen,
     openCart,
+    removeCoupon,
     removeItem,
     toggleCart,
     totals,

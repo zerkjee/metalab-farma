@@ -1,4 +1,5 @@
 import type { CartItem } from '@/types/cart';
+import type { AppliedCoupon } from '@/types/coupon';
 
 export type ShippingMethodId = 'standard' | 'express';
 export type PaymentMethodId = 'pix' | 'card' | 'boleto';
@@ -40,6 +41,10 @@ export interface MockOrder {
   payment: PaymentMethod;
   subtotal: number;
   shippingTotal: number;
+  discountTotal: number;
+  shippingDiscountTotal: number;
+  payableShippingTotal: number;
   total: number;
+  coupons: AppliedCoupon[];
   status: 'mock_created';
 }

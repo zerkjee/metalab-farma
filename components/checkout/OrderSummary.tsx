@@ -3,13 +3,18 @@
 import { LockKeyhole, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import type { CartItem } from '@/types/cart';
+import type { CouponState } from '@/types/coupon';
 
 interface OrderSummaryProps {
   formId: string;
   items: CartItem[];
   subtotal: number;
   shippingTotal: number;
+  discountTotal: number;
+  shippingDiscountTotal: number;
+  payableShippingTotal: number;
   total: number;
+  coupons: CouponState;
 }
 
 function formatCurrency(value: number) {
@@ -24,7 +29,11 @@ export default function OrderSummary({
   items,
   subtotal,
   shippingTotal,
+  discountTotal,
+  shippingDiscountTotal,
+  payableShippingTotal,
   total,
+  coupons,
 }: OrderSummaryProps) {
   return (
     <aside className="sticky top-24 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -60,10 +69,28 @@ export default function OrderSummary({
           <span className="text-gray-500">Subtotal</span>
           <span className="font-bold text-gray-950">{formatCurrency(subtotal)}</span>
         </div>
+        {discountTotal > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-emerald-600">Desconto {coupons.discount ? `(${coupons.discount.code})` : ''}</span>
+            <span className="font-bold text-emerald-600">- {formatCurrency(discountTotal)}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Frete mockado</span>
           <span className="font-bold text-gray-950">{formatCurrency(shippingTotal)}</span>
         </div>
+        {shippingDiscountTotal > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-emerald-600">Cupom {coupons.freeShipping?.code}</span>
+            <span className="font-bold text-emerald-600">- {formatCurrency(shippingDiscountTotal)}</span>
+          </div>
+        )}
+        {shippingDiscountTotal > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">Frete a pagar</span>
+            <span className="font-bold text-gray-950">{formatCurrency(payableShippingTotal)}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between border-t border-gray-100 pt-3">
           <span className="text-base font-black text-gray-950">Total</span>
           <span className="text-2xl font-black text-[#6b21a8]">{formatCurrency(total)}</span>

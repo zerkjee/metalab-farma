@@ -1,4 +1,6 @@
 import type { Product } from '@/types/product';
+import type { CouponState, CouponType, CouponValidationResult } from '@/types/coupon';
+import type { CalculatedCartTotals } from '@/services/cartTotals';
 
 export interface CartItem {
   productId: number;
@@ -11,19 +13,14 @@ export interface CartItem {
   color: string;
 }
 
-export interface CartCouponState {
-  discountCouponCode: string | null;
-  freeShippingCouponCode: string | null;
-}
-
 export interface CartState {
   items: CartItem[];
-  coupons: CartCouponState;
+  coupons: CouponState;
 }
 
-export interface CartTotals {
-  itemCount: number;
-  subtotal: number;
-}
+export type CartTotals = CalculatedCartTotals;
 
 export type AddCartProductInput = Product;
+
+export type ApplyCouponFn = (code: string) => CouponValidationResult;
+export type RemoveCouponFn = (type: CouponType) => void;
