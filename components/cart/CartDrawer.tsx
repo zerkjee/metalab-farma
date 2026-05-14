@@ -163,14 +163,16 @@ export default function CartDrawer() {
                 </div>
               </div>
 
-              <button
-                className="mt-5 w-full rounded-xl px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90 active:scale-[0.99]"
+              <Link
+                href="/checkout"
+                onClick={closeCart}
+                className="mt-5 block w-full rounded-xl px-5 py-3 text-center text-sm font-black text-white transition-all hover:opacity-90 active:scale-[0.99]"
                 style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
               >
                 Continuar para checkout
-              </button>
+              </Link>
               <p className="mt-3 text-center text-[11px] text-gray-400">
-                Checkout sera conectado na proxima etapa.
+                Checkout mockado conectado ao carrinho.
               </p>
             </div>
           </>
