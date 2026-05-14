@@ -42,20 +42,6 @@ export interface AdminCustomer {
   lastOrder: string;
 }
 
-export interface AdminCoupon {
-  id: string;
-  code: string;
-  title: string;
-  type: 'percent' | 'fixed' | 'shipping';
-  value: number;
-  used: number;
-  limit: number;
-  validUntil: string;
-  active: boolean;
-  audience: 'todos' | 'silver' | 'gold' | 'black';
-  minOrder: number;
-}
-
 export interface AdminBanner {
   id: number;
   title: string;
@@ -255,18 +241,6 @@ export const adminCustomers: AdminCustomer[] = [
   { id: 8,  name: 'Larissa Teixeira',   email: 'larissa@email.com',   city: 'BH',             state: 'MG', level: 'gold',   orders: 7, totalSpent: 1432.90, cashback: 71.64, joined: '2024-08-25', lastOrder: '2025-05-08' },
   { id: 9,  name: 'Diego Cardoso',      email: 'diego@email.com',     city: 'Natal',          state: 'RN', level: 'silver', orders: 2, totalSpent: 194.80,  cashback: 3.89,  joined: '2025-03-01', lastOrder: '2025-05-06' },
   { id: 10, name: 'Luciana Martins',    email: 'luciana@email.com',   city: 'Goiânia',        state: 'GO', level: 'black',  orders: 12, totalSpent: 3892.60, cashback: 311.40, joined: '2024-06-15', lastOrder: '2025-04-30' },
-];
-
-// ── Coupons ──────────────────────────────────────────────────────────
-
-export const adminCoupons: AdminCoupon[] = [
-  { id: 'cp1', code: 'GOLD10',   title: '10% OFF — Clientes Gold',   type: 'percent', value: 10, used: 34, limit: 100, validUntil: '2025-05-31', active: true,  audience: 'gold',   minOrder: 100 },
-  { id: 'cp2', code: 'FRETEVIP', title: 'Frete Grátis VIP',          type: 'shipping', value: 0,  used: 21, limit: 50,  validUntil: '2025-05-20', active: true,  audience: 'gold',   minOrder: 0   },
-  { id: 'cp3', code: 'KIT15',    title: '15% OFF em Kits',           type: 'percent', value: 15, used: 18, limit: 80,  validUntil: '2025-06-30', active: true,  audience: 'todos',  minOrder: 150 },
-  { id: 'cp4', code: 'BLACK20',  title: '20% OFF — Membros Black',   type: 'percent', value: 20, used: 8,  limit: 30,  validUntil: '2025-05-15', active: true,  audience: 'black',  minOrder: 200 },
-  { id: 'cp5', code: 'BOAS10',   title: 'Boas-vindas 10% OFF',       type: 'percent', value: 10, used: 89, limit: 500, validUntil: '2025-12-31', active: true,  audience: 'todos',  minOrder: 50  },
-  { id: 'cp6', code: 'MAIO30',   title: 'Promo Maio R$ 30 OFF',      type: 'fixed',   value: 30, used: 0,  limit: 40,  validUntil: '2025-05-31', active: false, audience: 'todos',  minOrder: 150 },
-  { id: 'cp7', code: 'SILVER5',  title: '5% OFF Silver',             type: 'percent', value: 5,  used: 12, limit: 200, validUntil: '2025-06-30', active: false, audience: 'silver', minOrder: 80  },
 ];
 
 // ── Banners (admin view) ─────────────────────────────────────────────
