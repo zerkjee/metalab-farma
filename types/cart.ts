@@ -3,7 +3,8 @@ import type { CouponState, CouponType, CouponValidationResult } from '@/types/co
 import type { CalculatedCartTotals } from '@/services/cartTotals';
 
 export interface CartItem {
-  productId: number;
+  productId: string;
+  slug: string;
   name: string;
   brand: string;
   imageUrl: string | null;

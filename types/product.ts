@@ -1,13 +1,20 @@
 export interface Product {
-  id: number;
+  id: string;
   nome: string;
+  slug: string;
+  sku?: string;
   marca: string;
-  preco: string | number;
+  preco: number;
+  precoOriginal?: number | null;
   estoque: number;
-  descricao: string | null;
-  imagem_url: string | null;
+  descricaoCurta?: string | null;
+  descricaoHtml?: string | null;
+  imagemUrl?: string | null;
+  imagem_url?: string | null;
   ativo: boolean;
-  criado_em: string;
-  cor_principal?: string;
-  cor_secundaria?: string;
+  destaque?: boolean;
+  corPrincipal?: string | null;
+  cor_principal?: string | null;
+  criadoEm?: string;
+  categoria?: { id: string; nome: string; slug: string } | null;
 }

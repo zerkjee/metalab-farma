@@ -6,7 +6,7 @@ import RatingDistribution from './RatingDistribution';
 import ReviewCard from './ReviewCard';
 
 interface ProductReviewsProps {
-  productId: number;
+  productId: string;
   color?: string;
 }
 

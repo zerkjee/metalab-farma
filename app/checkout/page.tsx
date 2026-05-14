@@ -10,12 +10,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { calculateCartTotals } from '@/services/cartTotals';
-import { createMockOrder } from '@/services/orders';
 import type {
   CheckoutForm as CheckoutFormValues,
-  MockOrder,
   PaymentMethod,
   PaymentMethodId,
+  RealOrder,
   ShippingMethod,
   ShippingMethodId,
 } from '@/types/checkout';
@@ -40,7 +39,7 @@ const shippingMethods: ShippingMethod[] = [
   {
     id: 'standard',
     label: 'Entrega padrao',
-    description: 'Envio nacional mockado com rastreio.',
+    description: 'Envio nacional com rastreio via Correios.',
     price: 19.9,
     estimate: '5 a 8 dias uteis',
   },
@@ -57,19 +56,25 @@ const paymentMethods: PaymentMethod[] = [
   {
     id: 'pix',
     label: 'Pix',
-    description: 'Confirmacao mockada instantanea.',
+    description: 'Confirmacao instantanea. QR Code gerado apos o pedido.',
   },
   {
     id: 'card',
-    label: 'Cartao',
-    description: 'Pagamento visual sem transacao real.',
+    label: 'Cartao de Credito',
+    description: 'Parcelamento disponivel. Processado pelo Mercado Pago.',
   },
   {
     id: 'boleto',
     label: 'Boleto',
-    description: 'Boleto demonstrativo para pedido mockado.',
+    description: 'Vencimento em 3 dias uteis. Compensacao em ate 2 dias.',
   },
 ];
+
+const metodoPagamentoMap: Record<PaymentMethodId, string> = {
+  pix: 'PIX',
+  card: 'CARTAO_CREDITO',
+  boleto: 'BOLETO',
+};
 
 export default function CheckoutPage() {
   const {
@@ -85,15 +90,13 @@ export default function CheckoutPage() {
   const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedShippingId, setSelectedShippingId] = useState<ShippingMethodId>('standard');
   const [selectedPaymentId, setSelectedPaymentId] = useState<PaymentMethodId>('pix');
-  const [order, setOrder] = useState<MockOrder | null>(null);
+  const [order, setOrder] = useState<RealOrder | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const selectedShipping = useMemo(
     () => shippingMethods.find((method) => method.id === selectedShippingId) ?? shippingMethods[0],
     [selectedShippingId],
-  );
-  const selectedPayment = useMemo(
-    () => paymentMethods.find((method) => method.id === selectedPaymentId) ?? paymentMethods[0],
-    [selectedPaymentId],
   );
   const totals = useMemo(() => calculateCartTotals({
     items,
@@ -109,29 +112,108 @@ export default function CheckoutPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  function finishOrder() {
-    const mockOrder = createMockOrder({
-      customer: form,
-      items,
-      shipping: selectedShipping,
-      payment: selectedPayment,
-      subtotal: totals.subtotal,
-      discountTotal: totals.discountTotal,
-      shippingDiscountTotal: totals.shippingDiscountTotal,
-      payableShippingTotal: totals.payableShippingTotal,
-      total: totals.total,
-      coupons: appliedCoupons,
-    });
+  async function finishOrder() {
+    setSubmitting(true);
+    setSubmitError('');
 
-    setOrder(mockOrder);
-    clearCart();
+    try {
+      const payload = {
+        itens: items.map((item) => ({
+          produtoId: item.productId.startsWith('local-') ? undefined : item.productId,
+          slug: item.slug,
+          quantidade: item.quantity,
+        })),
+        cliente: {
+          nome: form.fullName,
+          email: form.email,
+          cpf: form.cpf.replace(/\D/g, ''),
+          telefone: form.phone,
+        },
+        endereco: {
+          cep: form.zipCode.replace(/\D/g, ''),
+          logradouro: form.address,
+          numero: form.number,
+          complemento: form.complement || undefined,
+          bairro: form.district,
+          cidade: form.city,
+          estado: form.state,
+        },
+        frete: { preco: selectedShipping.price },
+        cupomCodigo: coupons.discount?.code ?? coupons.freeShipping?.code ?? undefined,
+        metodoPagamento: metodoPagamentoMap[selectedPaymentId],
+      };
+
+      const res = await fetch('/api/pedidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSubmitError(data.erro ?? 'Erro ao criar pedido. Tente novamente.');
+        return;
+      }
+
+      let pixQrCode: string | undefined;
+      let pixQrCodeBase64: string | undefined;
+
+      if (selectedPaymentId === 'pix') {
+        const pixRes = await fetch('/api/pagamento/criar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pedidoId: data.pedidoId }),
+        });
+        if (pixRes.ok) {
+          const pixData = await pixRes.json();
+          pixQrCode = pixData.pixQrCode;
+          pixQrCodeBase64 = pixData.pixQrCodeBase64;
+        }
+      }
+
+      setOrder({
+        id: data.pedidoId,
+        numero: data.pedidoNumero,
+        total: data.total,
+        metodoPagamento: selectedPaymentId,
+        pixQrCode,
+        pixQrCodeBase64,
+        customer: form,
+        shipping: selectedShipping,
+        coupons: appliedCoupons,
+      });
+      clearCart();
+    } catch {
+      setSubmitError('Erro de conexao. Verifique sua internet e tente novamente.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  function handleApplyCoupon() {
-    const result = applyCoupon(couponCode);
-    setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
-    if (result.ok) {
-      setCouponCode('');
+  async function handleApplyCoupon() {
+    if (!couponCode.trim()) return;
+
+    try {
+      const res = await fetch('/api/cupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo: couponCode.trim().toUpperCase() }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setCouponMessage({ type: 'error', text: data.erro ?? 'Cupom invalido.' });
+        return;
+      }
+
+      const result = applyCoupon(couponCode.trim().toUpperCase());
+      setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
+      if (result.ok) setCouponCode('');
+    } catch {
+      const result = applyCoupon(couponCode.trim().toUpperCase());
+      setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
+      if (result.ok) setCouponCode('');
     }
   }
 
@@ -171,7 +253,7 @@ export default function CheckoutPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Checkout</p>
             <h1 className="mt-3 text-3xl font-black text-gray-950">Seu carrinho esta vazio</h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500">
-              Adicione produtos ao carrinho antes de iniciar o checkout mockado.
+              Adicione produtos ao carrinho antes de finalizar o pedido.
             </p>
             <Link
               href="/#produtos"
@@ -198,14 +280,22 @@ export default function CheckoutPage() {
               Continuar comprando
             </Link>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Checkout mockado</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Checkout</p>
               <h1 className="mt-2 text-3xl font-black text-gray-950 sm:text-4xl">Finalize seu pedido</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-                Fluxo visual conectado ao carrinho. Nenhum pagamento real sera processado nesta etapa.
+                Pagamento processado com seguranca via Mercado Pago.
               </p>
             </div>
           </div>
         </section>
+
+        {submitError && (
+          <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {submitError}
+            </div>
+          </div>
+        )}
 
         <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
           <div className="flex flex-col gap-6">
@@ -219,7 +309,7 @@ export default function CheckoutPage() {
                 <input
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
-                  placeholder="PRIMEIRA30"
+                  placeholder="BEMVINDO10"
                   className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8] focus:bg-white"
                 />
                 <button
@@ -266,6 +356,7 @@ export default function CheckoutPage() {
               onShippingChange={setSelectedShippingId}
               onPaymentChange={setSelectedPaymentId}
               onSubmit={finishOrder}
+              submitting={submitting}
             />
           </div>
           <OrderSummary

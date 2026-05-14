@@ -182,7 +182,7 @@ export default function AvaliacoesPage() {
                   {/* Product badge above card */}
                   <div className="mb-1 px-1">
                     <a
-                      href={`/produtos/${r.productId}`}
+                      href={`/produtos/local-${r.productId}`}
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide transition-opacity hover:opacity-80"
                       style={{ color: r.productColor }}
                     >

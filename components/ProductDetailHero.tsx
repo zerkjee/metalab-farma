@@ -13,9 +13,7 @@ export default function ProductDetailHero({
   corPrincipal,
 }: ProductDetailHeroProps) {
   const { addItem } = useCart();
-  const preco = typeof product.preco === 'string'
-    ? parseFloat(product.preco)
-    : product.preco;
+  const preco = typeof product.preco === 'number' ? product.preco : parseFloat(String(product.preco));
 
   const precoFormatado = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -30,9 +28,9 @@ export default function ProductDetailHero({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {/* Imagem */}
           <div className="flex items-center justify-center bg-gray-50 rounded-2xl p-8 h-full min-h-96">
-            {product.imagem_url ? (
+            {(product.imagemUrl ?? product.imagem_url) ? (
               <img
-                src={product.imagem_url}
+                src={(product.imagemUrl ?? product.imagem_url)!}
                 alt={product.nome}
                 className="w-full h-full object-contain max-h-96"
               />

@@ -10,9 +10,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
-  const preco = typeof product.preco === 'string'
-    ? parseFloat(product.preco)
-    : product.preco;
+  const preco = typeof product.preco === 'number' ? product.preco : parseFloat(String(product.preco));
 
   const precoFormatado = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -20,7 +18,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }).format(preco);
 
   const temEstoque = product.estoque > 0;
-  const cor = product.cor_principal || '#6b21a8';
+  const cor = product.corPrincipal ?? product.cor_principal ?? '#6b21a8';
 
   return (
     <div
@@ -34,9 +32,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       {/* Imagem */}
       <div className="relative w-full h-52 bg-gray-50 flex items-center justify-center overflow-hidden">
-        {product.imagem_url ? (
+        {(product.imagemUrl ?? product.imagem_url) ? (
           <img
-            src={product.imagem_url}
+            src={(product.imagemUrl ?? product.imagem_url)!}
             alt={product.nome}
             className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
           />

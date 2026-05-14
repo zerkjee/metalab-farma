@@ -15,6 +15,7 @@ interface CheckoutFormProps {
   paymentMethods: PaymentMethod[];
   selectedShippingId: ShippingMethodId;
   selectedPaymentId: PaymentMethodId;
+  submitting?: boolean;
   onChange: <K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) => void;
   onShippingChange: (id: ShippingMethodId) => void;
   onPaymentChange: (id: PaymentMethodId) => void;
@@ -55,6 +56,7 @@ export default function CheckoutForm({
   paymentMethods,
   selectedShippingId,
   selectedPaymentId,
+  submitting = false,
   onChange,
   onShippingChange,
   onPaymentChange,
@@ -129,7 +131,7 @@ export default function CheckoutForm({
 
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Pagamento mockado</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Pagamento</p>
           <h2 className="mt-1 text-xl font-black text-gray-950">Como voce quer pagar?</h2>
         </div>
 

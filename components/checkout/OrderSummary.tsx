@@ -46,7 +46,7 @@ export default function OrderSummary({
         {items.map((item) => (
           <div key={item.productId} className="flex gap-3 rounded-2xl bg-gray-50 p-3">
             <Link
-              href={`/produtos/${item.productId}`}
+              href={`/produtos/${item.slug || item.productId}`}
               className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-white"
             >
               {item.imageUrl ? (
@@ -76,7 +76,7 @@ export default function OrderSummary({
           </div>
         )}
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500">Frete mockado</span>
+          <span className="text-gray-500">Frete</span>
           <span className="font-bold text-gray-950">{formatCurrency(shippingTotal)}</span>
         </div>
         {shippingDiscountTotal > 0 && (
@@ -108,7 +108,7 @@ export default function OrderSummary({
       </button>
 
       <p className="mt-3 text-center text-[11px] leading-5 text-gray-400">
-        Ambiente mockado. Nenhuma cobranca real sera criada.
+        Pagamento processado com segurança via Mercado Pago.
       </p>
     </aside>
   );

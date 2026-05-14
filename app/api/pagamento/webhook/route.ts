@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             status: "PAGAMENTO_APROVADO",
           },
         }),
-        ...pedido.itens.map((item) =>
+        ...pedido.itens.map((item: { produtoId: string; quantidade: number }) =>
           prisma.produto.update({
             where: { id: item.produtoId },
             data: { estoque: { decrement: item.quantidade } },

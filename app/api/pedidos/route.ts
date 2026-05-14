@@ -2,6 +2,29 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 
+interface ItemPedidoInput {
+  produtoId?: string
+  slug?: string
+  quantidade: number
+}
+
+interface ClienteInput {
+  nome: string
+  email: string
+  cpf: string
+  telefone?: string
+}
+
+interface EnderecoInput {
+  cep: string
+  logradouro: string
+  numero: string
+  complemento?: string
+  bairro: string
+  cidade: string
+  estado: string
+}
+
 function gerarNumeroPedido() {
   const now = new Date()
   const ano = now.getFullYear()
@@ -22,20 +45,36 @@ export async function POST(request: NextRequest) {
       frete,
       cupomCodigo,
       metodoPagamento,
+    }: {
+      itens: ItemPedidoInput[]
+      cliente: ClienteInput
+      endereco: EnderecoInput
+      frete?: { preco: number }
+      cupomCodigo?: string
+      metodoPagamento?: string
     } = body
 
     if (!itens?.length) {
       return NextResponse.json({ erro: "Carrinho vazio" }, { status: 400 })
     }
 
-    // Buscar produtos e validar estoque
-    const ids = itens.map((i: any) => i.produtoId)
+    // Buscar produtos por id ou slug
+    const ids = itens.map((i) => i.produtoId).filter(Boolean) as string[]
+    const slugs = itens.map((i) => i.slug).filter(Boolean) as string[]
     const produtos = await prisma.produto.findMany({
-      where: { id: { in: ids }, ativo: true },
+      where: {
+        ativo: true,
+        OR: [
+          ...(ids.length ? [{ id: { in: ids } }] : []),
+          ...(slugs.length ? [{ slug: { in: slugs } }] : []),
+        ],
+      },
     })
 
     for (const item of itens) {
-      const prod = produtos.find((p) => p.id === item.produtoId)
+      const prod = produtos.find(
+        (p) => p.id === item.produtoId || p.slug === item.slug
+      )
       if (!prod) {
         return NextResponse.json(
           { erro: `Produto ${item.produtoId} não encontrado` },
@@ -51,8 +90,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Calcular subtotal
-    const subtotal = itens.reduce((acc: number, item: any) => {
-      const prod = produtos.find((p) => p.id === item.produtoId)!
+    const subtotal = itens.reduce((acc: number, item) => {
+      const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
       return acc + Number(prod.preco) * item.quantidade
     }, 0)
 
@@ -90,7 +129,7 @@ export async function POST(request: NextRequest) {
         desconto: descontoTotal,
         frete: valorFrete,
         total,
-        metodoPagamento: metodoPagamento ?? "PIX",
+        metodoPagamento: (metodoPagamento ?? "PIX") as "PIX" | "CARTAO_CREDITO" | "CARTAO_DEBITO" | "BOLETO",
         compradorNome: cliente.nome,
         compradorEmail: cliente.email,
         compradorCpf: cliente.cpf.replace(/\D/g, ""),
@@ -99,8 +138,8 @@ export async function POST(request: NextRequest) {
         usuarioId: session?.user?.id ?? null,
         cupomId: cupomId ?? null,
         itens: {
-          create: itens.map((item: any) => {
-            const prod = produtos.find((p) => p.id === item.produtoId)!
+          create: itens.map((item) => {
+            const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
             return {
               produtoId: prod.id,
               quantidade: item.quantidade,

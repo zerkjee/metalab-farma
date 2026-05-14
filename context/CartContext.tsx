@@ -20,7 +20,7 @@ import type {
 } from '@/types/cart';
 import type { AppliedCoupon, CouponState } from '@/types/coupon';
 
-const CART_STORAGE_KEY = 'metalab_cart_state_v1';
+const CART_STORAGE_KEY = 'metalab_cart_state_v2';
 
 const initialCartState: CartState = {
   items: [],
@@ -37,9 +37,9 @@ interface CartContextValue {
   closeCart: () => void;
   toggleCart: () => void;
   addItem: (product: AddCartProductInput, quantity?: number) => void;
-  increaseItem: (productId: number) => void;
-  decreaseItem: (productId: number) => void;
-  removeItem: (productId: number) => void;
+  increaseItem: (productId: string) => void;
+  decreaseItem: (productId: string) => void;
+  removeItem: (productId: string) => void;
   applyCoupon: ApplyCouponFn;
   removeCoupon: RemoveCouponFn;
   clearCart: () => void;
@@ -52,13 +52,14 @@ function productToCartItem(product: AddCartProductInput, quantity: number): Cart
 
   return {
     productId: product.id,
+    slug: product.slug,
     name: product.nome,
     brand: product.marca,
-    imageUrl: product.imagem_url,
+    imageUrl: product.imagemUrl ?? product.imagem_url ?? null,
     unitPrice,
     quantity,
     stock: product.estoque,
-    color: product.cor_principal || '#6b21a8',
+    color: product.corPrincipal ?? product.cor_principal ?? '#6b21a8',
   };
 }
 
@@ -70,17 +71,14 @@ function sanitizeCartState(value: unknown): CartState {
     ? maybeState.items.filter((item): item is CartItem => {
       if (!item || typeof item !== 'object') return false;
       const maybeItem = item as Partial<CartItem>;
-      return typeof maybeItem.productId === 'number'
+      return typeof maybeItem.productId === 'string'
         && typeof maybeItem.name === 'string'
         && typeof maybeItem.unitPrice === 'number'
         && typeof maybeItem.quantity === 'number';
     })
     : [];
 
-  const maybeCoupons = maybeState.coupons as Partial<CouponState> & {
-    discountCouponCode?: string | null;
-    freeShippingCouponCode?: string | null;
-  } | undefined;
+  const maybeCoupons = maybeState.coupons as Partial<CouponState> | undefined;
 
   const isAppliedCoupon = (coupon: unknown): coupon is AppliedCoupon => {
     if (!coupon || typeof coupon !== 'object') return false;
@@ -93,6 +91,7 @@ function sanitizeCartState(value: unknown): CartState {
   return {
     items: items.map((item) => ({
       ...item,
+      slug: item.slug ?? '',
       quantity: Math.max(1, Math.min(item.quantity, item.stock || item.quantity)),
       color: item.color || '#6b21a8',
     })),
@@ -163,7 +162,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsOpen(true);
   }, []);
 
-  const increaseItem = useCallback((productId: number) => {
+  const increaseItem = useCallback((productId: string) => {
     setCart((current) => ({
       ...current,
       items: current.items.map((item) => item.productId === productId
@@ -172,7 +171,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  const decreaseItem = useCallback((productId: number) => {
+  const decreaseItem = useCallback((productId: string) => {
     setCart((current) => ({
       ...current,
       items: current.items
@@ -183,7 +182,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  const removeItem = useCallback((productId: number) => {
+  const removeItem = useCallback((productId: string) => {
     setCart((current) => ({
       ...current,
       items: current.items.filter((item) => item.productId !== productId),

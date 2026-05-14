@@ -216,12 +216,14 @@ export const purchaseNotifications: PurchaseNotif[] = [
   { productId: 10, productName: 'Articulice', productImage: '/products/articulice.png', productColor: '#6b21a8', customerCity: 'Campinas', customerState: 'SP', timeAgo: 'há 14 minutos' },
 ];
 
-export function getReviewsByProduct(productId: number): Review[] {
-  return reviews.filter((r) => r.productId === productId);
+export function getReviewsByProduct(productId: string): Review[] {
+  const numericId = parseInt(productId.replace('local-', '')) || parseInt(productId);
+  return reviews.filter((r) => r.productId === numericId);
 }
 
-export function getSummaryByProduct(productId: number): RatingSummary | null {
-  return ratingSummaries.find((s) => s.productId === productId) ?? null;
+export function getSummaryByProduct(productId: string): RatingSummary | null {
+  const numericId = parseInt(productId.replace('local-', '')) || parseInt(productId);
+  return ratingSummaries.find((s) => s.productId === numericId) ?? null;
 }
 
 export function getFeaturedReviews(): Review[] {

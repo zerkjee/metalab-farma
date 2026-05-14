@@ -7,9 +7,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const preco = typeof product.preco === 'string'
-    ? parseFloat(product.preco)
-    : product.preco;
+  const preco = typeof product.preco === 'number' ? product.preco : parseFloat(String(product.preco));
 
   const precoFormatado = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -22,9 +20,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-200">
       {/* Imagem do Produto */}
       <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-        {product.imagem_url ? (
+        {(product.imagemUrl ?? product.imagem_url) ? (
           <img
-            src={product.imagem_url}
+            src={(product.imagemUrl ?? product.imagem_url)!}
             alt={product.nome}
             className="w-full h-full object-cover"
           />
@@ -49,9 +47,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         </h3>
 
         {/* Descrição */}
-        {product.descricao && (
+        {product.descricaoCurta && (
           <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-            {product.descricao}
+            {product.descricaoCurta}
           </p>
         )}
 

@@ -73,7 +73,7 @@ export default function CartDrawer() {
             </div>
             <p className="text-lg font-black text-gray-950">Seu carrinho esta vazio</p>
             <p className="mt-2 text-sm leading-6 text-gray-500">
-              Adicione produtos do catalogo para preparar seu pedido mockado.
+              Adicione produtos do catalogo para iniciar seu pedido.
             </p>
             <button
               onClick={closeCart}
@@ -243,7 +243,7 @@ export default function CartDrawer() {
                 Continuar para checkout
               </Link>
               <p className="mt-3 text-center text-[11px] text-gray-400">
-                Checkout mockado conectado ao carrinho.
+                Pagamento seguro via Mercado Pago.
               </p>
             </div>
           </>

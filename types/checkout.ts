@@ -1,4 +1,3 @@
-import type { CartItem } from '@/types/cart';
 import type { AppliedCoupon } from '@/types/coupon';
 
 export type ShippingMethodId = 'standard' | 'express';
@@ -32,19 +31,14 @@ export interface PaymentMethod {
   description: string;
 }
 
-export interface MockOrder {
+export interface RealOrder {
   id: string;
-  createdAt: string;
-  customer: CheckoutForm;
-  items: CartItem[];
-  shipping: ShippingMethod;
-  payment: PaymentMethod;
-  subtotal: number;
-  shippingTotal: number;
-  discountTotal: number;
-  shippingDiscountTotal: number;
-  payableShippingTotal: number;
+  numero: string;
   total: number;
+  metodoPagamento: PaymentMethodId;
+  pixQrCode?: string;
+  pixQrCodeBase64?: string;
+  customer: CheckoutForm;
+  shipping: ShippingMethod;
   coupons: AppliedCoupon[];
-  status: 'mock_created';
 }
