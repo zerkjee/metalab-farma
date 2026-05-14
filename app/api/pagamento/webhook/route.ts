@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { sendOrderConfirmationEmail } from "@/lib/resend"
 
 // O Mercado Pago chama esta URL quando o status do pagamento muda
 export async function POST(request: NextRequest) {
@@ -47,8 +48,19 @@ export async function POST(request: NextRequest) {
         ),
       ])
 
-      // TODO: enviar email de confirmação (adicionar na próxima fase)
       console.log(`[WEBHOOK] Pedido ${pedido.numero} pago com sucesso`)
+      void sendOrderConfirmationEmail({
+        numero: pedido.numero,
+        compradorNome: pedido.compradorNome,
+        compradorEmail: pedido.compradorEmail,
+        total: Number(pedido.total),
+        metodoPagamento: "PIX",
+        itens: pedido.itens.map((item: { produtoNome: string; quantidade: number; precoUnit: unknown }) => ({
+          nome: item.produtoNome,
+          quantidade: item.quantidade,
+          precoUnit: Number(item.precoUnit),
+        })),
+      })
     }
 
     if (pagamento.status === "cancelled" || pagamento.status === "rejected") {

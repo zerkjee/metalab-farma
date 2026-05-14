@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { sendOrderConfirmationEmail } from "@/lib/resend"
 
 interface ItemPedidoInput {
   produtoId?: string
@@ -162,6 +163,20 @@ export async function POST(request: NextRequest) {
         data: { usoAtual: { increment: 1 } },
       })
     }
+
+    // Enviar email de confirmação (não bloqueia resposta)
+    void sendOrderConfirmationEmail({
+      numero: pedido.numero,
+      compradorNome: pedido.compradorNome,
+      compradorEmail: pedido.compradorEmail,
+      total: Number(pedido.total),
+      metodoPagamento: pedido.metodoPagamento ?? "PIX",
+      itens: pedido.itens.map((item) => ({
+        nome: item.produtoNome,
+        quantidade: item.quantidade,
+        precoUnit: Number(item.precoUnit),
+      })),
+    })
 
     return NextResponse.json(
       {
