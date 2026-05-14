@@ -13,7 +13,7 @@ import {
   Trash2,
   Truck,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/admin/Modal';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { fmtCurrency, fmtDate } from '@/data/admin';
@@ -21,7 +21,6 @@ import {
   couponKindLabels,
   couponStatusLabels,
   emptyCouponForm,
-  mockAdminCoupons,
 } from '@/data/adminCoupons';
 import type {
   AdminCoupon,
@@ -41,6 +40,53 @@ function couponValue(coupon: AdminCoupon) {
   if (coupon.kind === 'free_shipping') return 'Frete gratis';
   if (coupon.discountMode === 'percent') return `${coupon.percentage}%`;
   return fmtCurrency(coupon.fixedValue);
+}
+
+interface ApiCupom {
+  id: string;
+  codigo: string;
+  tipo: 'PERCENTUAL' | 'VALOR_FIXO' | 'FRETE_GRATIS';
+  valor: number;
+  usoMaximo: number | null;
+  usoAtual: number;
+  validade: string | null;
+  ativo: boolean;
+}
+
+function apiToCoupon(c: ApiCupom): AdminCoupon {
+  const isShipping = c.tipo === 'FRETE_GRATIS';
+  const isPercent = c.tipo === 'PERCENTUAL';
+  return {
+    id: c.id,
+    code: c.codigo,
+    name: c.codigo,
+    kind: isShipping ? 'free_shipping' : 'discount',
+    discountMode: isPercent ? 'percent' : 'fixed',
+    percentage: isPercent ? c.valor : 0,
+    fixedValue: c.tipo === 'VALOR_FIXO' ? c.valor : 0,
+    validUntil: c.validade ? c.validade.slice(0, 10) : '',
+    usageLimit: c.usoMaximo ?? 0,
+    usedTotal: c.usoAtual,
+    minimumOrderValue: 0,
+    status: c.ativo ? 'active' : 'inactive',
+    createdAt: new Date().toISOString().slice(0, 10),
+  };
+}
+
+function couponToApiPayload(values: AdminCouponFormValues) {
+  const tipo = values.kind === 'free_shipping'
+    ? 'FRETE_GRATIS'
+    : values.percentage > 0 ? 'PERCENTUAL' : 'VALOR_FIXO';
+  const valor = values.kind === 'free_shipping' ? 0
+    : values.percentage > 0 ? values.percentage : values.fixedValue;
+  return {
+    codigo: values.code,
+    tipo,
+    valor,
+    usoMaximo: values.usageLimit || null,
+    validade: values.validUntil || null,
+    ativo: values.status === 'active',
+  };
 }
 
 function formToCoupon(values: AdminCouponFormValues, existing?: AdminCoupon): AdminCoupon {
@@ -283,12 +329,24 @@ function CouponForm({
 }
 
 export default function AdminCupons() {
-  const [coupons, setCoupons] = useState<AdminCoupon[]>(mockAdminCoupons);
+  const [coupons, setCoupons] = useState<AdminCoupon[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CouponFilter>('all');
   const [kindFilter, setKindFilter] = useState<CouponKindFilter>('all');
   const [formMode, setFormMode] = useState<'create' | 'edit' | null>(null);
   const [editingCoupon, setEditingCoupon] = useState<AdminCoupon | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch('/api/admin/cupons')
+      .then((r) => r.json())
+      .then((data: unknown) => {
+        if (Array.isArray(data)) setCoupons(data.map((c) => apiToCoupon(c as ApiCupom)));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredCoupons = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -324,36 +382,77 @@ export default function AdminCupons() {
     setEditingCoupon(null);
   }
 
-  function saveCoupon(values: AdminCouponFormValues) {
+  async function saveCoupon(values: AdminCouponFormValues) {
+    const payload = couponToApiPayload(values);
     if (formMode === 'edit' && editingCoupon) {
-      const updated = formToCoupon(values, editingCoupon);
-      setCoupons((current) => current.map((coupon) => coupon.id === editingCoupon.id ? updated : coupon));
+      const res = await fetch(`/api/admin/cupons/${editingCoupon.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = apiToCoupon(data as ApiCupom);
+        updated.name = values.name;
+        updated.minimumOrderValue = values.minimumOrderValue;
+        setCoupons((cur) => cur.map((c) => c.id === editingCoupon.id ? updated : c));
+      }
     } else {
-      setCoupons((current) => [formToCoupon(values), ...current]);
+      const res = await fetch('/api/admin/cupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const created = apiToCoupon(data as ApiCupom);
+        created.name = values.name;
+        created.minimumOrderValue = values.minimumOrderValue;
+        setCoupons((cur) => [created, ...cur]);
+      }
     }
     closeForm();
   }
 
-  function toggleStatus(id: string) {
-    setCoupons((current) => current.map((coupon) => coupon.id === id
-      ? { ...coupon, status: coupon.status === 'active' ? 'inactive' : 'active' }
-      : coupon));
+  async function toggleStatus(id: string) {
+    const coupon = coupons.find((c) => c.id === id);
+    if (!coupon) return;
+    const newAtivo = coupon.status !== 'active';
+    const res = await fetch(`/api/admin/cupons/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ativo: newAtivo }),
+    });
+    if (res.ok) {
+      setCoupons((cur) => cur.map((c) => c.id === id ? { ...c, status: newAtivo ? 'active' : 'inactive' } : c));
+    }
   }
 
-  function duplicateCoupon(coupon: AdminCoupon) {
-    setCoupons((current) => [{
-      ...coupon,
-      id: `coupon-${Date.now()}`,
-      code: `${coupon.code}_COPIA`,
-      name: `${coupon.name} copia`,
-      status: 'inactive',
-      usedTotal: 0,
-      createdAt: new Date().toISOString().slice(0, 10),
-    }, ...current]);
+  async function duplicateCoupon(coupon: AdminCoupon) {
+    const payload = {
+      codigo: `${coupon.code}_COPIA`,
+      tipo: coupon.kind === 'free_shipping' ? 'FRETE_GRATIS' : coupon.discountMode === 'percent' ? 'PERCENTUAL' : 'VALOR_FIXO',
+      valor: coupon.kind === 'free_shipping' ? 0 : coupon.discountMode === 'percent' ? coupon.percentage : coupon.fixedValue,
+      usoMaximo: coupon.usageLimit || null,
+      validade: coupon.validUntil || null,
+      ativo: false,
+    };
+    const res = await fetch('/api/admin/cupons', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const copy = apiToCoupon(data as ApiCupom);
+      copy.name = `${coupon.name} copia`;
+      setCoupons((cur) => [copy, ...cur]);
+    }
   }
 
-  function deleteCoupon(id: string) {
-    setCoupons((current) => current.filter((coupon) => coupon.id !== id));
+  async function deleteCoupon(id: string) {
+    const res = await fetch(`/api/admin/cupons/${id}`, { method: 'DELETE' });
+    if (res.ok) setCoupons((cur) => cur.filter((c) => c.id !== id));
   }
 
   const formInitialValues = editingCoupon ? couponToForm(editingCoupon) : emptyCouponForm;
@@ -364,7 +463,7 @@ export default function AdminCupons() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400">Promocoes e retencao</p>
           <h2 className="mt-1 text-xl font-black text-white">Cupons</h2>
-          <p className="mt-1 text-xs text-slate-500">{coupons.length} cupons mockados no painel</p>
+          <p className="mt-1 text-xs text-slate-500">{loading ? 'Carregando...' : `${coupons.length} cupons no banco de dados`}</p>
         </div>
         <button
           onClick={openCreate}

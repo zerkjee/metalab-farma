@@ -148,7 +148,7 @@ function mapApiOrder(p: Record<string, unknown>): AdminOrderDetail {
 }
 
 export default function AdminPedidos() {
-  const [orders, setOrders] = useState<AdminOrderDetail[]>(mockAdminOrders);
+  const [orders, setOrders] = useState<AdminOrderDetail[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<AdminOrderStatus | 'todos'>('todos');
   const [page, setPage] = useState(1);
@@ -160,7 +160,7 @@ export default function AdminPedidos() {
     fetch('/api/pedidos')
       .then((r) => r.json())
       .then((data: unknown) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setOrders(data.map((p) => mapApiOrder(p as Record<string, unknown>)));
         }
       })
@@ -169,7 +169,8 @@ export default function AdminPedidos() {
   }, []);
 
   const metrics = useMemo(() => {
-    const today = orders.filter((order) => order.date.startsWith('2026-05-12'));
+    const todayPrefix = new Date().toISOString().slice(0, 10);
+    const today = orders.filter((order) => order.date.startsWith(todayPrefix));
     const revenue = orders
       .filter((order) => order.status !== 'cancelado')
       .reduce((sum, order) => sum + order.total, 0);
