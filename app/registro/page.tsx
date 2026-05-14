@@ -4,7 +4,7 @@ import { Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 function cpfMask(value: string) {
   return value.replace(/\D/g, '').slice(0, 11)
@@ -21,6 +21,12 @@ function phoneMask(value: string) {
 
 export default function RegistroPage() {
   const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
+
+  if (sessionStatus === 'authenticated' && session) {
+    router.replace('/');
+    return null;
+  }
 
   const [form, setForm] = useState({
     nome: '',

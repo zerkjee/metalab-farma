@@ -4,12 +4,18 @@ import { Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/';
+  const { data: session, status: sessionStatus } = useSession();
+
+  if (sessionStatus === 'authenticated' && session) {
+    router.replace(callbackUrl);
+    return null;
+  }
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
