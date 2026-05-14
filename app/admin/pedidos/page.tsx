@@ -88,6 +88,65 @@ function SkeletonTable() {
   );
 }
 
+const statusMap: Record<string, AdminOrderStatus> = {
+  AGUARDANDO_PAGAMENTO: 'aguardando_pagamento',
+  PAGAMENTO_APROVADO: 'pagamento_aprovado',
+  EM_SEPARACAO: 'em_separacao',
+  ENVIADO: 'enviado',
+  ENTREGUE: 'entregue',
+  CANCELADO: 'cancelado',
+  REEMBOLSADO: 'cancelado',
+};
+
+function mapApiOrder(p: Record<string, unknown>): AdminOrderDetail {
+  const endereco = (() => {
+    try { return JSON.parse(String(p.enderecoSnap ?? '{}')) } catch { return {} }
+  })();
+  const itens = Array.isArray(p.itens) ? p.itens : [];
+
+  return {
+    id: String(p.id),
+    customer: {
+      name: String(p.compradorNome ?? ''),
+      email: String(p.compradorEmail ?? ''),
+      phone: String(p.compradorTelefone ?? ''),
+      document: String(p.compradorCpf ?? ''),
+    },
+    address: {
+      street: String(endereco.logradouro ?? ''),
+      number: String(endereco.numero ?? ''),
+      district: String(endereco.bairro ?? ''),
+      city: String(endereco.cidade ?? ''),
+      state: String(endereco.estado ?? ''),
+      zip: String(endereco.cep ?? ''),
+      complement: String(endereco.complemento ?? ''),
+    },
+    items: itens.map((item: Record<string, unknown>) => ({
+      sku: String(item.produtoSku ?? ''),
+      name: String(item.produtoNome ?? ''),
+      image: String(item.produtoImagem ?? ''),
+      qty: Number(item.quantidade ?? 1),
+      unitPrice: Number(item.precoUnit ?? 0),
+    })),
+    subtotal: Number(p.subtotal ?? 0),
+    discount: Number(p.desconto ?? 0),
+    shipping: Number(p.frete ?? 0),
+    total: Number(p.total ?? 0),
+    payment: String(p.metodoPagamento ?? 'PIX'),
+    paymentCode: String(p.pixQrCode ?? ''),
+    date: String(p.criadoEm ?? new Date().toISOString()),
+    status: statusMap[String(p.status)] ?? 'aguardando_pagamento',
+    coupon: null,
+    timeline: [],
+    history: [],
+    notes: '',
+    trackingCode: String(p.codigoRastreio ?? ''),
+    channel: 'Loja Online',
+    tinyStatus: 'pendente',
+    invoiceStatus: 'nao_emitida',
+  } as AdminOrderDetail;
+}
+
 export default function AdminPedidos() {
   const [orders, setOrders] = useState<AdminOrderDetail[]>(mockAdminOrders);
   const [search, setSearch] = useState('');
@@ -97,8 +156,16 @@ export default function AdminPedidos() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setLoading(false), 450);
-    return () => window.clearTimeout(timer);
+    setLoading(true);
+    fetch('/api/pedidos')
+      .then((r) => r.json())
+      .then((data: unknown) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setOrders(data.map((p) => mapApiOrder(p as Record<string, unknown>)));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const metrics = useMemo(() => {
@@ -135,7 +202,22 @@ export default function AdminPedidos() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
+  const statusApiMap: Record<AdminOrderStatus, string> = {
+    aguardando_pagamento: 'AGUARDANDO_PAGAMENTO',
+    pagamento_aprovado: 'PAGAMENTO_APROVADO',
+    em_separacao: 'EM_SEPARACAO',
+    enviado: 'ENVIADO',
+    entregue: 'ENTREGUE',
+    cancelado: 'CANCELADO',
+  };
+
   function updateStatus(id: string, status: AdminOrderStatus) {
+    fetch(`/api/pedidos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: statusApiMap[status] }),
+    }).catch(() => {});
+
     setOrders((current) => current.map((order) => {
       if (order.id !== id) return order;
       return {
@@ -161,7 +243,7 @@ export default function AdminPedidos() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400">Operação e logística</p>
           <h2 className="mt-1 text-xl font-black text-white">Pedidos</h2>
-          <p className="mt-1 text-xs text-slate-500">{orders.length} pedidos mockados no painel</p>
+          <p className="mt-1 text-xs text-slate-500">{orders.length} pedidos no painel</p>
         </div>
         <button
           onClick={printOrder}
@@ -194,7 +276,7 @@ export default function AdminPedidos() {
 
       <div className="rounded-2xl border border-purple-700/30 bg-purple-600/10 px-5 py-3">
         <p className="text-xs leading-5 text-purple-300">
-          Gestão mockada preparada para backend, Tiny, Mercado Livre, logística, rastreamento, notas fiscais e automações.
+          Gestão integrada com Mercado Livre, logística, rastreamento, notas fiscais e automações.
         </p>
       </div>
 

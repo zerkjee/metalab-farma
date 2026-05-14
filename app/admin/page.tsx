@@ -1,56 +1,132 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import StatCard from '@/components/admin/StatCard';
 import LineChart from '@/components/admin/LineChart';
 import {
-  dashboardStats, revenueChart, visitorsChart,
-  topProducts, categoryChart, orders, fmtCurrency, fmtDate,
+  revenueChart, visitorsChart,
+  topProducts, categoryChart, fmtCurrency, fmtDate,
   statusColors,
 } from '@/data/admin';
 
-const sparkRevenue = revenueChart.map((d) => d.value);
-const sparkVisitors = visitorsChart.map((d) => d.value);
+interface AdminStats {
+  faturamentoMes: number;
+  pctFaturamento: number;
+  pedidosMes: number;
+  pedidosMesPassado: number;
+  clientesMes: number;
+  clientesTotal: number;
+  ticketMedio: number;
+  produtosAtivos: number;
+  produtosEstoqueBaixo: number;
+  cuponsAtivos: number;
+  sparklinesReceita: number[];
+  recentOrders: {
+    id: string;
+    numero: string;
+    compradorNome: string;
+    compradorEmail: string;
+    total: number;
+    status: string;
+    criadoEm: string;
+  }[];
+}
 
-const stats = [
-  { label: 'Faturamento (mês)',  value: fmtCurrency(dashboardStats.faturamento.value), change: dashboardStats.faturamento.change,  icon: '💰', sparkline: sparkRevenue },
-  { label: 'Pedidos (mês)',      value: String(dashboardStats.pedidos.value),           change: dashboardStats.pedidos.change,       icon: '🛍️', sparkline: undefined },
-  { label: 'Clientes ativos',    value: String(dashboardStats.clientes.value),          change: dashboardStats.clientes.change,      icon: '👥', sparkline: sparkVisitors },
-  { label: 'Ticket médio',       value: fmtCurrency(dashboardStats.ticketMedio.value),  change: dashboardStats.ticketMedio.change,   icon: '🎯', sparkline: undefined },
-  { label: 'Cupons resgatados',  value: String(dashboardStats.cupons.value),            change: dashboardStats.cupons.change,        icon: '🎫', sparkline: undefined },
-  { label: 'Conversão',          value: `${dashboardStats.conversao.value}%`,           change: dashboardStats.conversao.change,     icon: '📈', sparkline: undefined },
-];
-
-// Donut chart calculation
-const total = categoryChart.reduce((s, d) => s + d.value, 0);
-let offset = 0;
-const CIRC = 2 * Math.PI * 36; // r=36
-const segments = categoryChart.map((d) => {
-  const pct = d.value / total;
-  const seg = { ...d, dasharray: `${pct * CIRC} ${CIRC}`, dashoffset: -offset * CIRC };
-  offset += pct;
-  return seg;
-});
+const CIRC = 2 * Math.PI * 36;
 
 export default function AdminDashboard() {
   const [chartTab, setChartTab] = useState<'revenue' | 'visitors'>('revenue');
-  const recent = orders.slice(0, 5);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/stats')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.erro) setStats(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const faturamento = stats?.faturamentoMes ?? 0;
+  const pct = stats?.pctFaturamento ?? 0;
+  const pedidosMes = stats?.pedidosMes ?? 0;
+  const clientesMes = stats?.clientesMes ?? 0;
+  const ticketMedio = stats?.ticketMedio ?? 0;
+  const cuponsAtivos = stats?.cuponsAtivos ?? 0;
+
+  const pedidosChange = stats?.pedidosMesPassado
+    ? Math.round(((pedidosMes - (stats.pedidosMesPassado)) / (stats.pedidosMesPassado)) * 100)
+    : 0;
+
+  const statCards = [
+    {
+      label: 'Faturamento (mês)',
+      value: fmtCurrency(faturamento),
+      change: Math.round(pct),
+      icon: '💰',
+      sparkline: stats?.sparklinesReceita,
+    },
+    {
+      label: 'Pedidos (mês)',
+      value: String(pedidosMes),
+      change: pedidosChange,
+      icon: '🛍️',
+      sparkline: undefined,
+    },
+    {
+      label: 'Clientes novos',
+      value: String(clientesMes),
+      change: 0,
+      icon: '👥',
+      sparkline: undefined,
+    },
+    {
+      label: 'Ticket médio',
+      value: fmtCurrency(ticketMedio),
+      change: 0,
+      icon: '🎯',
+      sparkline: undefined,
+    },
+    {
+      label: 'Cupons ativos',
+      value: String(cuponsAtivos),
+      change: 0,
+      icon: '🎫',
+      sparkline: undefined,
+    },
+    {
+      label: 'Estoque baixo',
+      value: String(stats?.produtosEstoqueBaixo ?? 0),
+      change: 0,
+      icon: '📦',
+      sparkline: undefined,
+    },
+  ];
+
+  // Donut chart
+  const total = categoryChart.reduce((s, d) => s + d.value, 0);
+  let offset = 0;
+  const segments = categoryChart.map((d) => {
+    const pct2 = d.value / total;
+    const seg = { ...d, dasharray: `${pct2 * CIRC} ${CIRC}`, dashoffset: -offset * CIRC };
+    offset += pct2;
+    return seg;
+  });
+
+  const recentOrders = stats?.recentOrders?.slice(0, 5) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
 
-      {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {stats.map((s) => (
+        {statCards.map((s) => (
           <StatCard key={s.label} {...s} />
         ))}
       </div>
 
-      {/* Charts row */}
       <div className="grid lg:grid-cols-3 gap-4">
 
-        {/* Line chart (2/3) */}
         <div className="lg:col-span-2 rounded-2xl border border-slate-700/50 p-5"
           style={{ background: '#1e293b' }}>
           <div className="flex items-center justify-between mb-4">
@@ -78,12 +154,9 @@ export default function AdminDashboard() {
           />
         </div>
 
-        {/* Donut + categories (1/3) */}
         <div className="rounded-2xl border border-slate-700/50 p-5 flex flex-col gap-4"
           style={{ background: '#1e293b' }}>
           <h2 className="text-white font-bold text-sm">Categorias</h2>
-
-          {/* Donut */}
           <div className="flex justify-center">
             <svg width="100" height="100" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="36" fill="none" stroke="#0f172a" strokeWidth="14" />
@@ -104,8 +177,6 @@ export default function AdminDashboard() {
               </text>
             </svg>
           </div>
-
-          {/* Legend */}
           <div className="flex flex-col gap-2">
             {categoryChart.map((c) => (
               <div key={c.label} className="flex items-center justify-between">
@@ -120,10 +191,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Bottom row: top products + recent orders */}
       <div className="grid lg:grid-cols-2 gap-4">
 
-        {/* Top products */}
         <div className="rounded-2xl border border-slate-700/50 p-5"
           style={{ background: '#1e293b' }}>
           <h2 className="text-white font-bold text-sm mb-4">Top Produtos</h2>
@@ -148,32 +217,45 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent orders */}
         <div className="rounded-2xl border border-slate-700/50 p-5"
           style={{ background: '#1e293b' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold text-sm">Pedidos Recentes</h2>
             <Link href="/admin/pedidos" className="text-purple-400 text-xs hover:text-purple-300">Ver todos</Link>
           </div>
-          <div className="flex flex-col gap-0">
-            {recent.map((o, i) => (
-              <div key={o.id} className={`flex items-center gap-3 py-3 ${i < recent.length - 1 ? 'border-b border-slate-700/50' : ''}`}>
-                <div className="w-8 h-8 rounded-xl bg-slate-700 flex items-center justify-center text-white text-xs font-black flex-shrink-0">
-                  {o.customer.split(' ').map(w => w[0]).slice(0, 2).join('')}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-slate-200 text-xs font-semibold truncate">{o.customer}</p>
-                  <p className="text-slate-500 text-[10px]">{o.id} · {fmtDate(o.date)}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-white text-xs font-bold">{fmtCurrency(o.total)}</p>
-                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${statusColors[o.status].bg} ${statusColors[o.status].text}`}>
-                    {o.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {!stats ? (
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 rounded-xl bg-slate-700/50 animate-pulse" />
+              ))}
+            </div>
+          ) : recentOrders.length === 0 ? (
+            <p className="text-slate-500 text-sm text-center py-4">Nenhum pedido ainda.</p>
+          ) : (
+            <div className="flex flex-col gap-0">
+              {recentOrders.map((o, i) => {
+                const statusKey = o.status as keyof typeof statusColors;
+                const statusStyle = statusColors[statusKey] ?? { bg: 'bg-slate-700', text: 'text-slate-300' };
+                return (
+                  <div key={o.id} className={`flex items-center gap-3 py-3 ${i < recentOrders.length - 1 ? 'border-b border-slate-700/50' : ''}`}>
+                    <div className="w-8 h-8 rounded-xl bg-slate-700 flex items-center justify-center text-white text-xs font-black flex-shrink-0">
+                      {o.compradorNome.split(' ').map((w: string) => w[0]).slice(0, 2).join('')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-slate-200 text-xs font-semibold truncate">{o.compradorNome}</p>
+                      <p className="text-slate-500 text-[10px]">{o.numero} · {fmtDate(o.criadoEm)}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-white text-xs font-bold">{fmtCurrency(o.total)}</p>
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
+                        {statusKey}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
