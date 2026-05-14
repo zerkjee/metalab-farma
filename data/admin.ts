@@ -56,6 +56,20 @@ export interface AdminCoupon {
   minOrder: number;
 }
 
+export interface AdminBanner {
+  id: number;
+  title: string;
+  subtitle: string;
+  cta: string;
+  ctaHref: string;
+  image: string;
+  active: boolean;
+  order: number;
+  bg: string;
+  accent: string;
+  campaign: string;
+}
+
 // ── Dashboard stats ──────────────────────────────────────────────────
 
 export const dashboardStats = {
@@ -257,11 +271,59 @@ export const adminCoupons: AdminCoupon[] = [
 
 // ── Banners (admin view) ─────────────────────────────────────────────
 
-export const adminBanners = [
-  { id: 1, title: 'Qualidade e Tecnologia', subtitle: 'Banner principal da marca', active: true,  order: 1, bg: 'linear-gradient(135deg, #1a0533, #2d1654, #1e3a5f)' },
-  { id: 2, title: 'Kits com até 30% OFF',   subtitle: 'Promoção de kits',          active: true,  order: 2, bg: 'linear-gradient(135deg, #1e1b4b, #312e81, #1e3a5f)' },
-  { id: 3, title: '12.400 Clientes',         subtitle: 'Prova social',              active: true,  order: 3, bg: 'linear-gradient(135deg, #0c1a35, #1e3a5f, #1a2744)' },
-  { id: 4, title: 'Produto Lacrado',         subtitle: 'Qualidade e segurança',     active: true,  order: 4, bg: 'linear-gradient(135deg, #1a0533, #4a1272, #2d1654)' },
+export const adminBanners: AdminBanner[] = [
+  {
+    id: 1,
+    title: 'Qualidade e Tecnologia',
+    subtitle: 'Formulações exclusivas, insumos selecionados e embalagem lacrada.',
+    cta: 'Ver Produtos',
+    ctaHref: '#produtos',
+    image: '/products/articulice.png',
+    active: true,
+    order: 1,
+    bg: 'linear-gradient(135deg, #1a0533, #2d1654, #1e3a5f)',
+    accent: '#c084fc',
+    campaign: 'Institucional',
+  },
+  {
+    id: 2,
+    title: 'Kits com até 30% OFF',
+    subtitle: 'Compre Kit 2 ou Kit 3 e economize mais na sua rotina.',
+    cta: 'Ver Kits',
+    ctaHref: '#produtos',
+    image: '/products/ademoril-kit-3.png',
+    active: true,
+    order: 2,
+    bg: 'linear-gradient(135deg, #1e1b4b, #312e81, #1e3a5f)',
+    accent: '#a5b4fc',
+    campaign: 'Promoção',
+  },
+  {
+    id: 3,
+    title: 'Mais de 12.400 Clientes',
+    subtitle: 'Clientes de todo o Brasil confiam na Metalab Store.',
+    cta: 'Ver Avaliações',
+    ctaHref: '/avaliacoes',
+    image: '/products/biotina.png',
+    active: true,
+    order: 3,
+    bg: 'linear-gradient(135deg, #0c1a35, #1e3a5f, #1a2744)',
+    accent: '#7dd3fc',
+    campaign: 'Prova social',
+  },
+  {
+    id: 4,
+    title: 'Produto Lacrado',
+    subtitle: 'Procedência, nota fiscal e segurança em cada compra.',
+    cta: 'Saiba Mais',
+    ctaHref: '#qualidade',
+    image: '/products/complexo_b.png',
+    active: false,
+    order: 4,
+    bg: 'linear-gradient(135deg, #1a0533, #4a1272, #2d1654)',
+    accent: '#e879f9',
+    campaign: 'Confiança',
+  },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────

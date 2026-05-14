@@ -1,7 +1,9 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { clearMockAdminSession } from '@/utils/adminAuth';
 
 const titles: Record<string, string> = {
   '/admin':            'Dashboard',
@@ -15,8 +17,14 @@ const titles: Record<string, string> = {
 
 export default function AdminTopbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [notifOpen, setNotifOpen] = useState(false);
   const title = titles[pathname] ?? 'Admin';
+
+  function handleLogout() {
+    clearMockAdminSession();
+    router.replace('/admin/login');
+  }
 
   return (
     <header className="h-16 border-b border-slate-800 flex items-center px-6 gap-4 flex-shrink-0"
@@ -85,6 +93,24 @@ export default function AdminTopbar() {
           <p className="text-slate-500 text-[10px]">Metalab Store</p>
         </div>
       </div>
+
+      <button
+        onClick={handleLogout}
+        className="hidden sm:flex h-9 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-400 transition-all hover:border-purple-500/40 hover:bg-slate-700 hover:text-slate-100 active:scale-95"
+        title="Sair do painel"
+      >
+        <LogOut className="h-3.5 w-3.5" strokeWidth={1.9} />
+        Sair
+      </button>
+
+      <button
+        onClick={handleLogout}
+        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-purple-500/40 hover:bg-slate-700 hover:text-slate-100 active:scale-95 sm:hidden"
+        title="Sair do painel"
+        aria-label="Sair do painel"
+      >
+        <LogOut className="h-4 w-4" strokeWidth={1.9} />
+      </button>
     </header>
   );
 }

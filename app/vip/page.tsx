@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -378,7 +379,7 @@ export default function VipPage() {
                   Suba para o nível {nextLevel.name} e desbloqueie {nextLevel.cashbackPct}% cashback, além de benefícios exclusivos.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
+                  <Link
                     href="/#produtos"
                     className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-200 hover:scale-105 hover:shadow-2xl"
                     style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
@@ -387,7 +388,7 @@ export default function VipPage() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

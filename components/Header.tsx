@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { Settings } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
   { label: 'Início', href: '/' },
@@ -10,8 +13,16 @@ const navItems = [
   { label: 'Contato', href: '#' },
 ];
 
+const adminAccess = {
+  label: 'Admin',
+  href: '/admin',
+  title: 'Painel administrativo',
+};
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const isAdminActive = pathname?.startsWith(adminAccess.href);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
@@ -19,40 +30,57 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
 
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black tracking-tight text-gray-900">METALAB</span>
               <span className="text-lg font-semibold text-[#6b21a8]">Store</span>
             </div>
-          </a>
+          </Link>
 
           {/* Nav desktop */}
           <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) =>
               item.highlight ? (
-                <a
+                <Link
                   key={item.label}
                   href={item.href}
                   className="relative text-sm font-bold px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105"
                   style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)', color: '#fff' }}
                 >
                   {item.label} ✦
-                </a>
+                </Link>
               ) : (
-                <a
+                <Link
                   key={item.label}
                   href={item.href}
                   className="relative text-sm font-medium text-gray-600 hover:text-[#6b21a8] transition-colors duration-200 group"
                 >
                   {item.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#6b21a8] transition-all duration-300 group-hover:w-full" />
-                </a>
+                </Link>
               )
             )}
           </div>
 
           {/* Carrinho + hamburger */}
           <div className="flex items-center gap-4">
+            <Link
+              href={adminAccess.href}
+              title={adminAccess.title}
+              aria-label={adminAccess.title}
+              aria-current={isAdminActive ? 'page' : undefined}
+              className={`group relative hidden md:inline-flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-300 active:scale-95 ${
+                isAdminActive
+                  ? 'border-[#6b21a8]/30 bg-[#6b21a8]/10 text-[#6b21a8] shadow-sm'
+                  : 'border-gray-200 bg-white/80 text-gray-500 hover:border-[#6b21a8]/30 hover:bg-[#6b21a8]/5 hover:text-[#6b21a8] hover:shadow-sm'
+              }`}
+            >
+              <Settings className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45" strokeWidth={1.8} />
+              <span className="pointer-events-none absolute right-0 top-12 whitespace-nowrap rounded-md bg-gray-950 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-all duration-200 group-hover:translate-y-0.5 group-hover:opacity-100">
+                {adminAccess.label}
+              </span>
+            </Link>
+
             <button className="relative p-2 text-gray-600 hover:text-[#6b21a8] transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -78,7 +106,7 @@ export default function Header() {
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 py-4 flex flex-col gap-4">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.label}
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
@@ -87,8 +115,21 @@ export default function Header() {
                 }`}
               >
                 {item.label}{item.highlight ? ' ✦' : ''}
-              </a>
+              </Link>
             ))}
+            <Link
+              href={adminAccess.href}
+              onClick={() => setMenuOpen(false)}
+              aria-current={isAdminActive ? 'page' : undefined}
+              className={`flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
+                isAdminActive
+                  ? 'bg-[#6b21a8]/10 text-[#6b21a8]'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-[#6b21a8]'
+              }`}
+            >
+              <Settings className="h-4 w-4" strokeWidth={1.8} />
+              {adminAccess.label}
+            </Link>
           </div>
         )}
       </nav>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import StatCard from '@/components/admin/StatCard';
 import LineChart from '@/components/admin/LineChart';
 import {
@@ -152,7 +153,7 @@ export default function AdminDashboard() {
           style={{ background: '#1e293b' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold text-sm">Pedidos Recentes</h2>
-            <a href="/admin/pedidos" className="text-purple-400 text-xs hover:text-purple-300">Ver todos</a>
+            <Link href="/admin/pedidos" className="text-purple-400 text-xs hover:text-purple-300">Ver todos</Link>
           </div>
           <div className="flex flex-col gap-0">
             {recent.map((o, i) => (
