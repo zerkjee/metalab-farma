@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -103,7 +104,13 @@ function CouponCard({ coupon }: { coupon: Coupon }) {
 }
 
 export default function VipPage() {
-  const user = mockUser;
+  const { data: session } = useSession();
+  const user = {
+    ...mockUser,
+    name: session?.user?.name ?? mockUser.name,
+    firstName: session?.user?.name?.split(' ')[0] ?? mockUser.firstName,
+    email: session?.user?.email ?? mockUser.email,
+  };
   const levelCfg = getLevelConfig(user.level);
   const nextLevel = getNextLevel(user.level);
   const progress = getProgressToNext(user);

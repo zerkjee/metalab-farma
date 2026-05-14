@@ -202,3 +202,65 @@ export function formatOrderDate(value: string) {
 export function orderSummary(order: AdminOrderDetail) {
   return `${order.items.length} produto${order.items.length === 1 ? '' : 's'} · ${fmtCurrency(order.total)}`;
 }
+
+export const statusMap: Record<string, AdminOrderStatus> = {
+  AGUARDANDO_PAGAMENTO: 'aguardando_pagamento',
+  PAGAMENTO_APROVADO: 'pagamento_aprovado',
+  EM_SEPARACAO: 'em_separacao',
+  ENVIADO: 'enviado',
+  ENTREGUE: 'entregue',
+  CANCELADO: 'cancelado',
+  REEMBOLSADO: 'cancelado',
+};
+
+export function mapApiOrder(p: Record<string, unknown>): AdminOrderDetail {
+  const endereco = (() => {
+    try { return JSON.parse(String(p.enderecoSnap ?? '{}')) } catch { return {} }
+  })();
+  const itens = Array.isArray(p.itens) ? p.itens : [];
+
+  return {
+    id: String(p.id),
+    customer: {
+      name: String(p.compradorNome ?? ''),
+      email: String(p.compradorEmail ?? ''),
+      phone: String(p.compradorTelefone ?? ''),
+      document: String(p.compradorCpf ?? ''),
+    },
+    address: {
+      street: String(endereco.logradouro ?? ''),
+      number: String(endereco.numero ?? ''),
+      district: String(endereco.bairro ?? ''),
+      city: String(endereco.cidade ?? ''),
+      state: String(endereco.estado ?? ''),
+      zip: String(endereco.cep ?? ''),
+      complement: String(endereco.complemento ?? ''),
+    },
+    items: itens.map((item: Record<string, unknown>) => {
+      const produto = typeof item.produto === 'object' && item.produto !== null ? item.produto as Record<string, unknown> : {};
+      return {
+        sku: String(item.produtoSku ?? ''),
+        name: String(item.produtoNome ?? produto['nome'] ?? ''),
+        image: String(item.produtoImagem ?? produto['imagemUrl'] ?? ''),
+        qty: Number(item.quantidade ?? 1),
+        unitPrice: Number(item.precoUnit ?? 0),
+      };
+    }),
+    subtotal: Number(p.subtotal ?? 0),
+    discount: Number(p.desconto ?? 0),
+    shipping: Number(p.frete ?? 0),
+    total: Number(p.total ?? 0),
+    payment: String(p.metodoPagamento ?? 'PIX'),
+    paymentCode: String(p.pixQrCode ?? ''),
+    coupon: null,
+    status: statusMap[String(p.status)] ?? 'aguardando_pagamento',
+    date: String(p.criadoEm ?? new Date().toISOString()).slice(0, 10),
+    timeline: [],
+    history: [],
+    notes: '',
+    trackingCode: String(p.codigoRastreio ?? ''),
+    channel: 'Loja Online',
+    tinyStatus: 'pendente',
+    invoiceStatus: 'nao_emitida',
+  } as AdminOrderDetail;
+}

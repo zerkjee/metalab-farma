@@ -13,14 +13,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { fmtCurrency } from '@/data/admin';
 import {
   AdminOrderDetail,
   AdminOrderStatus,
-  findAdminOrder,
   formatOrderDate,
+  mapApiOrder,
   orderStatusFlow,
   orderStatusMeta,
 } from '@/utils/adminOrders';
@@ -69,15 +69,38 @@ function Timeline({ order }: { order: AdminOrderDetail }) {
 export default function AdminPedidoDetalhe() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const initialOrder = useMemo(() => findAdminOrder(params.id), [params.id]);
-  const [order, setOrder] = useState<AdminOrderDetail | null>(initialOrder ?? null);
-  const [note, setNote] = useState(initialOrder?.notes ?? '');
+  const [order, setOrder] = useState<AdminOrderDetail | null>(null);
+  const [note, setNote] = useState('');
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    setFetching(true);
+    fetch(`/api/pedidos/${params.id}`)
+      .then((r) => r.json())
+      .then((data: unknown) => {
+        if (data && typeof data === 'object' && !('erro' in (data as object))) {
+          const mapped = mapApiOrder(data as Record<string, unknown>);
+          setOrder(mapped);
+          setNote(mapped.notes ?? '');
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFetching(false));
+  }, [params.id]);
+
+  if (fetching) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!order) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/70 p-8 text-center">
         <p className="text-xl font-black text-white">Pedido não encontrado</p>
-        <p className="mt-2 text-sm text-slate-500">Esse pedido ainda não existe nos mocks administrativos.</p>
+        <p className="mt-2 text-sm text-slate-500">Verifique o ID e tente novamente.</p>
         <Link href="/admin/pedidos" className="mt-5 rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white">
           Voltar para pedidos
         </Link>
