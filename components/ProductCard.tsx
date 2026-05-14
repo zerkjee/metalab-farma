@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { Product } from '@/types/product';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
   const preco = typeof product.preco === 'string'
     ? parseFloat(product.preco)
     : product.preco;
@@ -100,6 +102,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             Ver Produto
           </Link>
           <button
+            onClick={() => addItem(product)}
             disabled={!temEstoque}
             className="flex-1 py-2 text-xs font-bold rounded-xl text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
             style={{ background: cor }}

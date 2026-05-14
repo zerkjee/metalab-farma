@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
 
 const navItems = [
   { label: 'Início', href: '/' },
@@ -23,6 +24,8 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const isAdminActive = pathname?.startsWith(adminAccess.href);
+  const { hydrated, totals, toggleCart } = useCart();
+  const cartCount = hydrated ? totals.itemCount : 0;
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
@@ -81,11 +84,20 @@ export default function Header() {
               </span>
             </Link>
 
-            <button className="relative p-2 text-gray-600 hover:text-[#6b21a8] transition-colors">
+            <button
+              onClick={toggleCart}
+              className="relative p-2 text-gray-600 hover:text-[#6b21a8] transition-colors"
+              aria-label={`Abrir carrinho com ${cartCount} itens`}
+            >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m10 0l2-9m-12 9h16m-16 0a2 2 0 11-4 0 2 2 0 014 0zm16 0a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6b21a8] px-1.5 text-[10px] font-black text-white shadow-md">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
             </button>
 
             {/* Hamburger mobile */}

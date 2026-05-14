@@ -1,6 +1,7 @@
 'use client';
 
 import { Product } from '@/types/product';
+import { useCart } from '@/context/CartContext';
 
 interface ProductDetailHeroProps {
   product: Product;
@@ -11,6 +12,7 @@ export default function ProductDetailHero({
   product,
   corPrincipal,
 }: ProductDetailHeroProps) {
+  const { addItem } = useCart();
   const preco = typeof product.preco === 'string'
     ? parseFloat(product.preco)
     : product.preco;
@@ -142,6 +144,7 @@ export default function ProductDetailHero({
                 Mais Informações
               </button>
               <button
+                onClick={() => addItem(product)}
                 disabled={!temEstoque}
                 className="flex-1 py-3 px-6 text-sm font-bold text-white rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
                 style={{
