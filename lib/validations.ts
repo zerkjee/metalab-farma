@@ -5,12 +5,28 @@ export const loginSchema = z.object({
   senha: z.string().min(6, "Mínimo 6 caracteres"),
 })
 
+function validarCPF(cpf: string): boolean {
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
+  let rem = (sum * 10) % 11;
+  if (rem === 10 || rem === 11) rem = 0;
+  if (rem !== parseInt(cpf[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
+  rem = (sum * 10) % 11;
+  if (rem === 10 || rem === 11) rem = 0;
+  return rem === parseInt(cpf[10]);
+}
+
 export const registroSchema = z.object({
-  nome: z.string().min(2, "Nome muito curto"),
+  nome: z.string().min(2, "Nome muito curto").max(80, "Nome muito longo"),
   email: z.string().email("Email inválido"),
-  senha: z.string().min(6, "Mínimo 6 caracteres"),
+  senha: z.string().min(8, "Mínimo 8 caracteres"),
   confirmarSenha: z.string(),
-  cpf: z.string().regex(/^\d{11}$/, "CPF inválido (apenas números, 11 dígitos)"),
+  cpf: z.string()
+    .regex(/^\d{11}$/, "CPF deve ter 11 dígitos")
+    .refine(validarCPF, "CPF inválido"),
   telefone: z.string().optional(),
 }).refine((d) => d.senha === d.confirmarSenha, {
   message: "Senhas não conferem",
