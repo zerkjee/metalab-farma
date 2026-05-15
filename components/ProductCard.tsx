@@ -18,7 +18,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }).format(preco);
 
   const temEstoque = product.estoque > 0;
-  const cor = product.corPrincipal ?? product.cor_principal ?? '#6b21a8';
+  const cor = product.corPrincipal ?? '#6b21a8';
 
   return (
     <div
@@ -32,9 +32,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       {/* Imagem */}
       <div className="relative w-full h-52 bg-gray-50 flex items-center justify-center overflow-hidden">
-        {(product.imagemUrl ?? product.imagem_url) ? (
+        {product.imagemUrl ? (
           <img
-            src={(product.imagemUrl ?? product.imagem_url)!}
+            src={product.imagemUrl!}
             alt={product.nome}
             className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
           />

@@ -28,8 +28,8 @@ export default function CartDrawer() {
     removeCoupon,
   } = useCart();
 
-  function handleApplyCoupon() {
-    const result = applyCoupon(couponCode);
+  async function handleApplyCoupon() {
+    const result = await applyCoupon(couponCode);
     setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
     if (result.ok) {
       setCouponCode('');

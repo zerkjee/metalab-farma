@@ -23,5 +23,5 @@ export type CartTotals = CalculatedCartTotals;
 
 export type AddCartProductInput = Product;
 
-export type ApplyCouponFn = (code: string) => CouponValidationResult;
+export type ApplyCouponFn = (code: string) => Promise<CouponValidationResult>;
 export type RemoveCouponFn = (type: CouponType) => void;

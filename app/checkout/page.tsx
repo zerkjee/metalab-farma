@@ -54,27 +54,21 @@ const shippingMethods: ShippingMethod[] = [
 
 const paymentMethods: PaymentMethod[] = [
   {
-    id: 'pix',
+    id: 'PIX',
     label: 'Pix',
     description: 'Confirmacao instantanea. QR Code gerado apos o pedido.',
   },
   {
-    id: 'card',
+    id: 'CARTAO_CREDITO',
     label: 'Cartao de Credito',
     description: 'Parcelamento disponivel. Processado pelo Mercado Pago.',
   },
   {
-    id: 'boleto',
+    id: 'BOLETO',
     label: 'Boleto',
     description: 'Vencimento em 3 dias uteis. Compensacao em ate 2 dias.',
   },
 ];
-
-const metodoPagamentoMap: Record<PaymentMethodId, string> = {
-  pix: 'PIX',
-  card: 'CARTAO_CREDITO',
-  boleto: 'BOLETO',
-};
 
 export default function CheckoutPage() {
   const {
@@ -89,7 +83,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedShippingId, setSelectedShippingId] = useState<ShippingMethodId>('standard');
-  const [selectedPaymentId, setSelectedPaymentId] = useState<PaymentMethodId>('pix');
+  const [selectedPaymentId, setSelectedPaymentId] = useState<PaymentMethodId>('PIX');
   const [order, setOrder] = useState<RealOrder | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -140,7 +134,7 @@ export default function CheckoutPage() {
         },
         frete: { preco: selectedShipping.price },
         cupomCodigo: coupons.discount?.code ?? coupons.freeShipping?.code ?? undefined,
-        metodoPagamento: metodoPagamentoMap[selectedPaymentId],
+        metodoPagamento: selectedPaymentId,
       };
 
       const res = await fetch('/api/pedidos', {
@@ -159,7 +153,7 @@ export default function CheckoutPage() {
       let pixQrCode: string | undefined;
       let pixQrCodeBase64: string | undefined;
 
-      if (selectedPaymentId === 'pix') {
+      if (selectedPaymentId === 'PIX') {
         const pixRes = await fetch('/api/pagamento/criar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -193,28 +187,9 @@ export default function CheckoutPage() {
 
   async function handleApplyCoupon() {
     if (!couponCode.trim()) return;
-
-    try {
-      const res = await fetch('/api/cupons', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo: couponCode.trim().toUpperCase() }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setCouponMessage({ type: 'error', text: data.erro ?? 'Cupom invalido.' });
-        return;
-      }
-
-      const result = applyCoupon(couponCode.trim().toUpperCase());
-      setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
-      if (result.ok) setCouponCode('');
-    } catch {
-      const result = applyCoupon(couponCode.trim().toUpperCase());
-      setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
-      if (result.ok) setCouponCode('');
-    }
+    const result = await applyCoupon(couponCode.trim().toUpperCase());
+    setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
+    if (result.ok) setCouponCode('');
   }
 
   if (order) {

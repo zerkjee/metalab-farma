@@ -1,7 +1,7 @@
 import type { AppliedCoupon } from '@/types/coupon';
 
 export type ShippingMethodId = 'standard' | 'express';
-export type PaymentMethodId = 'pix' | 'card' | 'boleto';
+export type PaymentMethodId = 'PIX' | 'CARTAO_CREDITO' | 'BOLETO';
 
 export interface CheckoutForm {
   fullName: string;

@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const numericId = parseInt(produto.id.replace('local-', '')) || 0
   const detail = getProductDetail(numericId)
-  const corPrincipal = produto.corPrincipal ?? produto.cor_principal ?? detail?.cor_principal ?? '#6b21a8'
+  const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#6b21a8'
   const corSecundaria = detail?.cor_secundaria ?? '#f3f4f6'
 
   return (

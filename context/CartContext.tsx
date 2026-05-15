@@ -189,12 +189,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  const applyCoupon = useCallback<ApplyCouponFn>((code) => {
+  const applyCoupon = useCallback<ApplyCouponFn>(async (code) => {
     const subtotal = calculateCartTotals({
       items: cart.items,
       coupons: cart.coupons,
     }).subtotal;
-    const result = validateCoupon({ code, coupons: cart.coupons, subtotal });
+    const result = await validateCoupon({ code, coupons: cart.coupons, subtotal });
 
     if (result.ok && result.coupon) {
       const slot = couponSlot(result.coupon.type);

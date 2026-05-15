@@ -28,9 +28,9 @@ export default function ProductDetailHero({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {/* Imagem */}
           <div className="flex items-center justify-center bg-gray-50 rounded-2xl p-8 h-full min-h-96">
-            {(product.imagemUrl ?? product.imagem_url) ? (
+            {product.imagemUrl ? (
               <img
-                src={(product.imagemUrl ?? product.imagem_url)!}
+                src={product.imagemUrl!}
                 alt={product.nome}
                 className="w-full h-full object-contain max-h-96"
               />
