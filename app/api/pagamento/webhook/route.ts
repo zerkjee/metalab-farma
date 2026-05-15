@@ -1,8 +1,52 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendOrderConfirmationEmail } from "@/lib/resend"
+import crypto from "crypto"
 
-// O Mercado Pago chama esta URL quando o status do pagamento muda
+function verifyMPSignature(
+  req: NextRequest,
+  paymentId: string
+): { valid: boolean; reason?: string } {
+  const secret = process.env.MP_WEBHOOK_SECRET
+  if (!secret) {
+    console.warn("[WEBHOOK] MP_WEBHOOK_SECRET não configurado — verificação pulada")
+    return { valid: true }
+  }
+
+  const xSignature = req.headers.get("x-signature")
+  const xRequestId = req.headers.get("x-request-id")
+
+  if (!xSignature || !xRequestId) {
+    return { valid: false, reason: "Headers x-signature/x-request-id ausentes" }
+  }
+
+  const parts = Object.fromEntries(
+    xSignature.split(",").flatMap((part) => {
+      const [k, v] = part.trim().split("=")
+      return k && v ? [[k, v]] : []
+    })
+  )
+  const { ts, v1 } = parts
+  if (!ts || !v1) {
+    return { valid: false, reason: "Formato inválido de x-signature" }
+  }
+
+  // Rejeitar timestamps com mais de 5 minutos (anti-replay)
+  if (Math.abs(Date.now() / 1000 - Number(ts)) > 300) {
+    return { valid: false, reason: "Request expirado (possível replay attack)" }
+  }
+
+  const manifest = `id:${paymentId};request-id:${xRequestId};ts:${ts};`
+  const expected = crypto.createHmac("sha256", secret).update(manifest).digest("hex")
+
+  try {
+    const valid = crypto.timingSafeEqual(Buffer.from(v1, "hex"), Buffer.from(expected, "hex"))
+    return { valid }
+  } catch {
+    return { valid: false, reason: "Assinatura malformada" }
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -12,13 +56,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true })
     }
 
+    const paymentId = String(body?.data?.id ?? "")
+    if (!paymentId) {
+      return NextResponse.json({ erro: "ID de pagamento ausente" }, { status: 400 })
+    }
+
+    const { valid, reason } = verifyMPSignature(request, paymentId)
+    if (!valid) {
+      console.warn(`[WEBHOOK] Assinatura inválida: ${reason}`)
+      return NextResponse.json({ erro: "Assinatura inválida" }, { status: 401 })
+    }
+
     const { MercadoPagoConfig, Payment } = await import("mercadopago")
     const client = new MercadoPagoConfig({
       accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
     })
 
     const paymentApi = new Payment(client)
-    const pagamento = await paymentApi.get({ id: body.data.id })
+    const pagamento = await paymentApi.get({ id: paymentId })
 
     if (pagamento.status === "approved") {
       const pedido = await prisma.pedido.findFirst({
@@ -30,7 +85,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ ok: true })
       }
 
-      // Marcar como pago e baixar estoque numa transação atômica
       await prisma.$transaction([
         prisma.pedido.update({
           where: { id: pedido.id },

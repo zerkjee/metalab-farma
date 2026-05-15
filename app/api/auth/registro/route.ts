@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { registroSchema } from "@/lib/validations"
+import { registroRatelimit } from "@/lib/rateLimit"
 import { z } from "zod"
 import { Prisma } from "@prisma/client"
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous"
+    const { success } = await registroRatelimit.limit(ip)
+    if (!success) {
+      return NextResponse.json({ erro: "Muitas tentativas. Tente novamente em 1 hora." }, { status: 429 })
+    }
+
     const body = await request.json()
     const raw = registroSchema.parse(body)
     const data = { ...raw, email: raw.email.toLowerCase().trim() }

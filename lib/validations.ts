@@ -8,6 +8,7 @@ export const loginSchema = z.object({
 export const senhaSchema = z
   .string()
   .min(8, "Mínimo 8 caracteres")
+  .max(72, "Máximo 72 caracteres")
   .regex(/[A-Z]/, "Deve conter pelo menos 1 letra maiúscula")
   .regex(/[a-z]/, "Deve conter pelo menos 1 letra minúscula")
   .regex(/[0-9]/, "Deve conter pelo menos 1 número")

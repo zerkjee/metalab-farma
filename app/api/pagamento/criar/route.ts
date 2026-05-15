@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { pagamentoRatelimit } from "@/lib/rateLimit"
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous"
+    const { success } = await pagamentoRatelimit.limit(ip)
+    if (!success) {
+      return NextResponse.json({ erro: "Muitas tentativas. Tente novamente em alguns minutos." }, { status: 429 })
+    }
+
     const { pedidoId } = await request.json()
 
     const pedido = await prisma.pedido.findUnique({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { cupomRatelimit } from "@/lib/rateLimit"
 
 const cupomSchema = z.object({
   codigo: z.string().min(3).max(20).regex(/^[A-Za-z0-9_-]+$/, "Código inválido"),
@@ -21,6 +22,12 @@ function invalidCouponResponse() {
 // POST /api/cupons — validar cupom (público)
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous"
+    const { success } = await cupomRatelimit.limit(ip)
+    if (!success) {
+      return NextResponse.json({ erro: "Muitas tentativas. Tente novamente em alguns minutos." }, { status: 429 })
+    }
+
     const body = await request.json()
     const parsed = cupomSchema.safeParse(body)
 
