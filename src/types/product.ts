@@ -5,7 +5,7 @@ export interface Product {
   preco: string | number;
   estoque: number;
   descricao: string | null;
-  imagem_url: string | null;
+  imagemUrl: string | null;
   ativo: boolean;
   criado_em: string;
 }

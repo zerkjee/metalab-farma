@@ -55,11 +55,11 @@ function productToCartItem(product: AddCartProductInput, quantity: number): Cart
     slug: product.slug,
     name: product.nome,
     brand: product.marca,
-    imageUrl: product.imagemUrl ?? product.imagem_url ?? null,
+    imageUrl: product.imagemUrl ?? null,
     unitPrice,
     quantity,
     stock: product.estoque,
-    color: product.corPrincipal ?? product.cor_principal ?? '#6b21a8',
+    color: product.corPrincipal ?? '#6b21a8',
   };
 }
 

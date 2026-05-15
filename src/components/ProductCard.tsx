@@ -20,9 +20,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-200">
       {/* Imagem do Produto */}
       <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-        {(product.imagemUrl ?? product.imagem_url) ? (
+        {product.imagemUrl ? (
           <img
-            src={(product.imagemUrl ?? product.imagem_url)!}
+            src={product.imagemUrl!}
             alt={product.nome}
             className="w-full h-full object-cover"
           />

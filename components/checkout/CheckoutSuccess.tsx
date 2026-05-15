@@ -75,7 +75,7 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
         )}
       </div>
 
-      {order.metodoPagamento === 'pix' && order.pixQrCode && (
+      {order.metodoPagamento === 'PIX' && order.pixQrCode && (
         <div className="mt-6 rounded-2xl border border-purple-100 bg-purple-50 p-5 text-left">
           <p className="text-sm font-black text-gray-950">Pague com Pix</p>
           <p className="mt-1 text-xs leading-5 text-gray-500">
