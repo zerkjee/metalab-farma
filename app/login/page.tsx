@@ -3,7 +3,7 @@
 import { Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, Suspense, useState } from 'react';
+import { FormEvent, Suspense, useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 
 function LoginForm() {
@@ -12,16 +12,19 @@ function LoginForm() {
   const callbackUrl = searchParams.get('callbackUrl') ?? '/';
   const { data: session, status: sessionStatus } = useSession();
 
-  if (sessionStatus === 'authenticated' && session) {
-    router.replace(callbackUrl);
-    return null;
-  }
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (sessionStatus === 'authenticated' && session) {
+      router.replace(callbackUrl);
+    }
+  }, [sessionStatus, session, router, callbackUrl]);
+
+  if (sessionStatus === 'authenticated') return null;
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

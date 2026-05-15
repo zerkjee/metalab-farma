@@ -8,7 +8,8 @@ import { Prisma } from "@prisma/client"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const data = registroSchema.parse(body)
+    const raw = registroSchema.parse(body)
+    const data = { ...raw, email: raw.email.toLowerCase().trim() }
 
     const existe = await prisma.usuario.findFirst({
       where: { OR: [{ email: data.email }, { cpf: data.cpf }] },

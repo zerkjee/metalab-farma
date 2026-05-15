@@ -6,7 +6,11 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useState, useCallback, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 
-// ── masks ────────────────────────────────────────────────────────────────────
+// ── formatters ───────────────────────────────────────────────────────────────
+function toTitleCase(s: string) {
+  return s.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+}
+
 function cpfMask(v: string) {
   return v.replace(/\D/g, '').slice(0, 11)
     .replace(/(\d{3})(\d)/, '$1.$2')
@@ -264,7 +268,7 @@ export default function RegistroPage() {
                     <input
                       type="text"
                       value={form.nome}
-                      onChange={(e) => set('nome', e.target.value)}
+                      onChange={(e) => set('nome', toTitleCase(e.target.value))}
                       onBlur={() => touch('nome')}
                       autoFocus
                       placeholder="Seu nome completo"
@@ -297,7 +301,7 @@ export default function RegistroPage() {
                     </Field>
                     <Field label="Telefone (opcional)">
                       <input
-                        type="text"
+                        type="tel"
                         value={form.telefone}
                         onChange={(e) => set('telefone', phoneMask(e.target.value))}
                         placeholder="(11) 99999-0000"
