@@ -8,45 +8,71 @@ import ProductReviews from '@/components/reviews/ProductReviews';
 import PurchaseNotification from '@/components/social-proof/PurchaseNotification';
 import { products as localProducts } from '@/data/products';
 import { getProductDetail } from '@/utils/productDetails';
+import { Product } from '@/types/product';
 
 interface ProductPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
+}
+
+async function getProduto(idParam: string): Promise<Product | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/produtos/${idParam}`, {
+      next: { revalidate: 60 },
+    })
+    if (res.ok) {
+      const p = await res.json()
+      return {
+        id: String(p.id),
+        slug: String(p.slug),
+        sku: p.sku ? String(p.sku) : undefined,
+        nome: String(p.nome),
+        marca: String(p.marca ?? 'Metalab'),
+        preco: Number(p.preco),
+        precoOriginal: p.precoOriginal ? Number(p.precoOriginal) : null,
+        estoque: Number(p.estoque ?? 0),
+        descricaoCurta: p.descricaoCurta ? String(p.descricaoCurta) : null,
+        descricaoHtml: p.descricaoHtml ? String(p.descricaoHtml) : null,
+        imagemUrl: p.imagemUrl ? String(p.imagemUrl) : null,
+        ativo: Boolean(p.ativo),
+        destaque: Boolean(p.destaque),
+        corPrincipal: p.corPrincipal ? String(p.corPrincipal) : null,
+        criadoEm: p.criadoEm ? String(p.criadoEm) : undefined,
+      }
+    }
+  } catch {
+    // fallback para dados locais
+  }
+
+  return localProducts.find((p) => p.id === idParam || p.slug === idParam) ?? null
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
-  const resolvedParams = await params;
-  const idParam = resolvedParams.id;
-  const produto = localProducts.find((p) => p.id === idParam || p.slug === idParam);
+  const { id: idParam } = await params
+  const produto = await getProduto(idParam)
 
-  if (!produto) {
-    return { title: 'Produto não encontrado' };
-  }
+  if (!produto) return { title: 'Produto não encontrado' }
 
   return {
     title: `${produto.nome} | Metalab Store`,
-    description: `${produto.nome} - Suplemento alimentar de qualidade e procedência garantida. Compre agora!`,
+    description: produto.descricaoCurta ?? `${produto.nome} - Suplemento alimentar de qualidade e procedência garantida.`,
     openGraph: {
       title: produto.nome,
-      description: 'Suplemento alimentar de qualidade e procedência garantida.',
+      description: produto.descricaoCurta ?? 'Suplemento alimentar de qualidade e procedência garantida.',
     },
-  };
+  }
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const resolvedParams = await params;
-  const idParam = resolvedParams.id;
-  const produto = localProducts.find((p) => p.id === idParam || p.slug === idParam);
+  const { id: idParam } = await params
+  const produto = await getProduto(idParam)
 
-  if (!produto) {
-    notFound();
-  }
+  if (!produto) notFound()
 
-  const numericId = parseInt(produto.id.replace('local-', '')) || 0;
-  const detail = getProductDetail(numericId);
-  const corPrincipal = produto.corPrincipal ?? produto.cor_principal ?? detail?.cor_principal ?? '#6b21a8';
-  const corSecundaria = detail?.cor_secundaria ?? '#f3f4f6';
+  const numericId = parseInt(produto.id.replace('local-', '')) || 0
+  const detail = getProductDetail(numericId)
+  const corPrincipal = produto.corPrincipal ?? produto.cor_principal ?? detail?.cor_principal ?? '#6b21a8'
+  const corSecundaria = detail?.cor_secundaria ?? '#f3f4f6'
 
   return (
     <>
@@ -61,11 +87,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
               Por que escolher este produto?
             </h2>
-            <p className="text-gray-600">
-              Qualidade, segurança e confiança em cada detalhe
-            </p>
+            <p className="text-gray-600">Qualidade, segurança e confiança em cada detalhe</p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { title: 'Qualidade Garantida', desc: 'Produto lacrado com procedência certificada' },
@@ -88,9 +111,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
-              Como incluir na rotina
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Como incluir na rotina</h2>
           </div>
           <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
             <p className="text-gray-700 text-lg leading-relaxed mb-6">
@@ -109,9 +130,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <section className="py-16 bg-gray-50 border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
-              Informações Importantes
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Informações Importantes</h2>
           </div>
           <div className="bg-white rounded-xl p-8 border border-gray-200 space-y-4">
             {[
@@ -142,9 +161,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">
             Pronto para adicionar este produto à sua rotina?
           </h2>
-          <p className="text-gray-600 mb-8 text-lg">
-            Complemente sua alimentação com qualidade e segurança
-          </p>
+          <p className="text-gray-600 mb-8 text-lg">Complemente sua alimentação com qualidade e segurança</p>
           <p className="text-xs text-gray-400 mt-8">
             Suplemento alimentar. Este produto não é medicamento. Sem indicação terapêutica. Leia o rótulo.
           </p>
@@ -154,5 +171,5 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Footer />
       <PurchaseNotification />
     </>
-  );
+  )
 }

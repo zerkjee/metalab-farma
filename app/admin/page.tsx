@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import StatCard from '@/components/admin/StatCard';
 import LineChart from '@/components/admin/LineChart';
-import {
-  revenueChart, visitorsChart,
-  topProducts, categoryChart, fmtCurrency, fmtDate,
-  statusColors,
-} from '@/data/admin';
+import { fmtCurrency, fmtDate, statusColors } from '@/data/admin';
+
+interface AnalyticsData {
+  receitaDiaria: { label: string; value: number }[];
+  topProdutos: { nome: string; vendas: number; receita: number; pct: number; cor: string }[];
+  porStatus: { label: string; value: number; cor: string }[];
+}
 
 interface AdminStats {
   faturamentoMes: number;
@@ -36,15 +38,19 @@ interface AdminStats {
 const CIRC = 2 * Math.PI * 36;
 
 export default function AdminDashboard() {
-  const [chartTab, setChartTab] = useState<'revenue' | 'visitors'>('revenue');
+  const [chartTab] = useState<'revenue'>('revenue');
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/stats')
       .then((r) => r.json())
-      .then((data) => {
-        if (!data.erro) setStats(data);
-      })
+      .then((data) => { if (!data.erro) setStats(data); })
+      .catch(() => {});
+
+    fetch('/api/admin/analytics')
+      .then((r) => r.json())
+      .then((data) => { if (!data.erro) setAnalytics(data); })
       .catch(() => {});
   }, []);
 
@@ -104,12 +110,13 @@ export default function AdminDashboard() {
     },
   ];
 
-  // Donut chart
-  const total = categoryChart.reduce((s, d) => s + d.value, 0);
+  // Donut chart com dados de status reais
+  const statusChartData = analytics?.porStatus ?? [];
+  const totalStatus = statusChartData.reduce((s, d) => s + d.value, 0) || 1;
   let offset = 0;
-  const segments = categoryChart.map((d) => {
-    const pct2 = d.value / total;
-    const seg = { ...d, dasharray: `${pct2 * CIRC} ${CIRC}`, dashoffset: -offset * CIRC };
+  const segments = statusChartData.map((d) => {
+    const pct2 = d.value / totalStatus;
+    const seg = { ...d, color: d.cor, dasharray: `${pct2 * CIRC} ${CIRC}`, dashoffset: -offset * CIRC };
     offset += pct2;
     return seg;
   });
@@ -130,64 +137,61 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 rounded-2xl border border-slate-700/50 p-5"
           style={{ background: '#1e293b' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold text-sm">Desempenho</h2>
-            <div className="flex gap-1">
-              {(['revenue', 'visitors'] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setChartTab(t)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    chartTab === t
-                      ? 'bg-purple-600 text-white'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
-                  }`}
-                >
-                  {t === 'revenue' ? 'Faturamento' : 'Visitantes'}
-                </button>
-              ))}
-            </div>
+            <h2 className="text-white font-bold text-sm">Faturamento (14 dias)</h2>
           </div>
-          <LineChart
-            data={chartTab === 'revenue' ? revenueChart : visitorsChart}
-            color={chartTab === 'revenue' ? '#7c3aed' : '#0ea5e9'}
-            formatValue={chartTab === 'revenue' ? (v) => `R$${(v / 1000).toFixed(1)}k` : undefined}
-          />
+          {analytics?.receitaDiaria?.length ? (
+            <LineChart
+              data={analytics.receitaDiaria}
+              color="#7c3aed"
+              formatValue={(v) => `R$${(v / 1000).toFixed(1)}k`}
+            />
+          ) : (
+            <div className="h-32 flex items-center justify-center">
+              <p className="text-slate-500 text-sm">Nenhum dado de receita ainda.</p>
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-slate-700/50 p-5 flex flex-col gap-4"
           style={{ background: '#1e293b' }}>
-          <h2 className="text-white font-bold text-sm">Categorias</h2>
-          <div className="flex justify-center">
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="36" fill="none" stroke="#0f172a" strokeWidth="14" />
-              {segments.map((seg, i) => (
-                <circle
-                  key={i}
-                  cx="50" cy="50" r="36"
-                  fill="none"
-                  stroke={seg.color}
-                  strokeWidth="14"
-                  strokeDasharray={seg.dasharray}
-                  strokeDashoffset={seg.dashoffset}
-                  transform="rotate(-90 50 50)"
-                />
-              ))}
-              <text x="50" y="54" textAnchor="middle" fill="white" style={{ fontSize: '10px', fontWeight: 700 }}>
-                {total}%
-              </text>
-            </svg>
-          </div>
-          <div className="flex flex-col gap-2">
-            {categoryChart.map((c) => (
-              <div key={c.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: c.color }} />
-                  <span className="text-slate-300 text-xs">{c.label}</span>
-                </div>
-                <span className="text-slate-400 text-xs font-bold">{c.value}%</span>
+          <h2 className="text-white font-bold text-sm">Pedidos por status</h2>
+          {segments.length > 0 ? (
+            <>
+              <div className="flex justify-center">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="36" fill="none" stroke="#0f172a" strokeWidth="14" />
+                  {segments.map((seg, i) => (
+                    <circle
+                      key={i}
+                      cx="50" cy="50" r="36"
+                      fill="none"
+                      stroke={seg.color}
+                      strokeWidth="14"
+                      strokeDasharray={seg.dasharray}
+                      strokeDashoffset={seg.dashoffset}
+                      transform="rotate(-90 50 50)"
+                    />
+                  ))}
+                  <text x="50" y="54" textAnchor="middle" fill="white" style={{ fontSize: '10px', fontWeight: 700 }}>
+                    {totalStatus}
+                  </text>
+                </svg>
               </div>
-            ))}
-          </div>
+              <div className="flex flex-col gap-2">
+                {statusChartData.map((c) => (
+                  <div key={c.label} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: c.cor }} />
+                      <span className="text-slate-300 text-xs">{c.label}</span>
+                    </div>
+                    <span className="text-slate-400 text-xs font-bold">{c.value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-slate-500 text-sm text-center py-4">Nenhum pedido ainda.</p>
+          )}
         </div>
       </div>
 
@@ -196,25 +200,29 @@ export default function AdminDashboard() {
         <div className="rounded-2xl border border-slate-700/50 p-5"
           style={{ background: '#1e293b' }}>
           <h2 className="text-white font-bold text-sm mb-4">Top Produtos</h2>
-          <div className="flex flex-col gap-3">
-            {topProducts.map((p, i) => (
-              <div key={p.name}>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-500 text-xs font-bold w-4">#{i + 1}</span>
-                    <span className="text-slate-200 text-xs font-semibold">{p.name}</span>
+          {analytics?.topProdutos?.length ? (
+            <div className="flex flex-col gap-3">
+              {analytics.topProdutos.map((p, i) => (
+                <div key={p.nome}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-500 text-xs font-bold w-4">#{i + 1}</span>
+                      <span className="text-slate-200 text-xs font-semibold truncate max-w-[140px]">{p.nome}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white text-xs font-bold">{fmtCurrency(p.receita)}</p>
+                      <p className="text-slate-500 text-[10px]">{p.vendas} vendas</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-white text-xs font-bold">{fmtCurrency(p.revenue)}</p>
-                    <p className="text-slate-500 text-[10px]">{p.sold} vendas</p>
+                  <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${p.pct}%`, background: p.cor }} />
                   </div>
                 </div>
-                <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${p.pct}%`, background: p.color }} />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-500 text-sm text-center py-4">Nenhuma venda ainda.</p>
+          )}
         </div>
 
         <div className="rounded-2xl border border-slate-700/50 p-5"

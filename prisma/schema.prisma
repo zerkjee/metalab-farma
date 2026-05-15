@@ -208,6 +208,10 @@ model Pedido {
   criadoEm    DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
+  @@index([usuarioId, criadoEm])
+  @@index([pagamentoId])
+  @@index([compradorEmail])
+  @@index([status])
   @@map("pedidos")
 }
 
@@ -277,9 +281,9 @@ model Avaliacao {
   aprovada Boolean @default(false)
 
   usuarioId String
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   produtoId String
-  produto   Produto @relation(fields: [produtoId], references: [id])
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
   criadoEm DateTime @default(now())
 
