@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -64,8 +66,8 @@ export async function GET() {
 
   let nextVersion = 'unknown';
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pkg = require('../../../../../package.json') as { dependencies?: { next?: string } };
+    const pkgPath = join(process.cwd(), 'package.json');
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { dependencies?: { next?: string } };
     nextVersion = pkg.dependencies?.next ?? 'unknown';
   } catch { /* ignore */ }
 
