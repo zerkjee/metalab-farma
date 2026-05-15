@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import bcrypt from 'bcryptjs';
+import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { senhaSchema } from '@/lib/validations';
 
 const criarAdminSchema = z.object({
   nome: z.string().min(2).max(80),
   email: z.string().email(),
-  senha: z.string().min(8).max(72),
+  senha: senhaSchema.max(72),
   papel: z.enum(['ADMIN', 'SUPER_ADMIN']),
 }).strict();
 

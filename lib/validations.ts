@@ -5,6 +5,14 @@ export const loginSchema = z.object({
   senha: z.string().min(6, "Mínimo 6 caracteres"),
 })
 
+export const senhaSchema = z
+  .string()
+  .min(8, "Mínimo 8 caracteres")
+  .regex(/[A-Z]/, "Deve conter pelo menos 1 letra maiúscula")
+  .regex(/[a-z]/, "Deve conter pelo menos 1 letra minúscula")
+  .regex(/[0-9]/, "Deve conter pelo menos 1 número")
+  .regex(/[^A-Za-z0-9]/, "Deve conter pelo menos 1 caractere especial")
+
 function validarCPF(cpf: string): boolean {
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
   let sum = 0;
@@ -22,7 +30,7 @@ function validarCPF(cpf: string): boolean {
 export const registroSchema = z.object({
   nome: z.string().min(2, "Nome muito curto").max(80, "Nome muito longo"),
   email: z.string().email("Email inválido"),
-  senha: z.string().min(8, "Mínimo 8 caracteres"),
+  senha: senhaSchema,
   confirmarSenha: z.string(),
   cpf: z.string()
     .regex(/^\d{11}$/, "CPF deve ter 11 dígitos")

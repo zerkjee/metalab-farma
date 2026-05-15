@@ -40,27 +40,14 @@ function validarCPF(cpf: string): boolean {
   return r === parseInt(d[10]);
 }
 
-// ── password strength ─────────────────────────────────────────────────────────
-type Strength = 'fraca' | 'média' | 'forte';
-
-function calcStrength(pwd: string): { level: Strength; score: number } {
-  if (pwd.length < 4) return { level: 'fraca', score: 0 };
-  let score = 0;
-  if (pwd.length >= 8) score++;
-  if (pwd.length >= 12) score++;
-  if (/[A-Z]/.test(pwd)) score++;
-  if (/[0-9]/.test(pwd)) score++;
-  if (/[^A-Za-z0-9]/.test(pwd)) score++;
-  if (score <= 1) return { level: 'fraca', score: 1 };
-  if (score <= 3) return { level: 'média', score: 2 };
-  return { level: 'forte', score: 3 };
-}
-
-const strengthConfig = {
-  fraca: { color: '#ef4444', label: 'Fraca', bars: 1 },
-  média: { color: '#f59e0b', label: 'Média', bars: 2 },
-  forte: { color: '#22c55e', label: 'Forte', bars: 3 },
-};
+// ── password requirements ─────────────────────────────────────────────────────
+const senhaReqs = [
+  { key: 'len',     label: 'Mínimo 8 caracteres',          test: (p: string) => p.length >= 8 },
+  { key: 'upper',   label: '1 letra maiúscula (A–Z)',       test: (p: string) => /[A-Z]/.test(p) },
+  { key: 'lower',   label: '1 letra minúscula (a–z)',       test: (p: string) => /[a-z]/.test(p) },
+  { key: 'num',     label: '1 número (0–9)',                test: (p: string) => /[0-9]/.test(p) },
+  { key: 'special', label: '1 caractere especial (!@#...)', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+];
 
 // ── field input ───────────────────────────────────────────────────────────────
 function Field({
@@ -129,12 +116,10 @@ export default function RegistroPage() {
   else if (cpfRaw.length !== 11) errors.cpf = 'CPF incompleto.';
   else if (!validarCPF(cpfRaw)) errors.cpf = 'CPF inválido.';
   if (!form.senha) errors.senha = 'Senha é obrigatória.';
-  else if (form.senha.length < 8) errors.senha = 'Mínimo 8 caracteres.';
+  else if (senhaReqs.some((r) => !r.test(form.senha))) errors.senha = 'A senha não atende todos os requisitos.';
   if (!form.confirmarSenha) errors.confirmarSenha = 'Confirme a senha.';
   else if (form.senha !== form.confirmarSenha) errors.confirmarSenha = 'As senhas não conferem.';
 
-  const strength = form.senha ? calcStrength(form.senha) : null;
-  const strCfg = strength ? strengthConfig[strength.level] : null;
   const isValid = Object.keys(errors).length === 0;
 
   async function handleSubmit(e: FormEvent) {
@@ -330,26 +315,21 @@ export default function RegistroPage() {
                         {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
-                    {/* Strength bar */}
-                    {form.senha.length > 0 && strCfg && (
-                      <div className="mt-1.5">
-                        <div className="flex gap-1 mb-1">
-                          {[1, 2, 3].map((i) => (
-                            <div
-                              key={i}
-                              className="h-1 flex-1 rounded-full transition-all duration-300"
-                              style={{
-                                background: i <= (strength?.score ?? 0) ? strCfg.color : 'rgb(51 65 85)',
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <p className="text-[11px] font-semibold" style={{ color: strCfg.color }}>
-                          Senha {strCfg.label}
-                          {strength?.level === 'fraca' && ' — adicione números e símbolos'}
-                          {strength?.level === 'média' && ' — adicione um símbolo para fortalecer'}
-                        </p>
-                      </div>
+                    {/* Requisitos de senha */}
+                    {form.senha.length > 0 && (
+                      <ul className="mt-2 flex flex-col gap-1">
+                        {senhaReqs.map((r) => {
+                          const ok = r.test(form.senha);
+                          return (
+                            <li key={r.key} className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${ok ? 'text-emerald-400' : 'text-slate-500'}`}>
+                              <span className={`flex-shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${ok ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-600'}`}>
+                                {ok ? '✓' : '×'}
+                              </span>
+                              {r.label}
+                            </li>
+                          );
+                        })}
+                      </ul>
                     )}
                   </Field>
 

@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { ShieldCheck, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
 
+const senhaReqs = [
+  { key: 'len',     label: 'Mínimo 8 caracteres',          test: (p: string) => p.length >= 8 },
+  { key: 'upper',   label: '1 letra maiúscula (A–Z)',       test: (p: string) => /[A-Z]/.test(p) },
+  { key: 'lower',   label: '1 letra minúscula (a–z)',       test: (p: string) => /[a-z]/.test(p) },
+  { key: 'num',     label: '1 número (0–9)',                test: (p: string) => /[0-9]/.test(p) },
+  { key: 'special', label: '1 caractere especial (!@#...)', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+];
+
 interface AdminUser {
   id: string;
   nome: string;
@@ -41,8 +49,11 @@ export default function CriarAdminPage() {
     if (isSuperAdmin) loadAdmins();
   }, [isSuperAdmin]);
 
+  const senhaValida = senhaReqs.every((r) => r.test(form.senha));
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
+    if (!senhaValida) { setError('A senha não atende todos os requisitos.'); return; }
     setSaving(true);
     setError('');
     setSuccess('');
@@ -141,14 +152,13 @@ export default function CriarAdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Senha (mín. 8 caracteres)</label>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Senha</label>
               <div className="relative">
                 <input
                   type={showSenha ? 'text' : 'password'}
                   value={form.senha}
                   onChange={(e) => setForm((v) => ({ ...v, senha: e.target.value }))}
                   required
-                  minLength={8}
                   placeholder="Senha segura"
                   className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2.5 pr-11 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
                 />
@@ -160,6 +170,21 @@ export default function CriarAdminPage() {
                   {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {form.senha.length > 0 && (
+                <ul className="mt-2 flex flex-col gap-1">
+                  {senhaReqs.map((r) => {
+                    const ok = r.test(form.senha);
+                    return (
+                      <li key={r.key} className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${ok ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        <span className={`flex-shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${ok ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-600'}`}>
+                          {ok ? '✓' : '×'}
+                        </span>
+                        {r.label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </div>
 
             <div>
@@ -181,7 +206,7 @@ export default function CriarAdminPage() {
 
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || !senhaValida}
               className="w-full rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1 flex items-center justify-center gap-2"
               style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
             >
