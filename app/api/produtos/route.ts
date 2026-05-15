@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const categoria = searchParams.get("categoria")
     const busca = searchParams.get("busca")
     const pagina = Math.max(1, parseInt(searchParams.get("pagina") ?? "1"))
-    const porPagina = parseInt(searchParams.get("por_pagina") ?? "20")
+    const porPagina = Math.min(Math.max(1, parseInt(searchParams.get("por_pagina") ?? "20") || 20), 100)
     const destaque = searchParams.get("destaque") === "true"
 
     const where: Prisma.ProdutoWhereInput = { ativo: true }

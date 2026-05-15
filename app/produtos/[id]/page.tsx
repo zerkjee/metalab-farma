@@ -147,7 +147,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 >
                   ⓘ
                 </div>
-                <p className="text-gray-700" dangerouslySetInnerHTML={{ __html: text }} />
+                <p className="text-gray-700">{text}</p>
               </div>
             ))}
           </div>

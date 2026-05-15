@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const busca = searchParams.get("busca") ?? ""
     const pagina = Math.max(1, parseInt(searchParams.get("pagina") ?? "1"))
-    const porPagina = parseInt(searchParams.get("por_pagina") ?? "50")
+    const porPagina = Math.min(Math.max(1, parseInt(searchParams.get("por_pagina") ?? "50") || 50), 200)
 
     const where = busca
       ? {

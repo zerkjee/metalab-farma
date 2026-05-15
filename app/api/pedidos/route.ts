@@ -1,30 +1,29 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { sendOrderConfirmationEmail } from "@/lib/resend"
+import { enderecoSchema } from "@/lib/validations"
 
-interface ItemPedidoInput {
-  produtoId?: string
-  slug?: string
-  quantidade: number
-}
+const pedidoSchema = z.object({
+  itens: z.array(z.object({
+    produtoId: z.string().optional(),
+    slug: z.string().optional(),
+    quantidade: z.number().int().min(1).max(99),
+  })).min(1).max(50),
+  cliente: z.object({
+    nome: z.string().min(2).max(80),
+    email: z.string().email(),
+    cpf: z.string().regex(/^\d{11}$/, "CPF inválido"),
+    telefone: z.string().optional(),
+  }),
+  endereco: enderecoSchema,
+  frete: z.object({ preco: z.number().min(0) }).optional(),
+  cupomCodigo: z.string().regex(/^[A-Za-z0-9_-]{3,20}$/).optional(),
+  metodoPagamento: z.enum(["PIX", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO"]).default("PIX"),
+})
 
-interface ClienteInput {
-  nome: string
-  email: string
-  cpf: string
-  telefone?: string
-}
-
-interface EnderecoInput {
-  cep: string
-  logradouro: string
-  numero: string
-  complemento?: string
-  bairro: string
-  cidade: string
-  estado: string
-}
+type PedidoInput = z.infer<typeof pedidoSchema>
 
 function gerarNumeroPedido() {
   const now = new Date()
@@ -39,25 +38,12 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     const body = await request.json()
 
-    const {
-      itens,
-      cliente,
-      endereco,
-      frete,
-      cupomCodigo,
-      metodoPagamento,
-    }: {
-      itens: ItemPedidoInput[]
-      cliente: ClienteInput
-      endereco: EnderecoInput
-      frete?: { preco: number }
-      cupomCodigo?: string
-      metodoPagamento?: string
-    } = body
-
-    if (!itens?.length) {
-      return NextResponse.json({ erro: "Carrinho vazio" }, { status: 400 })
+    const parsed = pedidoSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
     }
+
+    const { itens, cliente, endereco, frete, cupomCodigo, metodoPagamento }: PedidoInput = parsed.data
 
     // Buscar produtos por id ou slug
     const ids = itens.map((i) => i.produtoId).filter(Boolean) as string[]

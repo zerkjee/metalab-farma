@@ -40,25 +40,30 @@ if (novaSenha.length < 8) {
 }
 
 const bcrypt = require('bcryptjs');
-const { PrismaClient } = require('@prisma/client');
+const { Client } = require('pg');
 
-const prisma = new PrismaClient();
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
 
 try {
-  const usuario = await prisma.usuario.findUnique({ where: { email: email.toLowerCase().trim() } });
+  await client.connect();
 
-  if (!usuario) {
+  const { rows } = await client.query(
+    'SELECT id, papel FROM usuarios WHERE email = $1 AND ativo = true',
+    [email.toLowerCase().trim()]
+  );
+
+  if (rows.length === 0) {
     console.error(`Usuário não encontrado: ${email}`);
     process.exit(1);
   }
 
   const hash = await bcrypt.hash(novaSenha, 12);
-  await prisma.usuario.update({
-    where: { id: usuario.id },
-    data: { senha: hash },
-  });
+  await client.query('UPDATE usuarios SET senha = $1 WHERE id = $2', [hash, rows[0].id]);
 
-  console.log(`✓ Senha atualizada para: ${email} (papel: ${usuario.papel})`);
+  console.log(`✓ Senha atualizada para: ${email} (papel: ${rows[0].papel})`);
 } finally {
-  await prisma.$disconnect();
+  await client.end();
 }
