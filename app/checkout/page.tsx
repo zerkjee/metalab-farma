@@ -38,17 +38,17 @@ const checkoutFormId = 'metalab-checkout-form';
 const shippingMethods: ShippingMethod[] = [
   {
     id: 'standard',
-    label: 'Entrega padrao',
+    label: 'Entrega padrão',
     description: 'Envio nacional com rastreio via Correios.',
     price: 19.9,
-    estimate: '5 a 8 dias uteis',
+    estimate: '5 a 8 dias úteis',
   },
   {
     id: 'express',
     label: 'Entrega expressa',
-    description: 'Prioridade na separacao e no envio.',
+    description: 'Prioridade na separação e no envio.',
     price: 34.9,
-    estimate: '2 a 4 dias uteis',
+    estimate: '2 a 4 dias úteis',
   },
 ];
 
@@ -56,17 +56,17 @@ const paymentMethods: PaymentMethod[] = [
   {
     id: 'PIX',
     label: 'Pix',
-    description: 'Confirmacao instantanea. QR Code gerado apos o pedido.',
+    description: 'Confirmação instantânea. QR Code gerado após o pedido.',
   },
   {
     id: 'CARTAO_CREDITO',
-    label: 'Cartao de Credito',
-    description: 'Parcelamento disponivel. Processado pelo Mercado Pago.',
+    label: 'Cartão de Crédito',
+    description: 'Parcelamento disponível. Processado pelo Mercado Pago.',
   },
   {
     id: 'BOLETO',
     label: 'Boleto',
-    description: 'Vencimento em 3 dias uteis. Compensacao em ate 2 dias.',
+    description: 'Vencimento em 3 dias úteis. Compensação em até 2 dias.',
   },
 ];
 
@@ -179,7 +179,7 @@ export default function CheckoutPage() {
       });
       clearCart();
     } catch {
-      setSubmitError('Erro de conexao. Verifique sua internet e tente novamente.');
+      setSubmitError('Erro de conexão. Verifique sua internet e tente novamente.');
     } finally {
       setSubmitting(false);
     }
@@ -226,7 +226,7 @@ export default function CheckoutPage() {
               <ShoppingBag className="h-8 w-8" strokeWidth={1.7} />
             </div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Checkout</p>
-            <h1 className="mt-3 text-3xl font-black text-gray-950">Seu carrinho esta vazio</h1>
+            <h1 className="mt-3 text-3xl font-black text-gray-950">Seu carrinho está vazio</h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500">
               Adicione produtos ao carrinho antes de finalizar o pedido.
             </p>
@@ -258,7 +258,7 @@ export default function CheckoutPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Checkout</p>
               <h1 className="mt-2 text-3xl font-black text-gray-950 sm:text-4xl">Finalize seu pedido</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-                Pagamento processado com seguranca via Mercado Pago.
+                Pagamento processado com segurança via Mercado Pago.
               </p>
             </div>
           </div>
@@ -277,8 +277,8 @@ export default function CheckoutPage() {
             <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <div className="mb-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Cupons</p>
-                <h2 className="mt-1 text-xl font-black text-gray-950">Aplique seus beneficios</h2>
-                <p className="mt-1 text-sm text-gray-500">Permitido 1 cupom de desconto + 1 cupom de frete gratis.</p>
+                <h2 className="mt-1 text-xl font-black text-gray-950">Aplique seus benefícios</h2>
+                <p className="mt-1 text-sm text-gray-500">Permitido 1 cupom de desconto + 1 cupom de frete grátis.</p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
