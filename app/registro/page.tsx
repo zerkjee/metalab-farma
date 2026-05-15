@@ -3,7 +3,7 @@
 import { Eye, EyeOff, ShieldCheck, Package, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState, useCallback } from 'react';
+import { FormEvent, useState, useCallback, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 
 // ── masks ────────────────────────────────────────────────────────────────────
@@ -94,17 +94,18 @@ export default function RegistroPage() {
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
 
-  if (sessionStatus === 'authenticated' && session) {
-    router.replace('/');
-    return null;
-  }
-
   const [form, setForm] = useState(initial);
   const [touched, setTouched] = useState<Partial<Record<FormKey, boolean>>>({});
   const [showSenha, setShowSenha] = useState(false);
   const [showConfirmar, setShowConfirmar] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [serverError, setServerError] = useState('');
+
+  useEffect(() => {
+    if (sessionStatus === 'authenticated' && session) {
+      router.replace('/');
+    }
+  }, [sessionStatus, session, router]);
 
   const set = useCallback((field: FormKey, value: string) => {
     setForm((p) => ({ ...p, [field]: value }));
@@ -177,6 +178,8 @@ export default function RegistroPage() {
   }
 
   const loading = submitStatus === 'loading';
+
+  if (sessionStatus === 'authenticated') return null;
 
   return (
     <main
