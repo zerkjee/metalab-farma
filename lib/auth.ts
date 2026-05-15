@@ -50,9 +50,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        const role = (user as any).role
+        const roleRaw = (user as { role?: unknown }).role
         const ROLES_VALIDOS = ["CLIENTE", "ADMIN", "SUPER_ADMIN"] as const
-        token.role = ROLES_VALIDOS.includes(role) ? role : "CLIENTE"
+        const role = typeof roleRaw === 'string' ? roleRaw : ''
+        token.role = (ROLES_VALIDOS as readonly string[]).includes(role) ? role : "CLIENTE"
       }
       return token
     },

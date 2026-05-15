@@ -2,7 +2,7 @@ import type { AdminCoupon, AdminCouponFormValues } from '@/types/adminCoupon';
 
 export const couponKindLabels = {
   discount: 'Desconto',
-  free_shipping: 'Frete gratis',
+  free_shipping: 'Frete grátis',
 } as const;
 
 export const couponStatusLabels = {
@@ -41,7 +41,7 @@ export const mockAdminCoupons: AdminCoupon[] = [
   {
     id: 'coupon-carrinho30',
     code: 'CARRINHO30',
-    name: 'Recuperacao de carrinho',
+    name: 'Recuperação de carrinho',
     kind: 'discount',
     discountMode: 'fixed',
     percentage: 0,
@@ -56,7 +56,7 @@ export const mockAdminCoupons: AdminCoupon[] = [
   {
     id: 'coupon-fretegratis',
     code: 'FRETEGRATIS',
-    name: 'Frete gratis nacional',
+    name: 'Frete grátis nacional',
     kind: 'free_shipping',
     discountMode: 'fixed',
     percentage: 0,

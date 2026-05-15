@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import StatCard from '@/components/admin/StatCard';
 import LineChart from '@/components/admin/LineChart';
-import { fmtCurrency, fmtDate, statusColors } from '@/data/admin';
+import { fmtCurrency, fmtDate } from '@/data/admin';
+import { statusMap, orderStatusMeta } from '@/utils/adminOrders';
 
 interface AnalyticsData {
   receitaDiaria: { label: string; value: number }[];
@@ -242,8 +243,8 @@ export default function AdminDashboard() {
           ) : (
             <div className="flex flex-col gap-0">
               {recentOrders.map((o, i) => {
-                const statusKey = o.status as keyof typeof statusColors;
-                const statusStyle = statusColors[statusKey] ?? { bg: 'bg-slate-700', text: 'text-slate-300' };
+                const mappedStatus = statusMap[o.status] ?? 'aguardando_pagamento';
+                const statusStyle = orderStatusMeta[mappedStatus];
                 return (
                   <div key={o.id} className={`flex items-center gap-3 py-3 ${i < recentOrders.length - 1 ? 'border-b border-slate-700/50' : ''}`}>
                     <div className="w-8 h-8 rounded-xl bg-slate-700 flex items-center justify-center text-white text-xs font-black flex-shrink-0">
@@ -256,7 +257,7 @@ export default function AdminDashboard() {
                     <div className="text-right flex-shrink-0">
                       <p className="text-white text-xs font-bold">{fmtCurrency(o.total)}</p>
                       <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
-                        {statusKey}
+                        {statusStyle.label}
                       </span>
                     </div>
                   </div>
