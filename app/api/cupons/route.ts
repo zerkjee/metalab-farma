@@ -1,30 +1,49 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+
+const cupomSchema = z.object({
+  codigo: z.string().min(3).max(20).regex(/^[A-Za-z0-9_-]+$/, "Código inválido"),
+  subtotal: z.number().min(0),
+})
+
+// Delay artificial para dificultar brute force (sem revelar o motivo do erro)
+function invalidCouponResponse() {
+  return new Promise<NextResponse>((resolve) =>
+    setTimeout(
+      () => resolve(NextResponse.json({ erro: "Cupom inválido" }, { status: 404 })),
+      400
+    )
+  )
+}
 
 // POST /api/cupons — validar cupom (público)
 export async function POST(request: NextRequest) {
   try {
-    const { codigo, subtotal } = await request.json()
+    const body = await request.json()
+    const parsed = cupomSchema.safeParse(body)
 
-    if (!codigo) {
-      return NextResponse.json({ erro: "Código obrigatório" }, { status: 400 })
+    if (!parsed.success) {
+      return invalidCouponResponse()
     }
+
+    const { codigo, subtotal } = parsed.data
 
     const cupom = await prisma.cupom.findUnique({
       where: { codigo: codigo.toUpperCase().trim() },
     })
 
     if (!cupom || !cupom.ativo) {
-      return NextResponse.json({ erro: "Cupom inválido ou inativo" }, { status: 404 })
+      return invalidCouponResponse()
     }
 
     if (cupom.validade && new Date(cupom.validade) < new Date()) {
-      return NextResponse.json({ erro: "Cupom expirado" }, { status: 400 })
+      return invalidCouponResponse()
     }
 
     if (cupom.usoMaximo && cupom.usoAtual >= cupom.usoMaximo) {
-      return NextResponse.json({ erro: "Cupom esgotado" }, { status: 400 })
+      return invalidCouponResponse()
     }
 
     let desconto = 0

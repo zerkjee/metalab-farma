@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+
+const produtoUpdateSchema = z.object({
+  nome: z.string().min(1).optional(),
+  slug: z.string().min(1).optional(),
+  sku: z.string().min(1).optional(),
+  ean: z.string().nullable().optional(),
+  marca: z.string().optional(),
+  subtitulo: z.string().nullable().optional(),
+  descricaoHtml: z.string().optional(),
+  descricaoCurta: z.string().nullable().optional(),
+  preco: z.number().positive().optional(),
+  precoOriginal: z.number().positive().nullable().optional(),
+  estoque: z.number().int().min(0).optional(),
+  estoqueMin: z.number().int().min(0).optional(),
+  categoriaId: z.string().nullable().optional(),
+  corPrincipal: z.string().nullable().optional(),
+  corSecundaria: z.string().nullable().optional(),
+  imagemUrl: z.string().nullable().optional(),
+  metaTitulo: z.string().nullable().optional(),
+  metaDescricao: z.string().nullable().optional(),
+  palavrasChave: z.string().nullable().optional(),
+  ativo: z.boolean().optional(),
+  destaque: z.boolean().optional(),
+}).strict()
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -46,9 +71,17 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const { id } = await params
     const body = await request.json()
 
+    const parsed = produtoUpdateSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { erro: "Dados inválidos", detalhes: parsed.error.issues },
+        { status: 400 }
+      )
+    }
+
     const produto = await prisma.produto.update({
       where: { id },
-      data: body,
+      data: parsed.data,
     })
 
     return NextResponse.json(produto)

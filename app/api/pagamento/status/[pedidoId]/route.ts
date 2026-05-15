@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 
 type Params = { params: Promise<{ pedidoId: string }> }
 
-// GET /api/pagamento/status/:pedidoId — o frontend consulta isto em loop
-export async function GET(_req: NextRequest, { params }: Params) {
+// GET /api/pagamento/status/:pedidoId — polling de confirmação de pagamento
+// - Autenticado como dono ou admin: retorna dados completos
+// - Não autenticado: retorna apenas { pago, status } para polling anônimo
+// - O QR Code já é retornado por /api/pagamento/criar, não precisa ser re-exposto aqui
+export async function GET(req: NextRequest, { params }: Params) {
   try {
     const { pedidoId } = await params
+    const session = await auth()
 
     const pedido = await prisma.pedido.findUnique({
       where: { id: pedidoId },
@@ -17,8 +22,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         pago: true,
         pagoEm: true,
         total: true,
-        pixQrCode: true,
-        pixQrCodeBase64: true,
+        usuarioId: true,
       },
     })
 
@@ -26,8 +30,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ erro: "Pedido não encontrado" }, { status: 404 })
     }
 
-    return NextResponse.json(pedido)
-  } catch (error) {
+    const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN"
+    const isOwner = session?.user?.id && session.user.id === pedido.usuarioId
+
+    if (isAdmin || isOwner) {
+      const { usuarioId: _, ...dados } = pedido
+      return NextResponse.json(dados)
+    }
+
+    // Unauthenticated or different user: only return polling data
+    return NextResponse.json({ pago: pedido.pago, status: pedido.status })
+  } catch {
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
