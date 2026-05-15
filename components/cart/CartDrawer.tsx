@@ -15,6 +15,7 @@ function formatCurrency(value: number) {
 export default function CartDrawer() {
   const [couponCode, setCouponCode] = useState('');
   const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const {
     items,
     coupons,
@@ -29,10 +30,15 @@ export default function CartDrawer() {
   } = useCart();
 
   async function handleApplyCoupon() {
-    const result = await applyCoupon(couponCode);
-    setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
-    if (result.ok) {
-      setCouponCode('');
+    if (!couponCode.trim() || isApplyingCoupon) return;
+    setIsApplyingCoupon(true);
+    setCouponMessage(null);
+    try {
+      const result = await applyCoupon(couponCode);
+      setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
+      if (result.ok) setCouponCode('');
+    } finally {
+      setIsApplyingCoupon(false);
     }
   }
 
@@ -168,14 +174,22 @@ export default function CartDrawer() {
                   <input
                     value={couponCode}
                     onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+                    onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
                     placeholder="PRIMEIRA30"
-                    className="min-w-0 flex-1 rounded-xl border border-purple-200 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8]"
+                    disabled={isApplyingCoupon}
+                    className="min-w-0 flex-1 rounded-xl border border-purple-200 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8] disabled:opacity-60"
                   />
                   <button
                     onClick={handleApplyCoupon}
-                    className="rounded-xl bg-[#6b21a8] px-3 py-2 text-xs font-black text-white transition-all hover:opacity-90"
+                    disabled={isApplyingCoupon || !couponCode.trim()}
+                    className="rounded-xl bg-[#6b21a8] px-3 py-2 text-xs font-black text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 min-w-[60px] flex items-center justify-center"
                   >
-                    Aplicar
+                    {isApplyingCoupon ? (
+                      <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    ) : 'Aplicar'}
                   </button>
                 </div>
                 {couponMessage && (

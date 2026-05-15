@@ -3,20 +3,26 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 
-const nav = [
-  { label: 'Dashboard',  href: '/admin',           icon: '📊' },
-  { label: 'Produtos',   href: '/admin/produtos',   icon: '📦' },
-  { label: 'Pedidos',    href: '/admin/pedidos',    icon: '🛍️' },
-  { label: 'Clientes',   href: '/admin/clientes',   icon: '👥' },
-  { label: 'Cupons',     href: '/admin/cupons',     icon: '🎫' },
-  { label: 'Banners',    href: '/admin/banners',    icon: '🖼️' },
-  { label: 'Analytics',  href: '/admin/analytics',  icon: '📈' },
+type NavItem = { label: string; href: string; icon: string; superAdminOnly?: boolean };
+
+const nav: NavItem[] = [
+  { label: 'Dashboard',    href: '/admin',               icon: '📊' },
+  { label: 'Produtos',     href: '/admin/produtos',       icon: '📦' },
+  { label: 'Pedidos',      href: '/admin/pedidos',        icon: '🛍️' },
+  { label: 'Clientes',     href: '/admin/clientes',       icon: '👥' },
+  { label: 'Cupons',       href: '/admin/cupons',         icon: '🎫' },
+  { label: 'Banners',      href: '/admin/banners',        icon: '🖼️' },
+  { label: 'Analytics',    href: '/admin/analytics',      icon: '📈' },
+  { label: 'Admins',       href: '/admin/criar-admin',    icon: '🔑', superAdminOnly: true },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { data: session } = useSession();
+  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
 
   return (
     <aside
@@ -43,7 +49,7 @@ export default function AdminSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 py-4 overflow-hidden">
-        {nav.map((item) => {
+        {nav.filter((item) => !item.superAdminOnly || isSuperAdmin).map((item) => {
           const active = item.href === '/admin'
             ? pathname === '/admin'
             : pathname.startsWith(item.href);
@@ -73,13 +79,24 @@ export default function AdminSidebar() {
       {/* Footer */}
       <div className="border-t border-slate-800 p-3">
         {!collapsed && (
-          <Link
-            href="/"
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-all text-xs mb-2"
-          >
-            <span>🏪</span>
-            <span>Ver loja pública</span>
-          </Link>
+          <>
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-all text-xs mb-1"
+            >
+              <span>🏪</span>
+              <span>Ver loja pública</span>
+            </Link>
+            {isSuperAdmin && (
+              <Link
+                href="/dev"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-all text-xs mb-2"
+              >
+                <span>🔧</span>
+                <span>Painel Dev</span>
+              </Link>
+            )}
+          </>
         )}
         <button
           onClick={() => setCollapsed(v => !v)}

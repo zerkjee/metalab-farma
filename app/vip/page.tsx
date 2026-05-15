@@ -1,17 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import LevelBadge from '@/components/loyalty/LevelBadge';
-import {
-  mockUser, levels, achievements, cashbackHistory, coupons,
-  getLevelConfig, getNextLevel, getProgressToNext,
-} from '@/data/loyalty';
-import { CashbackEntry, Coupon } from '@/types/loyalty';
+import { levels, achievements, getLevelConfig, getNextLevel, getProgressToNext } from '@/data/loyalty';
+import type { LevelId } from '@/types/loyalty';
+
+interface UserStats {
+  level: LevelId;
+  points: number;
+  totalPedidos: number;
+  totalGasto: number;
+  cashbackBalance: number;
+  cashbackUsed: number;
+  memberSince: string;
+  recentOrders: {
+    id: string;
+    numero: string;
+    total: number;
+    status: string;
+    criadoEm: string;
+    primeiroProduto: string | null;
+  }[];
+}
+
+const statusLabel: Record<string, { label: string; color: string }> = {
+  AGUARDANDO_PAGAMENTO: { label: 'Aguardando', color: 'text-amber-400' },
+  PAGAMENTO_APROVADO: { label: 'Aprovado', color: 'text-emerald-400' },
+  EM_SEPARACAO: { label: 'Em separação', color: 'text-blue-400' },
+  ENVIADO: { label: 'Enviado', color: 'text-sky-400' },
+  ENTREGUE: { label: 'Entregue', color: 'text-emerald-400' },
+  CANCELADO: { label: 'Cancelado', color: 'text-red-400' },
+  REEMBOLSADO: { label: 'Reembolsado', color: 'text-orange-400' },
+};
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -21,103 +47,82 @@ function formatCurrency(v: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 }
 
-function CopyButton({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
-  function copy() {
-    navigator.clipboard.writeText(code).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-  return (
-    <button
-      onClick={copy}
-      className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all duration-200 ${
-        copied ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-white/30 text-white/70 hover:border-white/60 hover:text-white'
-      }`}
-    >
-      {copied ? '✓ Copiado' : 'Copiar'}
-    </button>
-  );
-}
-
 function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white/[0.06] border border-white/10 rounded-2xl backdrop-blur-sm ${className}`}>
+    <div className={`relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] backdrop-blur-sm ${className}`}>
       {children}
     </div>
   );
 }
 
-function CashbackRow({ entry }: { entry: CashbackEntry }) {
-  const earned = entry.type === 'earned';
+function StatChip({
+  label, value, sub, color,
+}: { label: string; value: string | number; sub: string; color: string }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-      <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${earned ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
-          {earned ? '↑' : '↓'}
-        </div>
-        <div>
-          <p className="text-white text-sm font-medium">{entry.description}</p>
-          <p className="text-white/40 text-xs">{formatDate(entry.date)}{entry.orderId ? ` · ${entry.orderId}` : ''}</p>
-        </div>
-      </div>
-      <span className={`font-bold text-sm ${earned ? 'text-emerald-400' : 'text-red-400'}`}>
-        {earned ? '+' : '-'}{formatCurrency(entry.amount)}
-      </span>
-    </div>
-  );
-}
-
-function CouponCard({ coupon }: { coupon: Coupon }) {
-  const cfg = getLevelConfig(coupon.level);
-  return (
-    <div className="relative rounded-2xl overflow-hidden border border-white/10">
-      {/* Stripe lateral */}
-      <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ background: cfg.gradient }} />
-
-      <div className="pl-5 pr-4 py-4 bg-white/[0.04]">
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div>
-            <p className="text-white font-bold text-sm">{coupon.title}</p>
-            <p className="text-white/50 text-xs mt-0.5">{coupon.description}</p>
-          </div>
-          <span className="text-lg font-black flex-shrink-0" style={{ color: cfg.color }}>{coupon.discount}</span>
-        </div>
-
-        <div className="flex items-center justify-between mt-3">
-          <div>
-            <code className="text-xs font-mono font-bold tracking-widest px-2.5 py-1 rounded-lg bg-white/10 text-white/80">
-              {coupon.code}
-            </code>
-            {coupon.minOrder > 0 && (
-              <p className="text-white/30 text-[10px] mt-1">Mínimo {formatCurrency(coupon.minOrder)}</p>
-            )}
-          </div>
-          <div className="text-right">
-            <CopyButton code={coupon.code} />
-            <p className="text-white/30 text-[10px] mt-1">Até {formatDate(coupon.validUntil)}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <GlassCard className="p-5 text-center group hover:border-white/20 transition-all">
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `radial-gradient(circle at 50% 0%, ${color}18 0%, transparent 70%)` }} />
+      <p className="relative text-white/40 text-[11px] uppercase tracking-widest mb-2">{label}</p>
+      <p className="relative text-2xl font-black" style={{ color }}>{value}</p>
+      <p className="relative text-white/30 text-xs mt-0.5">{sub}</p>
+    </GlassCard>
   );
 }
 
 export default function VipPage() {
-  const { data: session } = useSession();
-  const user = {
-    ...mockUser,
-    name: session?.user?.name ?? mockUser.name,
-    firstName: session?.user?.name?.split(' ')[0] ?? mockUser.firstName,
-    email: session?.user?.email ?? mockUser.email,
-  };
-  const levelCfg = getLevelConfig(user.level);
-  const nextLevel = getNextLevel(user.level);
-  const progress = getProgressToNext(user);
-  const pointsToNext = nextLevel ? nextLevel.minPoints - user.points : 0;
+  const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
 
-  const [historyExpanded, setHistoryExpanded] = useState(false);
-  const visibleHistory = historyExpanded ? cashbackHistory : cashbackHistory.slice(0, 4);
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    if (sessionStatus === 'unauthenticated') {
+      router.replace('/login');
+      return;
+    }
+    if (sessionStatus !== 'authenticated') return;
+
+    fetch('/api/user/stats')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) setStats(data);
+      })
+      .finally(() => setLoadingStats(false));
+  }, [sessionStatus, router]);
+
+  if (sessionStatus === 'loading' || loadingStats) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0f0522, #0f172a)' }}>
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl animate-pulse" style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }} />
+            <p className="text-white/40 text-sm animate-pulse">Carregando área VIP...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  const firstName = session?.user?.name?.split(' ')[0] ?? 'Atleta';
+  const level = stats?.level ?? 'silver';
+  const levelCfg = getLevelConfig(level);
+  const nextLevel = getNextLevel(level);
+  const fakeUser = {
+    name: session?.user?.name ?? '',
+    firstName,
+    email: session?.user?.email ?? '',
+    memberSince: stats?.memberSince ?? new Date().toISOString(),
+    level,
+    points: stats?.points ?? 0,
+    cashbackBalance: stats?.cashbackBalance ?? 0,
+    cashbackUsed: stats?.cashbackUsed ?? 0,
+    totalOrders: stats?.totalPedidos ?? 0,
+    totalSpent: stats?.totalGasto ?? 0,
+  };
+  const progress = getProgressToNext(fakeUser);
+  const pointsToNext = nextLevel ? nextLevel.minPoints - fakeUser.points : 0;
 
   return (
     <>
@@ -126,77 +131,91 @@ export default function VipPage() {
 
       {/* ── HERO ── */}
       <section
-        className="relative overflow-hidden pb-32 pt-16"
-        style={{ background: 'linear-gradient(135deg, #0f0522 0%, #1a0533 40%, #1e3a5f 100%)' }}
+        className="relative overflow-hidden pb-40 pt-16"
+        style={{ background: 'linear-gradient(160deg, #0a0118 0%, #12032a 30%, #1a1040 60%, #0f172a 100%)' }}
       >
-        {/* Círculos decorativos */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-10 pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${levelCfg.color}, transparent)`, transform: 'translate(30%, -30%)' }} />
-        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-5 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, #7c3aed, transparent)', transform: 'translate(-30%, 30%)' }} />
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        {/* Glows */}
+        <div className="pointer-events-none absolute -right-32 -top-32 h-[600px] w-[600px] rounded-full opacity-20 blur-3xl"
+          style={{ background: levelCfg.color }} />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 h-80 w-80 rounded-full opacity-10 blur-3xl"
+          style={{ background: '#7c3aed' }} />
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '36px 36px' }} />
+        {/* Noise grain */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.015]"
+          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'400\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.75\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'400\' height=\'400\' filter=\'url(%23n)\' opacity=\'1\'/%3E%3C/svg%3E")' }} />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* Topo: badge + nível */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10">
+          {/* Header row */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-12">
             <div>
-              <p className="text-white/50 text-sm mb-1">Área do Cliente</p>
-              <h1 className="text-3xl sm:text-4xl font-black text-white">
-                Olá, {user.firstName}! <span style={{ color: levelCfg.color }}>{levelCfg.emoji}</span>
+              <p className="text-white/40 text-xs uppercase tracking-[0.3em] mb-2">Área VIP</p>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+                Olá, <span style={{ color: levelCfg.color }}>{firstName}</span>
               </h1>
-              <p className="text-white/50 text-sm mt-1">Membro desde {formatDate(user.memberSince)}</p>
+              {stats?.memberSince && (
+                <p className="text-white/30 text-sm mt-2">
+                  Membro Metalab desde {formatDate(stats.memberSince)}
+                </p>
+              )}
             </div>
-            <div className="flex items-center gap-3 bg-white/[0.07] border border-white/10 rounded-2xl px-5 py-3">
-              <LevelBadge level={user.level} size="lg" />
+
+            <div
+              className="flex items-center gap-4 rounded-2xl border border-white/10 px-5 py-3.5 backdrop-blur-sm"
+              style={{ background: `linear-gradient(135deg, ${levelCfg.color}18, transparent)` }}
+            >
+              <LevelBadge level={level} size="lg" />
               <div>
-                <p className="text-xs text-white/50 uppercase tracking-widest">Nível atual</p>
-                <p className="font-black text-xl uppercase tracking-wide" style={{ color: levelCfg.color }}>
+                <p className="text-[10px] text-white/40 uppercase tracking-[0.3em]">Nível atual</p>
+                <p className="font-black text-xl uppercase tracking-wider mt-0.5" style={{ color: levelCfg.color }}>
                   {levelCfg.name}
                 </p>
+                <p className="text-[10px] text-white/30 mt-0.5">{levelCfg.cashbackPct}% cashback</p>
               </div>
             </div>
           </div>
 
-          {/* Stats rápidos */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-            {[
-              { label: 'Pontos', value: user.points.toLocaleString('pt-BR'), sub: 'acumulados', color: levelCfg.color },
-              { label: 'Cashback', value: formatCurrency(user.cashbackBalance), sub: 'disponível', color: '#34d399' },
-              { label: 'Pedidos', value: user.totalOrders, sub: 'realizados', color: '#60a5fa' },
-              { label: 'Economia', value: formatCurrency(user.cashbackUsed), sub: 'com cashback', color: '#f472b6' },
-            ].map(({ label, value, sub, color }) => (
-              <GlassCard key={label} className="p-5 text-center">
-                <p className="text-white/40 text-xs uppercase tracking-wide mb-1">{label}</p>
-                <p className="text-2xl font-black" style={{ color }}>{value}</p>
-                <p className="text-white/30 text-xs mt-0.5">{sub}</p>
-              </GlassCard>
-            ))}
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+            <StatChip label="Pontos" value={fakeUser.points.toLocaleString('pt-BR')} sub="acumulados" color={levelCfg.color} />
+            <StatChip label="Pedidos" value={fakeUser.totalOrders} sub="realizados" color="#60a5fa" />
+            <StatChip label="Total gasto" value={formatCurrency(fakeUser.totalSpent)} sub="em compras" color="#34d399" />
+            <StatChip label="Cashback" value={fakeUser.cashbackBalance > 0 ? formatCurrency(fakeUser.cashbackBalance) : 'Em breve'} sub="disponível" color="#f472b6" />
           </div>
 
-          {/* Progresso ao próximo nível */}
+          {/* Progress */}
           {nextLevel && (
             <GlassCard className="p-6">
-              <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+              <div className="flex items-center justify-between mb-5 gap-4 flex-wrap">
                 <div className="flex items-center gap-3">
-                  <LevelBadge level={user.level} size="sm" />
-                  <span className="text-white/50 text-sm">→</span>
+                  <LevelBadge level={level} size="sm" />
+                  <svg className="w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
                   <LevelBadge level={nextLevel.id} size="sm" />
-                  <span className="text-white font-bold text-sm">
-                    Faltam <span style={{ color: nextLevel.color }}>{pointsToNext.toLocaleString('pt-BR')} pts</span> para o nível {nextLevel.name}
-                  </span>
+                  <p className="text-white text-sm font-semibold">
+                    Faltam{' '}
+                    <span className="font-black" style={{ color: nextLevel.color }}>
+                      {pointsToNext.toLocaleString('pt-BR')} pts
+                    </span>{' '}
+                    para o nível <span className="font-black">{nextLevel.name}</span>
+                  </p>
                 </div>
-                <span className="text-white/40 text-sm font-bold">{progress}%</span>
+                <span className="text-white/40 text-sm font-black tabular-nums">{progress}%</span>
               </div>
-              <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+              <div className="relative w-full h-3 bg-white/8 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-1000"
+                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000"
+                  style={{ width: `${progress}%`, background: levelCfg.gradient }}
+                />
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full opacity-40 blur-sm transition-all duration-1000"
                   style={{ width: `${progress}%`, background: levelCfg.gradient }}
                 />
               </div>
-              <div className="flex justify-between mt-2 text-xs text-white/30">
-                <span>{user.points.toLocaleString('pt-BR')} pts</span>
+              <div className="flex justify-between mt-2 text-xs text-white/25">
+                <span>{fakeUser.points.toLocaleString('pt-BR')} pts</span>
                 <span>{nextLevel.minPoints.toLocaleString('pt-BR')} pts</span>
               </div>
             </GlassCard>
@@ -204,159 +223,168 @@ export default function VipPage() {
         </div>
       </section>
 
-      {/* ── CONTEÚDO PRINCIPAL (fundo escuro contínuo) ── */}
-      <div style={{ background: 'linear-gradient(180deg, #1a0533 0%, #0f172a 100%)' }} className="-mt-20 pt-8 pb-24">
+      {/* ── CONTEÚDO ── */}
+      <div
+        className="-mt-24 pt-4 pb-24"
+        style={{ background: 'linear-gradient(180deg, #0f172a 0%, #080d1a 100%)' }}
+      >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* Cashback + Cupons */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+          {/* Pedidos recentes */}
+          {stats && stats.recentOrders.length > 0 && (
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-white font-black text-xl">Pedidos Recentes</h2>
+                <Link href="/pedidos" className="text-xs font-bold text-purple-400 hover:text-purple-300 transition-colors">
+                  Ver todos →
+                </Link>
+              </div>
+              <div className="flex flex-col gap-3">
+                {stats.recentOrders.map((order) => {
+                  const s = statusLabel[order.status] ?? { label: order.status, color: 'text-white/60' };
+                  return (
+                    <GlassCard key={order.id} className="flex items-center gap-4 px-5 py-4 hover:border-white/15 transition-all">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-black text-white"
+                        style={{ background: 'linear-gradient(135deg, #1e1b4b, #3730a3)' }}
+                      >
+                        #
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold text-sm">{order.numero}</p>
+                        <p className="text-white/40 text-xs truncate">{order.primeiroProduto ?? 'Pedido'}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-white font-black text-sm">{formatCurrency(order.total)}</p>
+                        <p className={`text-xs font-semibold ${s.color}`}>{s.label}</p>
+                      </div>
+                      <div className="hidden sm:block text-right flex-shrink-0">
+                        <p className="text-white/30 text-xs">{formatDate(order.criadoEm)}</p>
+                      </div>
+                    </GlassCard>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-            {/* Cashback */}
+          {/* Cashback (preview, sem dados reais ainda) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-white font-black text-lg">💰 Cashback</h2>
+                <div>
+                  <h2 className="text-white font-black text-lg">Cashback</h2>
+                  <p className="text-white/40 text-xs mt-0.5">{levelCfg.cashbackPct}% em todas as compras</p>
+                </div>
                 <div className="text-right">
-                  <p className="text-2xl font-black text-emerald-400">{formatCurrency(user.cashbackBalance)}</p>
-                  <p className="text-white/40 text-xs">disponível para usar</p>
+                  <p className="text-2xl font-black text-emerald-400">
+                    {fakeUser.cashbackBalance > 0 ? formatCurrency(fakeUser.cashbackBalance) : 'R$ 0,00'}
+                  </p>
+                  <p className="text-white/30 text-xs">disponível</p>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-3 mb-5">
-                <div className="bg-white/5 rounded-xl p-3 text-center">
-                  <p className="text-emerald-400 font-black text-lg">{levelCfg.cashbackPct}%</p>
-                  <p className="text-white/40 text-xs">sua taxa atual</p>
+                <div className="bg-white/5 rounded-xl p-3.5 text-center">
+                  <p className="text-emerald-400 font-black text-2xl">{levelCfg.cashbackPct}%</p>
+                  <p className="text-white/40 text-xs mt-0.5">sua taxa</p>
                 </div>
-                <div className="bg-white/5 rounded-xl p-3 text-center">
-                  <p className="text-white font-black text-lg">{formatCurrency(user.cashbackUsed)}</p>
-                  <p className="text-white/40 text-xs">já economizados</p>
+                <div className="bg-white/5 rounded-xl p-3.5 text-center">
+                  <p className="text-white font-black text-lg">{formatCurrency(fakeUser.totalSpent)}</p>
+                  <p className="text-white/40 text-xs mt-0.5">total gasto</p>
                 </div>
               </div>
-              <div className="space-y-0 max-h-56 overflow-y-auto pr-1">
-                {visibleHistory.map((e) => <CashbackRow key={e.id} entry={e} />)}
+
+              <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 text-center">
+                <p className="text-white/40 text-xs">
+                  Sistema de resgates disponível em breve. Seus pontos estão sendo acumulados automaticamente.
+                </p>
               </div>
-              {cashbackHistory.length > 4 && (
-                <button
-                  onClick={() => setHistoryExpanded((v) => !v)}
-                  className="mt-4 text-xs font-bold text-white/40 hover:text-white/70 transition-colors w-full text-center"
-                >
-                  {historyExpanded ? 'Mostrar menos ↑' : `Ver mais ${cashbackHistory.length - 4} entradas ↓`}
-                </button>
-              )}
             </GlassCard>
 
-            {/* Cupons */}
+            {/* Conquistas (4 primeiras) */}
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-white font-black text-lg">🎫 Cupons Ativos</h2>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: levelCfg.color + '30', color: levelCfg.color }}>
-                  {coupons.filter(c => !c.used).length} disponíveis
+                <h2 className="text-white font-black text-lg">Conquistas</h2>
+                <span className="text-white/40 text-sm tabular-nums">
+                  {achievements.filter((a) => a.unlocked).length}/{achievements.length}
                 </span>
               </div>
-              <div className="flex flex-col gap-4">
-                {coupons.filter(c => !c.used).map((c) => <CouponCard key={c.id} coupon={c} />)}
-              </div>
-            </GlassCard>
-          </div>
-
-          {/* Conquistas */}
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-black text-xl">🏆 Conquistas</h2>
-              <span className="text-white/40 text-sm">
-                {achievements.filter(a => a.unlocked).length}/{achievements.length} desbloqueadas
-              </span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {achievements.map((ach) => (
-                <div
-                  key={ach.id}
-                  className={`rounded-2xl p-5 border transition-all duration-300 flex flex-col gap-3 ${
-                    ach.unlocked
-                      ? 'bg-white/[0.07] border-white/15 hover:bg-white/10'
-                      : 'bg-white/[0.02] border-white/5 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-3xl ${!ach.unlocked ? 'grayscale opacity-40' : ''}`}>{ach.icon}</span>
-                    {ach.unlocked ? (
-                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">✓ Desbloqueada</span>
-                    ) : (
-                      <span className="text-[10px] font-bold text-white/30 bg-white/5 px-2 py-0.5 rounded-full">Bloqueada</span>
+              <div className="grid grid-cols-2 gap-3">
+                {achievements.slice(0, 4).map((ach) => (
+                  <div
+                    key={ach.id}
+                    className={`rounded-xl p-3.5 border transition-all ${
+                      ach.unlocked
+                        ? 'bg-white/[0.06] border-white/12 hover:bg-white/10'
+                        : 'bg-white/[0.02] border-white/5 opacity-50'
+                    }`}
+                  >
+                    <span className={`text-2xl block mb-2 ${!ach.unlocked ? 'grayscale opacity-30' : ''}`}>{ach.icon}</span>
+                    <p className={`text-xs font-bold leading-snug ${ach.unlocked ? 'text-white' : 'text-white/30'}`}>
+                      {ach.title}
+                    </p>
+                    {ach.unlocked && (
+                      <p className="text-[10px] font-bold text-emerald-400 mt-1">{ach.reward}</p>
                     )}
                   </div>
-                  <div>
-                    <p className={`font-bold text-sm ${ach.unlocked ? 'text-white' : 'text-white/40'}`}>{ach.title}</p>
-                    <p className="text-white/30 text-xs mt-0.5 leading-snug">{ach.description}</p>
-                  </div>
-                  {ach.unlocked ? (
-                    <span className="text-xs font-bold" style={{ color: levelCfg.color }}>{ach.reward}</span>
-                  ) : (
-                    ach.progress !== undefined && ach.maxProgress !== undefined && (
-                      <div>
-                        <div className="flex justify-between text-[10px] text-white/30 mb-1">
-                          <span>{ach.progress.toLocaleString('pt-BR')}</span>
-                          <span>{ach.maxProgress.toLocaleString('pt-BR')}</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-white/30"
-                            style={{ width: `${Math.min(100, (ach.progress / ach.maxProgress) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </GlassCard>
           </div>
 
           {/* Benefícios por nível */}
           <div className="mb-10">
-            <h2 className="text-white font-black text-xl mb-5">⚡ Benefícios por Nível</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <h2 className="text-white font-black text-xl mb-5">Benefícios por Nível</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {levels.map((lvl) => {
-                const isCurrentLevel = lvl.id === user.level;
+                const isCurrent = lvl.id === level;
                 return (
                   <div
                     key={lvl.id}
-                    className={`rounded-2xl p-6 border transition-all duration-300 relative overflow-hidden ${
-                      isCurrentLevel ? 'border-white/25' : 'border-white/8 opacity-75'
+                    className={`relative rounded-2xl border p-6 transition-all ${
+                      isCurrent ? 'border-white/20' : 'border-white/6 opacity-70 hover:opacity-90'
                     }`}
-                    style={{ background: isCurrentLevel ? lvl.gradientCard : 'rgba(255,255,255,0.03)' }}
+                    style={{ background: isCurrent ? lvl.gradientCard : 'rgba(255,255,255,0.02)' }}
                   >
-                    {isCurrentLevel && (
-                      <div className="absolute top-3 right-3 text-[10px] font-black px-2.5 py-1 rounded-full text-white"
-                        style={{ background: lvl.color + '50' }}>
+                    {isCurrent && (
+                      <span
+                        className="absolute right-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-black text-white"
+                        style={{ background: lvl.color + '50' }}
+                      >
                         Seu nível
-                      </div>
+                      </span>
                     )}
 
-                    {/* Badge */}
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-lg"
-                        style={{ background: lvl.gradient }}>
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg flex-shrink-0"
+                        style={{ background: lvl.gradient }}
+                      >
                         {lvl.emoji}
                       </div>
                       <div>
-                        <p className="font-black text-base uppercase tracking-widest" style={{ color: lvl.color }}>{lvl.name}</p>
-                        <p className="text-white/40 text-xs">
-                          {lvl.maxPoints ? `${lvl.minPoints.toLocaleString('pt-BR')}–${lvl.maxPoints.toLocaleString('pt-BR')} pts` : `${lvl.minPoints.toLocaleString('pt-BR')}+ pts`}
+                        <p className="font-black text-sm uppercase tracking-widest" style={{ color: lvl.color }}>
+                          {lvl.name}
+                        </p>
+                        <p className="text-white/35 text-xs">
+                          {lvl.maxPoints
+                            ? `${lvl.minPoints.toLocaleString('pt-BR')}–${lvl.maxPoints.toLocaleString('pt-BR')} pts`
+                            : `${lvl.minPoints.toLocaleString('pt-BR')}+ pts`}
                         </p>
                       </div>
                     </div>
 
-                    {/* Cashback destaque */}
                     <div className="mb-5 py-3 px-4 rounded-xl bg-white/5 text-center">
                       <span className="text-3xl font-black" style={{ color: lvl.color }}>{lvl.cashbackPct}%</span>
-                      <span className="text-white/50 text-sm ml-1">cashback</span>
+                      <span className="text-white/40 text-sm ml-1.5">cashback</span>
                     </div>
 
-                    {/* Benefícios */}
-                    <ul className="flex flex-col gap-2.5">
+                    <ul className="flex flex-col gap-2">
                       {lvl.benefits.map((b) => (
                         <li key={b.text} className="flex items-start gap-2 text-xs">
-                          <span className="text-base leading-none mt-0.5 flex-shrink-0">{b.icon}</span>
-                          <span className={isCurrentLevel ? 'text-white/80' : 'text-white/40'}>{b.text}</span>
+                          <span className="text-sm leading-none mt-0.5 flex-shrink-0">{b.icon}</span>
+                          <span className={isCurrent ? 'text-white/75' : 'text-white/35'}>{b.text}</span>
                         </li>
                       ))}
                     </ul>
@@ -369,37 +397,42 @@ export default function VipPage() {
           {/* CTA upgrade */}
           {nextLevel && (
             <div
-              className="rounded-2xl p-8 border border-white/10 text-center relative overflow-hidden"
+              className="rounded-2xl border border-white/10 p-8 text-center relative overflow-hidden"
               style={{ background: nextLevel.gradientCard }}
             >
-              <div className="absolute inset-0 opacity-5"
-                style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+              <div className="absolute inset-0 opacity-[0.04]"
+                style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+              <div className="pointer-events-none absolute inset-0 opacity-20"
+                style={{ background: `radial-gradient(ellipse at 50% 0%, ${nextLevel.color}40 0%, transparent 60%)` }} />
               <div className="relative">
-                <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-5xl mx-auto mb-5 shadow-2xl"
-                  style={{ background: nextLevel.gradient }}>
+                <div
+                  className="w-20 h-20 rounded-3xl flex items-center justify-center text-5xl mx-auto mb-5 shadow-2xl"
+                  style={{ background: nextLevel.gradient }}
+                >
                   {nextLevel.emoji}
                 </div>
                 <h3 className="text-2xl font-black text-white mb-2">
-                  Faltam <span style={{ color: nextLevel.color }}>{pointsToNext.toLocaleString('pt-BR')} pontos</span> para o {nextLevel.name}
+                  Faltam{' '}
+                  <span style={{ color: nextLevel.color }}>{pointsToNext.toLocaleString('pt-BR')} pontos</span>{' '}
+                  para o {nextLevel.name}
                 </h3>
-                <p className="text-white/60 mb-6 max-w-md mx-auto text-sm leading-relaxed">
-                  Suba para o nível {nextLevel.name} e desbloqueie {nextLevel.cashbackPct}% cashback, além de benefícios exclusivos.
+                <p className="text-white/55 mb-6 max-w-md mx-auto text-sm leading-relaxed">
+                  Suba para {nextLevel.name} e desbloqueie {nextLevel.cashbackPct}% cashback e benefícios exclusivos.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    href="/#produtos"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-200 hover:scale-105 hover:shadow-2xl"
-                    style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
-                  >
-                    Comprar agora e ganhar pontos
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
-                </div>
+                <Link
+                  href="/#produtos"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white text-sm transition-all hover:scale-105 hover:shadow-2xl"
+                  style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                >
+                  Comprar e ganhar pontos
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
               </div>
             </div>
           )}
+
         </div>
       </div>
 
