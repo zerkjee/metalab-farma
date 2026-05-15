@@ -68,8 +68,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ erro: "Método de pagamento não suportado" }, { status: 400 })
-  } catch (error: any) {
-    console.error("[POST /api/pagamento/criar]", error?.message ?? error)
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error("[POST /api/pagamento/criar]", msg)
     return NextResponse.json({ erro: "Erro ao criar pagamento" }, { status: 500 })
   }
 }

@@ -1,12 +1,27 @@
 export default function Footer() {
-  const nav = {
-    Produtos: ['Suplementos', 'Vitaminas', 'Minerais', 'Fitoterápicos'],
-    Institucional: ['Sobre a Metalab', 'Qualidade', 'Certificações', 'Contato'],
-    Atendimento: ['FAQ', 'Política de Privacidade', 'Trocas e Devoluções', 'Fale Conosco'],
+  const nav: Record<string, { label: string; href: string }[]> = {
+    Produtos: [
+      { label: 'Suplementos', href: '/#produtos' },
+      { label: 'Vitaminas', href: '/#produtos' },
+      { label: 'Minerais', href: '/#produtos' },
+      { label: 'Fitoterápicos', href: '/#produtos' },
+    ],
+    Institucional: [
+      { label: 'Sobre a Metalab', href: '/' },
+      { label: 'Qualidade', href: '/' },
+      { label: 'Certificações', href: '/' },
+      { label: 'Contato', href: '/#contato' },
+    ],
+    Atendimento: [
+      { label: 'FAQ', href: '/' },
+      { label: 'Política de Privacidade', href: '/' },
+      { label: 'Trocas e Devoluções', href: '/' },
+      { label: 'Fale Conosco', href: '/#contato' },
+    ],
   };
 
   return (
-    <footer className="bg-gray-950 text-white">
+    <footer id="contato" className="bg-gray-950 text-white">
       {/* Main */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -30,9 +45,9 @@ export default function Footer() {
               <h4 className="text-sm font-bold text-white mb-4 uppercase tracking-wide">{section}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-sm text-gray-400 hover:text-[#c084fc] transition-colors duration-200">
-                      {link}
+                  <li key={link.label}>
+                    <a href={link.href} className="text-sm text-gray-400 hover:text-[#c084fc] transition-colors duration-200">
+                      {link.label}
                     </a>
                   </li>
                 ))}

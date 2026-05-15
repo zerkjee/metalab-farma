@@ -77,9 +77,9 @@ export default function CartDrawer() {
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#6b21a8]/10 text-[#6b21a8]">
               <ShoppingBag className="h-8 w-8" strokeWidth={1.7} />
             </div>
-            <p className="text-lg font-black text-gray-950">Seu carrinho esta vazio</p>
+            <p className="text-lg font-black text-gray-950">Seu carrinho está vazio</p>
             <p className="mt-2 text-sm leading-6 text-gray-500">
-              Adicione produtos do catalogo para iniciar seu pedido.
+              Adicione produtos do catálogo para iniciar seu pedido.
             </p>
             <button
               onClick={closeCart}
@@ -168,7 +168,7 @@ export default function CartDrawer() {
               <div className="mb-4 rounded-2xl border border-dashed border-[#6b21a8]/30 bg-[#6b21a8]/5 p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#6b21a8]">Cupons</p>
                 <p className="mt-1 text-sm text-gray-600">
-                  Use 1 cupom de desconto + 1 cupom de frete gratis.
+                  Use 1 cupom de desconto + 1 cupom de frete grátis.
                 </p>
                 <div className="mt-3 flex gap-2">
                   <input
@@ -238,7 +238,7 @@ export default function CartDrawer() {
                 )}
                 {coupons.freeShipping && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-emerald-600">Frete gratis</span>
+                    <span className="text-emerald-600">Frete grátis</span>
                     <span className="font-bold text-emerald-600">Aplicado no checkout</span>
                   </div>
                 )}

@@ -37,7 +37,7 @@ function normalizeCode(value: string) {
 }
 
 function couponValue(coupon: AdminCoupon) {
-  if (coupon.kind === 'free_shipping') return 'Frete gratis';
+  if (coupon.kind === 'free_shipping') return 'Frete grátis';
   if (coupon.discountMode === 'percent') return `${coupon.percentage}%`;
   return fmtCurrency(coupon.fixedValue);
 }
@@ -145,8 +145,8 @@ function RulePanel() {
     <div className="rounded-2xl border border-purple-700/30 bg-purple-600/10 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-purple-300">Regra de combinacao</p>
-          <p className="mt-1 text-sm font-semibold text-white">O cliente pode usar 1 cupom de desconto + 1 cupom de frete gratis.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-purple-300">Regra de combinação</p>
+          <p className="mt-1 text-sm font-semibold text-white">O cliente pode usar 1 cupom de desconto + 1 cupom de frete grátis.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <span className="inline-flex items-center gap-2 rounded-xl bg-slate-950/40 px-3 py-2 text-xs font-semibold text-emerald-300">
@@ -193,12 +193,12 @@ function CouponForm({
     >
       <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-300">Regra visual</p>
-        <p className="mt-2 text-sm text-slate-300">Cadastre cupons separados: um de desconto e outro de frete gratis. Na loja, dois cupons de desconto nao devem ser combinados.</p>
+        <p className="mt-2 text-sm text-slate-300">Cadastre cupons separados: um de desconto e outro de frete grátis. Na loja, dois cupons de desconto não devem ser combinados.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Codigo</label>
+          <label className="mb-1 block text-xs text-slate-400">Código</label>
           <input
             value={values.code}
             onChange={(event) => setField('code', normalizeCode(event.target.value))}
@@ -231,7 +231,7 @@ function CouponForm({
             className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
           >
             <option value="discount">Desconto</option>
-            <option value="free_shipping">Frete gratis</option>
+            <option value="free_shipping">Frete grátis</option>
           </select>
         </div>
         <div>
@@ -289,7 +289,7 @@ function CouponForm({
           />
         </div>
         <div className="md:col-span-2">
-          <label className="mb-1 block text-xs text-slate-400">Valor minimo de compra</label>
+          <label className="mb-1 block text-xs text-slate-400">Valor mínimo de compra</label>
           <input
             type="number"
             min="0"
@@ -303,7 +303,7 @@ function CouponForm({
 
       {discountConflict && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300">
-          Use porcentagem ou valor fixo para o desconto. Nao combine os dois no mesmo cupom.
+          Use porcentagem ou valor fixo para o desconto. Não combine os dois no mesmo cupom.
         </div>
       )}
 
@@ -461,7 +461,7 @@ export default function AdminCupons() {
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400">Promocoes e retencao</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400">Promoções e retenção</p>
           <h2 className="mt-1 text-xl font-black text-white">Cupons</h2>
           <p className="mt-1 text-xs text-slate-500">{loading ? 'Carregando...' : `${coupons.length} cupons no banco de dados`}</p>
         </div>
@@ -479,7 +479,7 @@ export default function AdminCupons() {
         {[
           { label: 'Cupons ativos', value: coupons.filter((coupon) => coupon.status === 'active').length, icon: Gift },
           { label: 'Descontos ativos', value: activeDiscounts, icon: BadgePercent },
-          { label: 'Frete gratis ativo', value: activeShipping, icon: Truck },
+          { label: 'Frete grátis ativo', value: activeShipping, icon: Truck },
           { label: 'Usos totais', value: coupons.reduce((sum, coupon) => sum + coupon.usedTotal, 0), icon: CheckCircle2 },
         ].map((metric) => {
           const Icon = metric.icon;
@@ -503,7 +503,7 @@ export default function AdminCupons() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar por codigo, nome, tipo ou status..."
+            placeholder="Buscar por código, nome, tipo ou status..."
             className="w-full bg-transparent text-sm text-slate-300 outline-none placeholder:text-slate-600"
           />
         </div>
@@ -547,10 +547,10 @@ export default function AdminCupons() {
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500">Tipo</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Valor</th>
                 <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">Uso total</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Compra minima</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Compra mínima</th>
                 <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">Validade</th>
                 <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">Status</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Acoes</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -584,7 +584,7 @@ export default function AdminCupons() {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-right text-sm font-semibold text-slate-300">
-                      {coupon.minimumOrderValue > 0 ? fmtCurrency(coupon.minimumOrderValue) : 'Sem minimo'}
+                      {coupon.minimumOrderValue > 0 ? fmtCurrency(coupon.minimumOrderValue) : 'Sem mínimo'}
                     </td>
                     <td className="px-5 py-4 text-center text-sm text-slate-300">
                       {fmtDate(coupon.validUntil)}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { produtoSchema } from "@/lib/validations"
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     const porPagina = parseInt(searchParams.get("por_pagina") ?? "20")
     const destaque = searchParams.get("destaque") === "true"
 
-    const where: any = { ativo: true }
+    const where: Prisma.ProdutoWhereInput = { ativo: true }
     if (categoria) where.categoria = { slug: categoria }
     if (destaque) where.destaque = true
     if (busca) {
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const data = produtoSchema.parse(body)
 
-    const produto = await prisma.produto.create({ data: data as any })
+    const produto = await prisma.produto.create({ data: data as Prisma.ProdutoUncheckedCreateInput })
     return NextResponse.json(produto, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {

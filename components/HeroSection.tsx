@@ -26,7 +26,7 @@ export default function HeroSection() {
               Explorar Produtos
             </a>
             <a
-              href="#"
+              href="/#produtos"
               className="inline-block bg-gray-700 text-white font-semibold py-3 px-8 rounded-lg hover:bg-gray-600 transition-all hover:shadow-lg"
             >
               Saiba Mais

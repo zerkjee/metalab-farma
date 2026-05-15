@@ -12,7 +12,7 @@ const navItems = [
   { label: 'Produtos', href: '/#produtos' },
   { label: 'Avaliações', href: '/avaliacoes' },
   { label: 'VIP', href: '/vip', highlight: true },
-  { label: 'Contato', href: '#' },
+  { label: 'Contato', href: '/#contato' },
 ];
 
 const adminAccess = {
