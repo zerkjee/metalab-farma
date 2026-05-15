@@ -14,11 +14,17 @@ import type { LevelId } from '@/types/loyalty';
 interface UserStats {
   level: LevelId;
   points: number;
+  multiplier: number;
   totalPedidos: number;
   totalGasto: number;
   cashbackBalance: number;
   cashbackUsed: number;
   memberSince: string;
+  period: {
+    start: string;
+    nextReset: string;
+    months: number;
+  };
   recentOrders: {
     id: string;
     numero: string;
@@ -179,6 +185,28 @@ export default function VipPage() {
             </div>
           </div>
 
+          {/* Período semestral */}
+          {stats?.period && (
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-white/50">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Período: <span className="text-white/70 font-semibold">
+                  {formatDate(stats.period.start)} – hoje
+                </span>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-white/50">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Próximo reset: <span className="text-amber-400/80 font-semibold">
+                  {formatDate(stats.period.nextReset)}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
             <StatChip label="Pontos" value={fakeUser.points.toLocaleString('pt-BR')} sub="acumulados" color={levelCfg.color} />
@@ -298,10 +326,15 @@ export default function VipPage() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 text-center">
-                <p className="text-white/40 text-xs">
-                  Sistema de resgates disponível em breve. Seus pontos estão sendo acumulados automaticamente.
+              <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3">
+                <p className="text-white/40 text-xs text-center leading-relaxed">
+                  Sistema de resgates disponível em breve. Seus pontos são acumulados automaticamente e <span className="text-amber-400/70 font-semibold">renovam a cada 6 meses</span>.
                 </p>
+                {stats?.period?.nextReset && (
+                  <p className="text-center text-[11px] text-white/25 mt-2">
+                    Próxima renovação: {formatDate(stats.period.nextReset)}
+                  </p>
+                )}
               </div>
             </GlassCard>
 
