@@ -3,11 +3,18 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { LevelId } from '@/types/loyalty';
 
+// Thresholds match minPoints in data/loyalty.ts (based on R$ spent, 1:1)
 function calcLevel(totalGasto: number): LevelId {
-  if (totalGasto >= 5000) return 'black';
-  if (totalGasto >= 1000) return 'gold';
+  if (totalGasto >= 8000) return 'black';
+  if (totalGasto >= 500) return 'gold';
   return 'silver';
 }
+
+const MULTIPLIER: Record<LevelId, number> = {
+  silver: 1.0,
+  gold: 1.5,
+  black: 2.0,
+};
 
 export async function GET() {
   const session = await auth();
@@ -34,8 +41,9 @@ export async function GET() {
 
   const totalGasto = pedidos.reduce((sum, p) => sum + Number(p.total), 0);
   const totalPedidos = pedidos.length;
-  const points = Math.floor(totalGasto);
   const level = calcLevel(totalGasto);
+  // Displayed points = R$ spent × level multiplier (retroactive reward on level-up)
+  const points = Math.floor(totalGasto * MULTIPLIER[level]);
 
   const usuario = await prisma.usuario.findUnique({
     where: { id: session.user.id },

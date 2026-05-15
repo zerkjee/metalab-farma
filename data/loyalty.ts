@@ -6,7 +6,8 @@ export const levels: LevelConfig[] = [
     name: 'Silver',
     emoji: '🥈',
     minPoints: 0,
-    maxPoints: 999,
+    maxPoints: 499,
+    multiplier: 1.0,
     cashbackPct: 2,
     gradient: 'linear-gradient(135deg, #475569 0%, #94a3b8 50%, #cbd5e1 100%)',
     gradientCard: 'linear-gradient(135deg, #1e293b, #334155)',
@@ -14,6 +15,7 @@ export const levels: LevelConfig[] = [
     colorDim: '#475569',
     benefits: [
       { icon: '💰', text: '2% cashback em todas as compras' },
+      { icon: '⚡', text: '1 ponto por R$ 1 gasto' },
       { icon: '🚚', text: 'Frete grátis acima de R$ 200' },
       { icon: '📧', text: 'Newsletter com novidades em primeira mão' },
       { icon: '🎁', text: 'Cupom de boas-vindas' },
@@ -23,8 +25,9 @@ export const levels: LevelConfig[] = [
     id: 'gold',
     name: 'Gold',
     emoji: '🥇',
-    minPoints: 1000,
-    maxPoints: 4999,
+    minPoints: 500,
+    maxPoints: 7999,
+    multiplier: 1.5,
     cashbackPct: 5,
     gradient: 'linear-gradient(135deg, #92400e 0%, #d97706 50%, #fbbf24 100%)',
     gradientCard: 'linear-gradient(135deg, #451a03, #78350f)',
@@ -32,8 +35,9 @@ export const levels: LevelConfig[] = [
     colorDim: '#d97706',
     benefits: [
       { icon: '💰', text: '5% cashback em todas as compras' },
+      { icon: '⚡', text: '1,5 pontos por R$ 1 gasto (+50%)' },
       { icon: '🚚', text: 'Frete grátis acima de R$ 100' },
-      { icon: '⚡', text: 'Acesso antecipado a lançamentos' },
+      { icon: '🔓', text: 'Acesso antecipado a lançamentos' },
       { icon: '🎫', text: 'Cupons mensais exclusivos Gold' },
       { icon: '📦', text: 'Desconto especial em kits' },
       { icon: '🏆', text: 'Suporte prioritário' },
@@ -43,8 +47,9 @@ export const levels: LevelConfig[] = [
     id: 'black',
     name: 'Black',
     emoji: '💎',
-    minPoints: 5000,
+    minPoints: 8000,
     maxPoints: null,
+    multiplier: 2.0,
     cashbackPct: 8,
     gradient: 'linear-gradient(135deg, #0f0f0f 0%, #1f1f1f 50%, #374151 100%)',
     gradientCard: 'linear-gradient(135deg, #000000, #111827)',
@@ -52,8 +57,9 @@ export const levels: LevelConfig[] = [
     colorDim: '#6b7280',
     benefits: [
       { icon: '💰', text: '8% cashback em todas as compras' },
+      { icon: '⚡', text: '2 pontos por R$ 1 gasto (+100%)' },
       { icon: '🚚', text: 'Frete grátis em TODOS os pedidos' },
-      { icon: '⚡', text: 'Acesso antecipado + reserva garantida' },
+      { icon: '🔓', text: 'Acesso antecipado + reserva garantida' },
       { icon: '🎫', text: 'Cupons semanais exclusivos Black' },
       { icon: '📦', text: 'Kits exclusivos Black Member' },
       { icon: '👑', text: 'Atendimento VIP personalizado' },
@@ -218,6 +224,7 @@ export function getProgressToNext(user: MockUser): number {
   if (!next) return 100;
   const current = getLevelConfig(user.level);
   const range = next.minPoints - current.minPoints;
-  const done = user.points - current.minPoints;
-  return Math.min(100, Math.round((done / range) * 100));
+  // Progress uses totalSpent (R$ = base 1:1), same scale as minPoints thresholds
+  const done = user.totalSpent - current.minPoints;
+  return Math.min(100, Math.max(0, Math.round((done / range) * 100)));
 }

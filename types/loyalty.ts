@@ -4,8 +4,11 @@ export interface LevelConfig {
   id: LevelId;
   name: string;
   emoji: string;
+  /** Minimum R$ spent to reach this level (= base progress points, 1:1 with R$) */
   minPoints: number;
   maxPoints: number | null;
+  /** Points multiplier applied to total spend to calculate displayed points */
+  multiplier: number;
   cashbackPct: number;
   gradient: string;
   gradientCard: string;

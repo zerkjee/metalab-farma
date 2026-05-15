@@ -115,14 +115,15 @@ export default function VipPage() {
     email: session?.user?.email ?? '',
     memberSince: stats?.memberSince ?? new Date().toISOString(),
     level,
-    points: stats?.points ?? 0,
+    points: stats?.points ?? 0,              // displayed (multiplied) — for stats chip
     cashbackBalance: stats?.cashbackBalance ?? 0,
     cashbackUsed: stats?.cashbackUsed ?? 0,
     totalOrders: stats?.totalPedidos ?? 0,
-    totalSpent: stats?.totalGasto ?? 0,
+    totalSpent: stats?.totalGasto ?? 0,       // R$ spent (base 1:1) — for progress bar
   };
   const progress = getProgressToNext(fakeUser);
-  const pointsToNext = nextLevel ? nextLevel.minPoints - fakeUser.points : 0;
+  // pointsToNext uses totalSpent (R$) vs threshold — same scale as minPoints
+  const pointsToNext = nextLevel ? Math.max(0, nextLevel.minPoints - fakeUser.totalSpent) : 0;
 
   return (
     <>
@@ -171,7 +172,9 @@ export default function VipPage() {
                 <p className="font-black text-xl uppercase tracking-wider mt-0.5" style={{ color: levelCfg.color }}>
                   {levelCfg.name}
                 </p>
-                <p className="text-[10px] text-white/30 mt-0.5">{levelCfg.cashbackPct}% cashback</p>
+                <p className="text-[10px] text-white/30 mt-0.5">
+                  {levelCfg.cashbackPct}% cashback · {levelCfg.multiplier}x pontos
+                </p>
               </div>
             </div>
           </div>
@@ -197,9 +200,9 @@ export default function VipPage() {
                   <p className="text-white text-sm font-semibold">
                     Faltam{' '}
                     <span className="font-black" style={{ color: nextLevel.color }}>
-                      {pointsToNext.toLocaleString('pt-BR')} pts
+                      R$ {pointsToNext.toLocaleString('pt-BR', { minimumFractionDigits: 0 })} em compras
                     </span>{' '}
-                    para o nível <span className="font-black">{nextLevel.name}</span>
+                    para o <span className="font-black">{nextLevel.name}</span>
                   </p>
                 </div>
                 <span className="text-white/40 text-sm font-black tabular-nums">{progress}%</span>
@@ -215,8 +218,8 @@ export default function VipPage() {
                 />
               </div>
               <div className="flex justify-between mt-2 text-xs text-white/25">
-                <span>{fakeUser.points.toLocaleString('pt-BR')} pts</span>
-                <span>{nextLevel.minPoints.toLocaleString('pt-BR')} pts</span>
+                <span>R$ {fakeUser.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</span>
+                <span>R$ {nextLevel.minPoints.toLocaleString('pt-BR')}</span>
               </div>
             </GlassCard>
           )}
@@ -375,9 +378,15 @@ export default function VipPage() {
                       </div>
                     </div>
 
-                    <div className="mb-5 py-3 px-4 rounded-xl bg-white/5 text-center">
-                      <span className="text-3xl font-black" style={{ color: lvl.color }}>{lvl.cashbackPct}%</span>
-                      <span className="text-white/40 text-sm ml-1.5">cashback</span>
+                    <div className="mb-5 grid grid-cols-2 gap-2">
+                      <div className="py-3 px-2 rounded-xl bg-white/5 text-center">
+                        <p className="text-2xl font-black" style={{ color: lvl.color }}>{lvl.cashbackPct}%</p>
+                        <p className="text-white/35 text-[10px] mt-0.5">cashback</p>
+                      </div>
+                      <div className="py-3 px-2 rounded-xl bg-white/5 text-center">
+                        <p className="text-2xl font-black" style={{ color: lvl.color }}>{lvl.multiplier}x</p>
+                        <p className="text-white/35 text-[10px] mt-0.5">pts por R$1</p>
+                      </div>
                     </div>
 
                     <ul className="flex flex-col gap-2">
@@ -413,11 +422,17 @@ export default function VipPage() {
                 </div>
                 <h3 className="text-2xl font-black text-white mb-2">
                   Faltam{' '}
-                  <span style={{ color: nextLevel.color }}>{pointsToNext.toLocaleString('pt-BR')} pontos</span>{' '}
+                  <span style={{ color: nextLevel.color }}>
+                    R$ {pointsToNext.toLocaleString('pt-BR', { minimumFractionDigits: 0 })} em compras
+                  </span>{' '}
                   para o {nextLevel.name}
                 </h3>
-                <p className="text-white/55 mb-6 max-w-md mx-auto text-sm leading-relaxed">
-                  Suba para {nextLevel.name} e desbloqueie {nextLevel.cashbackPct}% cashback e benefícios exclusivos.
+                <p className="text-white/55 mb-3 max-w-md mx-auto text-sm leading-relaxed">
+                  Suba para {nextLevel.name} e desbloqueie {nextLevel.cashbackPct}% cashback e ganhe{' '}
+                  <strong className="text-white">{nextLevel.multiplier}x pontos</strong> em cada compra.
+                </p>
+                <p className="text-white/30 text-xs mb-5">
+                  Seus pontos atuais serão recalculados com o novo multiplicador ao atingir o nível.
                 </p>
                 <Link
                   href="/#produtos"
