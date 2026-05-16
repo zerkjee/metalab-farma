@@ -161,8 +161,8 @@ export default function CheckoutPage() {
         });
         if (pixRes.ok) {
           const pixData = await pixRes.json();
-          pixQrCode = pixData.pixQrCode;
-          pixQrCodeBase64 = pixData.pixQrCodeBase64;
+          pixQrCode = pixData.qrCode;
+          pixQrCodeBase64 = pixData.qrCodeBase64;
         }
       }
 

@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Copy, PackageCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { RealOrder } from '@/types/checkout';
 
 function formatCurrency(value: number) {
@@ -14,6 +14,28 @@ function formatCurrency(value: number) {
 
 export default function CheckoutSuccess({ order }: { order: RealOrder }) {
   const [copied, setCopied] = useState(false);
+  const [pago, setPago] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (order.metodoPagamento !== 'PIX' || !order.pixQrCode) return;
+
+    intervalRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/pagamento/status/${order.id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.pago) {
+          setPago(true);
+          clearInterval(intervalRef.current!);
+        }
+      } catch {
+        // ignore network errors, keep polling
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalRef.current!);
+  }, [order.id, order.metodoPagamento, order.pixQrCode]);
 
   function copyPix() {
     if (!order.pixQrCode) return;
@@ -76,34 +98,46 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
       </div>
 
       {order.metodoPagamento === 'PIX' && order.pixQrCode && (
-        <div className="mt-6 rounded-2xl border border-purple-100 bg-purple-50 p-5 text-left">
-          <p className="text-sm font-black text-gray-950">Pague com Pix</p>
-          <p className="mt-1 text-xs leading-5 text-gray-500">
-            Escaneie o QR Code ou copie o código Pix para pagar. O pedido será confirmado automaticamente após o pagamento.
-          </p>
-
-          {order.pixQrCodeBase64 && (
-            <div className="mt-4 flex justify-center">
-              <img
-                src={`data:image/png;base64,${order.pixQrCodeBase64}`}
-                alt="QR Code Pix"
-                className="h-48 w-48 rounded-xl border border-purple-200 bg-white p-2"
-              />
+        <div className={`mt-6 rounded-2xl border p-5 text-left transition-colors ${pago ? 'border-emerald-200 bg-emerald-50' : 'border-purple-100 bg-purple-50'}`}>
+          {pago ? (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <CheckCircle2 className="h-12 w-12 text-emerald-500" strokeWidth={1.6} />
+              <p className="text-lg font-black text-gray-950">Pagamento confirmado!</p>
+              <p className="text-sm text-gray-500">Seu pedido foi pago com sucesso. Você receberá um e-mail de confirmação.</p>
             </div>
-          )}
+          ) : (
+            <>
+              <p className="text-sm font-black text-gray-950">Pague com Pix</p>
+              <p className="mt-1 text-xs leading-5 text-gray-500">
+                Escaneie o QR Code ou copie o código Pix para pagar. O pedido será confirmado automaticamente após o pagamento.
+              </p>
 
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-purple-200 bg-white px-3 py-3">
-            <p className="flex-1 truncate text-xs font-mono text-gray-700">{order.pixQrCode}</p>
-            <button
-              onClick={copyPix}
-              className="flex-shrink-0 rounded-lg bg-[#6b21a8] p-1.5 text-white transition-all hover:opacity-90"
-              title="Copiar código Pix"
-            >
-              <Copy className="h-4 w-4" strokeWidth={1.8} />
-            </button>
-          </div>
-          {copied && (
-            <p className="mt-2 text-center text-xs font-semibold text-emerald-600">Código copiado!</p>
+              {order.pixQrCodeBase64 && (
+                <div className="mt-4 flex justify-center">
+                  <img
+                    src={`data:image/png;base64,${order.pixQrCodeBase64}`}
+                    alt="QR Code Pix"
+                    className="h-48 w-48 rounded-xl border border-purple-200 bg-white p-2"
+                  />
+                </div>
+              )}
+
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-purple-200 bg-white px-3 py-3">
+                <p className="flex-1 truncate text-xs font-mono text-gray-700">{order.pixQrCode}</p>
+                <button
+                  onClick={copyPix}
+                  className="flex-shrink-0 rounded-lg bg-[#6b21a8] p-1.5 text-white transition-all hover:opacity-90"
+                  title="Copiar código Pix"
+                >
+                  <Copy className="h-4 w-4" strokeWidth={1.8} />
+                </button>
+              </div>
+              {copied && (
+                <p className="mt-2 text-center text-xs font-semibold text-emerald-600">Código copiado!</p>
+              )}
+
+              <p className="mt-3 text-center text-xs text-gray-400">Aguardando pagamento...</p>
+            </>
           )}
         </div>
       )}
