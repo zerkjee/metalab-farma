@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { StatusPedido } from "@prisma/client"
 
 export async function GET() {
   try {
@@ -14,6 +15,8 @@ export async function GET() {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
+    const statusPago = { notIn: [StatusPedido.CANCELADO, StatusPedido.REEMBOLSADO] }
+
     const [
       pedidosMes,
       pedidosMesPassado,
@@ -24,11 +27,11 @@ export async function GET() {
       cuponsAtivos,
     ] = await Promise.all([
       prisma.pedido.findMany({
-        where: { criadoEm: { gte: startOfMonth }, pago: true },
+        where: { criadoEm: { gte: startOfMonth }, status: statusPago },
         select: { total: true, criadoEm: true },
       }),
       prisma.pedido.findMany({
-        where: { criadoEm: { gte: startOfLastMonth, lte: endOfLastMonth }, pago: true },
+        where: { criadoEm: { gte: startOfLastMonth, lte: endOfLastMonth }, status: statusPago },
         select: { total: true },
       }),
       prisma.usuario.count({
