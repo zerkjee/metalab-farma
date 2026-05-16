@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, User, LogOut } from 'lucide-react';
+import { Settings, User, LogOut, Package } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -98,8 +98,12 @@ export default function Header() {
                     <p className="text-xs font-semibold text-gray-900 truncate">{session?.user?.name}</p>
                     <p className="text-[11px] text-gray-400 truncate">{session?.user?.email}</p>
                   </div>
+                  <Link href="/pedidos"
+                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-gray-600 hover:bg-gray-50 transition-colors">
+                    <Package size={14} /> Meus pedidos
+                  </Link>
                   <button onClick={() => signOut({ callbackUrl: '/' })}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-red-500 hover:bg-red-50 transition-colors">
+                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100">
                     <LogOut size={14} /> Sair
                   </button>
                 </div>
@@ -169,13 +173,20 @@ export default function Header() {
               {adminAccess.label}
             </Link>
             {isLoggedIn ? (
-              <button
-                onClick={() => { setMenuOpen(false); void signOut({ callbackUrl: '/' }); }}
-                className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
-              >
-                <LogOut className="h-4 w-4" strokeWidth={1.8} />
-                Sair ({session?.user?.name?.split(' ')[0]})
-              </button>
+              <>
+                <Link href="/pedidos" onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#6b21a8] transition-all">
+                  <Package className="h-4 w-4" strokeWidth={1.8} />
+                  Meus pedidos
+                </Link>
+                <button
+                  onClick={() => { setMenuOpen(false); void signOut({ callbackUrl: '/' }); }}
+                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
+                >
+                  <LogOut className="h-4 w-4" strokeWidth={1.8} />
+                  Sair ({session?.user?.name?.split(' ')[0]})
+                </button>
+              </>
             ) : (
               <Link href="/login" onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-[#6b21a8] hover:bg-purple-50 transition-all">
