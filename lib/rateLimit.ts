@@ -1,35 +1,20 @@
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+// Fallback sem Redis: sempre permite a requisição
+const noopLimiter = { limit: async (_key: string) => ({ success: true }) }
 
-// 5 tentativas de login por IP a cada 15 minutos
-export const loginRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(5, "15 m"),
-  prefix: "rl:login",
-})
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function makeRatelimit(limiter: any, prefix: string): { limit: (key: string) => Promise<{ success: boolean }> } {
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) return noopLimiter
 
-// 3 registros por IP por hora
-export const registroRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(3, "1 h"),
-  prefix: "rl:registro",
-})
+  const redis = new Redis({ url, token })
+  return new Ratelimit({ redis, limiter, prefix })
+}
 
-// 10 tentativas de pagamento por IP a cada 10 minutos
-export const pagamentoRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, "10 m"),
-  prefix: "rl:pagamento",
-})
-
-// 30 validações de cupom por IP a cada 10 minutos
-export const cupomRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(30, "10 m"),
-  prefix: "rl:cupom",
-})
+export const loginRatelimit    = makeRatelimit(Ratelimit.slidingWindow(5,  "15 m"), "rl:login")
+export const registroRatelimit = makeRatelimit(Ratelimit.slidingWindow(3,  "1 h"),  "rl:registro")
+export const pagamentoRatelimit= makeRatelimit(Ratelimit.slidingWindow(10, "10 m"), "rl:pagamento")
+export const cupomRatelimit    = makeRatelimit(Ratelimit.slidingWindow(30, "10 m"), "rl:cupom")
