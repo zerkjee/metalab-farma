@@ -73,17 +73,24 @@ function buildOrderEmailHtml(data: OrderEmailData) {
 }
 
 export async function sendOrderConfirmationEmail(data: OrderEmailData) {
-  if (!process.env.RESEND_API_KEY) return
+  if (!process.env.RESEND_API_KEY) {
+    console.warn("[Resend] RESEND_API_KEY não configurada — email não enviado")
+    return
+  }
+
+  const from = process.env.EMAIL_FROM ?? "Metalab Store <onboarding@resend.dev>"
 
   try {
     const { Resend } = await import("resend")
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: "Metalab Store <pedidos@metalab.com.br>",
+    const result = await resend.emails.send({
+      from,
       to: data.compradorEmail,
       subject: `Pedido ${data.numero} recebido — Metalab Store`,
       html: buildOrderEmailHtml(data),
     })
+    const emailId = (result as { data?: { id?: string }; id?: string })?.data?.id ?? (result as { id?: string })?.id ?? "?"
+    console.log(`[Resend] Email enviado para ${data.compradorEmail} — id: ${emailId}`)
   } catch (error) {
     console.error("[Resend] Erro ao enviar email de confirmação:", error)
   }
