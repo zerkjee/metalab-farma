@@ -12,6 +12,7 @@ import { useCart } from '@/context/CartContext';
 import { calculateCartTotals } from '@/services/cartTotals';
 import type {
   CheckoutForm as CheckoutFormValues,
+  FreteStatus,
   PaymentMethod,
   PaymentMethodId,
   RealOrder,
@@ -35,21 +36,9 @@ const initialForm: CheckoutFormValues = {
 
 const checkoutFormId = 'metalab-checkout-form';
 
-const shippingMethods: ShippingMethod[] = [
-  {
-    id: 'standard',
-    label: 'Entrega padrão',
-    description: 'Envio nacional com rastreio via Correios.',
-    price: 19.9,
-    estimate: '5 a 8 dias úteis',
-  },
-  {
-    id: 'express',
-    label: 'Entrega expressa',
-    description: 'Prioridade na separação e no envio.',
-    price: 34.9,
-    estimate: '2 a 4 dias úteis',
-  },
+const initialShippingMethods: ShippingMethod[] = [
+  { id: 'standard', label: 'Entrega padrão',   description: 'Envio nacional com rastreio via Correios.', price: 0, estimate: '' },
+  { id: 'express',  label: 'Entrega expressa', description: 'Prioridade na separação e no envio.',       price: 0, estimate: '' },
 ];
 
 const paymentMethods: PaymentMethod[] = [
@@ -88,6 +77,8 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [cuponsDisponiveis, setCuponsDisponiveis] = useState<{ codigo: string; tipo: string; valor: number }[]>([]);
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>(initialShippingMethods);
+  const [freteStatus, setFreteStatus] = useState<FreteStatus>('idle');
 
   useEffect(() => {
     fetch('/api/cupons/disponiveis')
@@ -95,6 +86,32 @@ export default function CheckoutPage() {
       .then((data) => { if (Array.isArray(data)) setCuponsDisponiveis(data); })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const digits = form.zipCode.replace(/\D/g, '');
+    if (digits.length !== 8) {
+      setFreteStatus('idle');
+      setShippingMethods(initialShippingMethods);
+      return;
+    }
+    setFreteStatus('loading');
+    const controller = new AbortController();
+    fetch(`/api/frete?cep=${digits}`, { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setShippingMethods(data as ShippingMethod[]);
+          setSelectedShippingId(data[0].id as ShippingMethodId);
+          setFreteStatus('done');
+        } else {
+          setFreteStatus('error');
+        }
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') setFreteStatus('error');
+      });
+    return () => controller.abort();
+  }, [form.zipCode]);
 
   const selectedShipping = useMemo(
     () => shippingMethods.find((method) => method.id === selectedShippingId) ?? shippingMethods[0],
@@ -381,6 +398,7 @@ export default function CheckoutPage() {
               paymentMethods={paymentMethods}
               selectedShippingId={selectedShippingId}
               selectedPaymentId={selectedPaymentId}
+              freteStatus={freteStatus}
               onChange={updateForm}
               onShippingChange={setSelectedShippingId}
               onPaymentChange={setSelectedPaymentId}
@@ -398,6 +416,7 @@ export default function CheckoutPage() {
             payableShippingTotal={totals.payableShippingTotal}
             total={totals.total}
             coupons={coupons}
+            freteStatus={freteStatus}
           />
         </section>
       </main>

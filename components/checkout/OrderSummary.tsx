@@ -4,6 +4,7 @@ import { LockKeyhole, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import type { CartItem } from '@/types/cart';
 import type { CouponState } from '@/types/coupon';
+import type { FreteStatus } from '@/types/checkout';
 
 interface OrderSummaryProps {
   formId: string;
@@ -15,6 +16,7 @@ interface OrderSummaryProps {
   payableShippingTotal: number;
   total: number;
   coupons: CouponState;
+  freteStatus: FreteStatus;
 }
 
 function formatCurrency(value: number) {
@@ -34,7 +36,9 @@ export default function OrderSummary({
   payableShippingTotal,
   total,
   coupons,
+  freteStatus,
 }: OrderSummaryProps) {
+  const freteCalculado = freteStatus === 'done';
   return (
     <aside className="sticky top-24 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="mb-5">
@@ -77,15 +81,18 @@ export default function OrderSummary({
         )}
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Frete</span>
-          <span className="font-bold text-gray-950">{formatCurrency(shippingTotal)}</span>
+          {freteCalculado
+            ? <span className="font-bold text-gray-950">{formatCurrency(shippingTotal)}</span>
+            : <span className="text-xs font-semibold text-gray-400 italic">Informe o CEP</span>
+          }
         </div>
-        {shippingDiscountTotal > 0 && (
+        {freteCalculado && shippingDiscountTotal > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-emerald-600">Cupom {coupons.freeShipping?.code}</span>
             <span className="font-bold text-emerald-600">- {formatCurrency(shippingDiscountTotal)}</span>
           </div>
         )}
-        {shippingDiscountTotal > 0 && (
+        {freteCalculado && shippingDiscountTotal > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">Frete a pagar</span>
             <span className="font-bold text-gray-950">{formatCurrency(payableShippingTotal)}</span>
@@ -93,7 +100,10 @@ export default function OrderSummary({
         )}
         <div className="flex items-center justify-between border-t border-gray-100 pt-3">
           <span className="text-base font-black text-gray-950">Total</span>
-          <span className="text-2xl font-black text-[#6b21a8]">{formatCurrency(total)}</span>
+          {freteCalculado
+            ? <span className="text-2xl font-black text-[#6b21a8]">{formatCurrency(total)}</span>
+            : <span className="text-sm font-semibold text-gray-400 italic">+ frete</span>
+          }
         </div>
       </div>
 

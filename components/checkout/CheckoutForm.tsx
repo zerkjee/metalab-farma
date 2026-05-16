@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import type {
   CheckoutForm as CheckoutFormValues,
+  FreteStatus,
   PaymentMethod,
   PaymentMethodId,
   ShippingMethod,
@@ -16,6 +17,7 @@ interface CheckoutFormProps {
   paymentMethods: PaymentMethod[];
   selectedShippingId: ShippingMethodId;
   selectedPaymentId: PaymentMethodId;
+  freteStatus: FreteStatus;
   submitting?: boolean;
   onChange: <K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) => void;
   onShippingChange: (id: ShippingMethodId) => void;
@@ -55,6 +57,7 @@ export default function CheckoutForm({
   paymentMethods,
   selectedShippingId,
   selectedPaymentId,
+  freteStatus,
   submitting = false,
   onChange,
   onShippingChange,
@@ -240,32 +243,53 @@ export default function CheckoutForm({
           <h2 className="mt-1 text-xl font-black text-gray-950">Escolha a forma de entrega</h2>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
-          {shippingMethods.map((method) => {
-            const active = method.id === selectedShippingId;
-            return (
-              <button
-                key={method.id}
-                type="button"
-                onClick={() => onShippingChange(method.id)}
-                className={`rounded-2xl border p-4 text-left transition-all ${
-                  active
-                    ? 'border-[#6b21a8] bg-[#6b21a8]/5 shadow-sm'
-                    : 'border-gray-200 bg-gray-50 hover:border-[#6b21a8]/40 hover:bg-white'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-black text-gray-950">{method.label}</p>
-                    <p className="mt-1 text-sm leading-5 text-gray-500">{method.description}</p>
-                    <p className="mt-2 text-xs font-semibold text-gray-400">{method.estimate}</p>
+        {freteStatus === 'idle' && (
+          <p className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-4 text-sm text-gray-400">
+            Informe o CEP acima para calcular o frete.
+          </p>
+        )}
+
+        {freteStatus === 'loading' && (
+          <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#6b21a8] border-t-transparent" />
+            <p className="text-sm text-gray-500">Calculando frete...</p>
+          </div>
+        )}
+
+        {freteStatus === 'error' && (
+          <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-4 text-sm text-red-600">
+            Não foi possível calcular o frete para este CEP. Verifique o CEP e tente novamente.
+          </p>
+        )}
+
+        {freteStatus === 'done' && (
+          <div className="grid gap-3 md:grid-cols-2">
+            {shippingMethods.map((method) => {
+              const active = method.id === selectedShippingId;
+              return (
+                <button
+                  key={method.id}
+                  type="button"
+                  onClick={() => onShippingChange(method.id)}
+                  className={`rounded-2xl border p-4 text-left transition-all ${
+                    active
+                      ? 'border-[#6b21a8] bg-[#6b21a8]/5 shadow-sm'
+                      : 'border-gray-200 bg-gray-50 hover:border-[#6b21a8]/40 hover:bg-white'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-black text-gray-950">{method.label}</p>
+                      <p className="mt-1 text-sm leading-5 text-gray-500">{method.description}</p>
+                      <p className="mt-2 text-xs font-semibold text-gray-400">{method.estimate}</p>
+                    </div>
+                    <span className="shrink-0 text-sm font-black text-[#6b21a8]">{formatCurrency(method.price)}</span>
                   </div>
-                  <span className="shrink-0 text-sm font-black text-[#6b21a8]">{formatCurrency(method.price)}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* ── Pagamento ── */}

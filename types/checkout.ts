@@ -25,6 +25,8 @@ export interface ShippingMethod {
   estimate: string;
 }
 
+export type FreteStatus = 'idle' | 'loading' | 'done' | 'error';
+
 export interface PaymentMethod {
   id: PaymentMethodId;
   label: string;
