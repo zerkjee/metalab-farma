@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
 import OrderSummary from '@/components/checkout/OrderSummary';
@@ -87,6 +87,14 @@ export default function CheckoutPage() {
   const [order, setOrder] = useState<RealOrder | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [cuponsDisponiveis, setCuponsDisponiveis] = useState<{ codigo: string; tipo: string; valor: number }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/cupons/disponiveis')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setCuponsDisponiveis(data); })
+      .catch(() => {});
+  }, []);
 
   const selectedShipping = useMemo(
     () => shippingMethods.find((method) => method.id === selectedShippingId) ?? shippingMethods[0],
@@ -101,6 +109,20 @@ export default function CheckoutPage() {
     () => [coupons.discount, coupons.freeShipping].filter((coupon) => coupon !== null),
     [coupons.discount, coupons.freeShipping],
   );
+
+  function cupomLabel(c: { tipo: string; valor: number }) {
+    if (c.tipo === 'FRETE_GRATIS') return 'Frete grátis';
+    if (c.tipo === 'PERCENTUAL') return `${c.valor}% off`;
+    return `R$${c.valor.toFixed(2).replace('.', ',')} off`;
+  }
+
+  async function aplicarCupomChip(codigo: string) {
+    setCouponCode(codigo);
+    setCouponMessage(null);
+    const result = await applyCoupon(codigo);
+    setCouponMessage({ type: result.ok ? 'success' : 'error', text: result.message });
+    if (result.ok) setCouponCode('');
+  }
 
   function updateForm<K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -280,11 +302,42 @@ export default function CheckoutPage() {
                 <h2 className="mt-1 text-xl font-black text-gray-950">Aplique seus benefícios</h2>
                 <p className="mt-1 text-sm text-gray-500">Permitido 1 cupom de desconto + 1 cupom de frete grátis.</p>
               </div>
+
+              {cuponsDisponiveis.length > 0 && (
+                <div className="mb-4">
+                  <p className="mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Cupons disponíveis — clique para aplicar</p>
+                  <div className="flex flex-wrap gap-2">
+                    {cuponsDisponiveis.map((c) => {
+                      const jaAplicado =
+                        coupons.discount?.code === c.codigo || coupons.freeShipping?.code === c.codigo;
+                      return (
+                        <button
+                          key={c.codigo}
+                          type="button"
+                          disabled={jaAplicado}
+                          onClick={() => aplicarCupomChip(c.codigo)}
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${
+                            jaAplicado
+                              ? 'border-emerald-200 bg-emerald-50 text-emerald-600 cursor-default'
+                              : 'border-purple-200 bg-purple-50 text-[#6b21a8] hover:bg-purple-100 cursor-pointer'
+                          }`}
+                        >
+                          <span>{c.codigo}</span>
+                          <span className="opacity-70">·</span>
+                          <span>{cupomLabel(c)}</span>
+                          {jaAplicado && <span className="ml-0.5">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
-                  placeholder="BEMVINDO10"
+                  placeholder="Ou digite um código"
                   className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8] focus:bg-white"
                 />
                 <button
