@@ -14,7 +14,7 @@ import {
   Tags,
   Trash2,
 } from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Modal from '@/components/admin/Modal';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { fmtCurrency, productStatusColors, type ProductStatus } from '@/data/admin';
@@ -240,6 +240,8 @@ export default function AdminProdutos() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [saveError, setSaveError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -394,6 +396,23 @@ export default function AdminProdutos() {
     if (res.ok) {
       setProducts((cur) => cur.filter((p) => p.id !== id));
       setTotal((t) => t - 1);
+    }
+  }
+
+  async function handleImageUpload(file: File) {
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) { setSaveError(data.erro ?? 'Erro no upload'); return; }
+      updateField('imagesText', data.url);
+      updateField('image', data.url);
+    } catch {
+      setSaveError('Erro de conexão no upload.');
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -681,11 +700,29 @@ export default function AdminProdutos() {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-slate-400">Imagem URL</label>
-                    <input value={form.imagesText}
-                      onChange={(e) => { updateField('imagesText', e.target.value); updateField('image', parseList(e.target.value)[0] || form.image); }}
-                      className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
-                      placeholder="/products/produto.png" />
+                    <label className="mb-1 block text-xs text-slate-400">Imagem</label>
+                    <div className="flex gap-2">
+                      <input value={form.imagesText}
+                        onChange={(e) => { updateField('imagesText', e.target.value); updateField('image', parseList(e.target.value)[0] || form.image); }}
+                        className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+                        placeholder="URL ou faça upload →" />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); e.target.value = ''; }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-600 bg-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 transition-all hover:bg-slate-600 disabled:opacity-50"
+                      >
+                        <ImagePlus className="h-3.5 w-3.5" strokeWidth={1.8} />
+                        {uploading ? 'Enviando…' : 'Upload'}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="mb-1 block text-xs text-slate-400">Tags</label>
