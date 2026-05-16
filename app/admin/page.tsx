@@ -6,11 +6,23 @@ import StatCard from '@/components/admin/StatCard';
 import LineChart from '@/components/admin/LineChart';
 import { fmtCurrency, fmtDate } from '@/data/admin';
 import { statusMap, orderStatusMeta } from '@/utils/adminOrders';
+import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 
 interface AnalyticsData {
   receitaDiaria: { label: string; value: number }[];
   topProdutos: { nome: string; vendas: number; receita: number; pct: number; cor: string }[];
   porStatus: { label: string; value: number; cor: string }[];
+}
+
+interface ReembolsoOrder {
+  id: string;
+  numero: string;
+  compradorNome: string;
+  compradorEmail: string;
+  total: number;
+  status: string;
+  metodoPagamento: string | null;
+  criadoEm: string;
 }
 
 interface AdminStats {
@@ -25,6 +37,9 @@ interface AdminStats {
   produtosEstoqueBaixo: number;
   cuponsAtivos: number;
   sparklinesReceita: number[];
+  reembolsosMes: number;
+  reembolsosCount: number;
+  pedidosReembolsados: ReembolsoOrder[];
   recentOrders: {
     id: string;
     numero: string;
@@ -42,6 +57,7 @@ export default function AdminDashboard() {
   const [chartTab] = useState<'revenue'>('revenue');
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [showReembolsos, setShowReembolsos] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/stats')
@@ -131,6 +147,115 @@ export default function AdminDashboard() {
         {statCards.map((s) => (
           <StatCard key={s.label} {...s} />
         ))}
+      </div>
+
+      {/* ── Painel de Reembolsos ── */}
+      <div className="rounded-2xl border border-slate-700/50 overflow-hidden" style={{ background: '#1e293b' }}>
+        <button
+          onClick={() => setShowReembolsos((v) => !v)}
+          className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-700/30 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10">
+              <RotateCcw className="h-4 w-4 text-red-400" strokeWidth={1.8} />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-black text-white">Reembolsos e Cancelamentos</p>
+              <p className="text-xs text-slate-500">
+                {stats
+                  ? `${stats.reembolsosCount} no total · ${fmtCurrency(stats.reembolsosMes)} reembolsado este mês`
+                  : 'Carregando...'}
+              </p>
+            </div>
+          </div>
+          {showReembolsos
+            ? <ChevronUp className="h-4 w-4 text-slate-400" strokeWidth={2} />
+            : <ChevronDown className="h-4 w-4 text-slate-400" strokeWidth={2} />}
+        </button>
+
+        {showReembolsos && (
+          <div className="border-t border-slate-700/50 px-5 pb-5">
+
+            {/* resumo */}
+            <div className="grid grid-cols-3 gap-3 py-4">
+              {[
+                { label: 'Total reembolsado (mês)', value: fmtCurrency(stats?.reembolsosMes ?? 0), color: 'text-red-400' },
+                { label: 'Qtd. de pedidos', value: String(stats?.reembolsosCount ?? 0), color: 'text-slate-200' },
+                {
+                  label: 'Ticket médio cancelado',
+                  value: stats?.reembolsosCount
+                    ? fmtCurrency((stats.pedidosReembolsados ?? []).reduce((s, p) => s + p.total, 0) / stats.reembolsosCount)
+                    : '—',
+                  color: 'text-slate-200',
+                },
+              ].map((item) => (
+                <div key={item.label} className="rounded-xl bg-slate-900 p-3 text-center">
+                  <p className={`text-lg font-black ${item.color}`}>{item.value}</p>
+                  <p className="mt-1 text-[10px] text-slate-500">{item.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* tabela */}
+            {!stats ? (
+              <div className="flex flex-col gap-2">
+                {[1, 2].map((i) => <div key={i} className="h-12 rounded-xl bg-slate-700/50 animate-pulse" />)}
+              </div>
+            ) : (stats.pedidosReembolsados ?? []).length === 0 ? (
+              <p className="py-6 text-center text-sm text-slate-500">Nenhum reembolso ou cancelamento registrado.</p>
+            ) : (
+              <div className="overflow-hidden rounded-xl border border-slate-700/50">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-700/50 bg-slate-900/50">
+                      <th className="px-4 py-2.5 text-left font-semibold text-slate-500">Pedido</th>
+                      <th className="px-4 py-2.5 text-left font-semibold text-slate-500">Cliente</th>
+                      <th className="px-4 py-2.5 text-center font-semibold text-slate-500">Status</th>
+                      <th className="px-4 py-2.5 text-center font-semibold text-slate-500">Pagamento</th>
+                      <th className="px-4 py-2.5 text-right font-semibold text-slate-500">Valor</th>
+                      <th className="px-4 py-2.5 text-right font-semibold text-slate-500">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(stats.pedidosReembolsados ?? []).map((o, i) => {
+                      const isReembolsado = o.status === 'REEMBOLSADO';
+                      return (
+                        <tr
+                          key={o.id}
+                          className={`transition-colors hover:bg-slate-700/20 ${i < (stats.pedidosReembolsados.length - 1) ? 'border-b border-slate-700/30' : ''}`}
+                        >
+                          <td className="px-4 py-3">
+                            <Link href={`/admin/pedidos/${o.id}`} className="font-black text-purple-400 hover:text-purple-300">
+                              {o.numero}
+                            </Link>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="font-semibold text-slate-200 truncate max-w-[160px]">{o.compradorNome}</p>
+                            <p className="text-slate-500 truncate max-w-[160px]">{o.compradorEmail}</p>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`rounded-full px-2.5 py-0.5 font-bold ${isReembolsado ? 'bg-blue-500/15 text-blue-400' : 'bg-red-500/15 text-red-400'}`}>
+                              {isReembolsado ? 'Reembolsado' : 'Cancelado'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center text-slate-400">
+                            {o.metodoPagamento ?? '—'}
+                          </td>
+                          <td className="px-4 py-3 text-right font-black text-white">
+                            {fmtCurrency(o.total)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-500">
+                            {fmtDate(o.criadoEm)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4">

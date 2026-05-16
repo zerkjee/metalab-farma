@@ -65,20 +65,40 @@ export async function GET() {
       }
     })
 
-    const ultimos10Pedidos = await prisma.pedido.findMany({
-      orderBy: { criadoEm: "desc" },
-      take: 10,
-      select: {
-        id: true,
-        numero: true,
-        compradorNome: true,
-        compradorEmail: true,
-        total: true,
-        status: true,
-        metodoPagamento: true,
-        criadoEm: true,
-      },
-    })
+    const [ultimos10Pedidos, pedidosReembolsados] = await Promise.all([
+      prisma.pedido.findMany({
+        orderBy: { criadoEm: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          numero: true,
+          compradorNome: true,
+          compradorEmail: true,
+          total: true,
+          status: true,
+          metodoPagamento: true,
+          criadoEm: true,
+        },
+      }),
+      prisma.pedido.findMany({
+        where: { status: { in: [StatusPedido.CANCELADO, StatusPedido.REEMBOLSADO] } },
+        orderBy: { criadoEm: "desc" },
+        select: {
+          id: true,
+          numero: true,
+          compradorNome: true,
+          compradorEmail: true,
+          total: true,
+          status: true,
+          metodoPagamento: true,
+          criadoEm: true,
+        },
+      }),
+    ])
+
+    const reembolsosMes = pedidosReembolsados
+      .filter((p) => p.criadoEm >= startOfMonth)
+      .reduce((s, p) => s + Number(p.total), 0)
 
     return NextResponse.json({
       faturamentoMes,
@@ -93,6 +113,12 @@ export async function GET() {
       produtosEstoqueBaixo,
       cuponsAtivos,
       sparklinesReceita: Object.values(revenueByDay),
+      reembolsosMes,
+      reembolsosCount: pedidosReembolsados.length,
+      pedidosReembolsados: pedidosReembolsados.map((p) => ({
+        ...p,
+        total: Number(p.total),
+      })),
       recentOrders: ultimos10Pedidos.map((p) => ({
         ...p,
         total: Number(p.total),
