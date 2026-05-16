@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
 
     const parsed = pedidoSchema.safeParse(body)
     if (!parsed.success) {
+      console.error("[POST /api/pedidos] Zod issues:", JSON.stringify(parsed.error.issues))
       return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
     }
 
