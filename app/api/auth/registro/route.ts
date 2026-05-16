@@ -40,6 +40,18 @@ export async function POST(request: NextRequest) {
         cpf: data.cpf,
         telefone: data.telefone,
         papel: "CLIENTE",
+        enderecos: {
+          create: {
+            cep: data.endereco.cep,
+            logradouro: data.endereco.logradouro,
+            numero: data.endereco.numero,
+            complemento: data.endereco.complemento,
+            bairro: data.endereco.bairro,
+            cidade: data.endereco.cidade,
+            estado: data.endereco.estado,
+            principal: true,
+          },
+        },
       },
       select: { id: true, email: true, nome: true },
     })

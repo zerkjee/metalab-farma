@@ -77,9 +77,17 @@ const inputCls = (hasError: boolean) =>
   }`;
 
 // ── main page ─────────────────────────────────────────────────────────────────
-type FormKey = 'nome' | 'email' | 'cpf' | 'telefone' | 'senha' | 'confirmarSenha';
+function cepMask(v: string) {
+  return v.replace(/\D/g, '').slice(0, 8).replace(/(\d{5})(\d{1,3})$/, '$1-$2');
+}
 
-const initial = { nome: '', email: '', cpf: '', telefone: '', senha: '', confirmarSenha: '' };
+type FormKey = 'nome' | 'email' | 'cpf' | 'telefone' | 'senha' | 'confirmarSenha'
+  | 'cep' | 'logradouro' | 'numero' | 'complemento' | 'bairro' | 'cidade' | 'estado';
+
+const initial = {
+  nome: '', email: '', cpf: '', telefone: '', senha: '', confirmarSenha: '',
+  cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '',
+};
 
 export default function RegistroPage() {
   const router = useRouter();
@@ -102,6 +110,20 @@ export default function RegistroPage() {
     setForm((p) => ({ ...p, [field]: value }));
   }, []);
 
+  const lookupCep = useCallback(async (raw: string) => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length !== 8) return;
+    try {
+      const res = await fetch(`/api/cep?cep=${digits}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.logradouro) setForm((p) => ({ ...p, logradouro: data.logradouro }));
+      if (data.bairro)     setForm((p) => ({ ...p, bairro: data.bairro }));
+      if (data.cidade)     setForm((p) => ({ ...p, cidade: data.cidade }));
+      if (data.estado)     setForm((p) => ({ ...p, estado: data.estado }));
+    } catch { /* ignore */ }
+  }, []);
+
   const touch = useCallback((field: FormKey) => {
     setTouched((p) => ({ ...p, [field]: true }));
   }, []);
@@ -119,12 +141,22 @@ export default function RegistroPage() {
   else if (senhaReqs.some((r) => !r.test(form.senha))) errors.senha = 'A senha não atende todos os requisitos.';
   if (!form.confirmarSenha) errors.confirmarSenha = 'Confirme a senha.';
   else if (form.senha !== form.confirmarSenha) errors.confirmarSenha = 'As senhas não conferem.';
+  const cepRaw = form.cep.replace(/\D/g, '');
+  if (!cepRaw || cepRaw.length !== 8) errors.cep = 'CEP inválido.';
+  if (!form.logradouro.trim()) errors.logradouro = 'Endereço é obrigatório.';
+  if (!form.numero.trim()) errors.numero = 'Número é obrigatório.';
+  if (!form.bairro.trim()) errors.bairro = 'Bairro é obrigatório.';
+  if (!form.cidade.trim()) errors.cidade = 'Cidade é obrigatória.';
+  if (!form.estado.trim() || form.estado.length !== 2) errors.estado = 'UF inválida.';
 
   const isValid = Object.keys(errors).length === 0;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setTouched({ nome: true, email: true, cpf: true, senha: true, confirmarSenha: true });
+    setTouched({
+      nome: true, email: true, cpf: true, senha: true, confirmarSenha: true,
+      cep: true, logradouro: true, numero: true, bairro: true, cidade: true, estado: true,
+    });
     if (!isValid) return;
 
     setSubmitStatus('loading');
@@ -141,6 +173,15 @@ export default function RegistroPage() {
           telefone: form.telefone ? form.telefone.replace(/\D/g, '') : undefined,
           senha: form.senha,
           confirmarSenha: form.confirmarSenha,
+          endereco: {
+            cep: cepRaw,
+            logradouro: form.logradouro.trim(),
+            numero: form.numero.trim(),
+            complemento: form.complemento.trim() || undefined,
+            bairro: form.bairro.trim(),
+            cidade: form.cidade.trim(),
+            estado: form.estado.toUpperCase(),
+          },
         }),
       });
 
@@ -294,6 +335,96 @@ export default function RegistroPage() {
                         className={inputCls(false)}
                       />
                     </Field>
+                  </div>
+
+                  {/* ── Endereço ── */}
+                  <div className="border-t border-white/10 pt-3.5 mt-0.5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-300 mb-3">Endereço</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="CEP" error={errors.cep} touched={touched.cep}>
+                        <input
+                          type="text"
+                          value={form.cep}
+                          onChange={(e) => {
+                            const masked = cepMask(e.target.value);
+                            set('cep', masked);
+                            if (masked.replace(/\D/g, '').length === 8) lookupCep(masked);
+                          }}
+                          onBlur={() => touch('cep')}
+                          placeholder="00000-000"
+                          inputMode="numeric"
+                          className={inputCls(!!(touched.cep && errors.cep))}
+                        />
+                      </Field>
+                      <Field label="Número" error={errors.numero} touched={touched.numero}>
+                        <input
+                          type="text"
+                          value={form.numero}
+                          onChange={(e) => set('numero', e.target.value)}
+                          onBlur={() => touch('numero')}
+                          placeholder="120"
+                          className={inputCls(!!(touched.numero && errors.numero))}
+                        />
+                      </Field>
+                    </div>
+                    <div className="mt-3">
+                      <Field label="Endereço" error={errors.logradouro} touched={touched.logradouro}>
+                        <input
+                          type="text"
+                          value={form.logradouro}
+                          onChange={(e) => set('logradouro', e.target.value)}
+                          onBlur={() => touch('logradouro')}
+                          placeholder="Rua das Flores"
+                          className={inputCls(!!(touched.logradouro && errors.logradouro))}
+                        />
+                      </Field>
+                    </div>
+                    <div className="mt-3">
+                      <Field label="Complemento (opcional)">
+                        <input
+                          type="text"
+                          value={form.complemento}
+                          onChange={(e) => set('complemento', e.target.value)}
+                          placeholder="Apto 402"
+                          className={inputCls(false)}
+                        />
+                      </Field>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <Field label="Bairro" error={errors.bairro} touched={touched.bairro}>
+                        <input
+                          type="text"
+                          value={form.bairro}
+                          onChange={(e) => set('bairro', e.target.value)}
+                          onBlur={() => touch('bairro')}
+                          placeholder="Centro"
+                          className={inputCls(!!(touched.bairro && errors.bairro))}
+                        />
+                      </Field>
+                      <Field label="Estado" error={errors.estado} touched={touched.estado}>
+                        <input
+                          type="text"
+                          value={form.estado}
+                          onChange={(e) => set('estado', e.target.value.toUpperCase().slice(0, 2))}
+                          onBlur={() => touch('estado')}
+                          placeholder="MG"
+                          maxLength={2}
+                          className={inputCls(!!(touched.estado && errors.estado))}
+                        />
+                      </Field>
+                    </div>
+                    <div className="mt-3">
+                      <Field label="Cidade" error={errors.cidade} touched={touched.cidade}>
+                        <input
+                          type="text"
+                          value={form.cidade}
+                          onChange={(e) => set('cidade', e.target.value)}
+                          onBlur={() => touch('cidade')}
+                          placeholder="Belo Horizonte"
+                          className={inputCls(!!(touched.cidade && errors.cidade))}
+                        />
+                      </Field>
+                    </div>
                   </div>
 
                   <Field label="Senha" error={errors.senha} touched={touched.senha}>

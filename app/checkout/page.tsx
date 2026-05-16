@@ -2,7 +2,8 @@
 
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
 import OrderSummary from '@/components/checkout/OrderSummary';
@@ -68,6 +69,7 @@ export default function CheckoutPage() {
     removeCoupon,
     clearCart,
   } = useCart();
+  const { data: session } = useSession();
   const [form, setForm] = useState<CheckoutFormValues>(initialForm);
   const [couponCode, setCouponCode] = useState('');
   const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -79,6 +81,42 @@ export default function CheckoutPage() {
   const [cuponsDisponiveis, setCuponsDisponiveis] = useState<{ codigo: string; tipo: string; valor: number }[]>([]);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>(initialShippingMethods);
   const [freteStatus, setFreteStatus] = useState<FreteStatus>('idle');
+  const [enderecoMode, setEnderecoMode] = useState<'salvo' | 'novo'>('salvo');
+  const [temEnderecoSalvo, setTemEnderecoSalvo] = useState(false);
+  const savedFormRef = useRef<CheckoutFormValues | null>(null);
+
+  useEffect(() => {
+    if (!session?.user) return;
+    fetch('/api/user/perfil')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.erro) return;
+        const cpfFormatado = data.cpf
+          ? data.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+          : '';
+        const telFormatado = data.telefone
+          ? data.telefone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+          : '';
+        const e = data.enderecoPrincipal;
+        const preenchido: CheckoutFormValues = {
+          fullName: data.nome ?? '',
+          email: data.email ?? '',
+          cpf: cpfFormatado,
+          phone: telFormatado,
+          zipCode: e ? e.cep.replace(/(\d{5})(\d{3})/, '$1-$2') : '',
+          address: e?.logradouro ?? '',
+          number: e?.numero ?? '',
+          complement: e?.complemento ?? '',
+          district: e?.bairro ?? '',
+          city: e?.cidade ?? '',
+          state: e?.estado ?? '',
+        };
+        savedFormRef.current = preenchido;
+        setForm(preenchido);
+        if (e) setTemEnderecoSalvo(true);
+      })
+      .catch(() => {});
+  }, [session]);
 
   useEffect(() => {
     fetch('/api/cupons/disponiveis')
@@ -126,6 +164,17 @@ export default function CheckoutPage() {
     () => [coupons.discount, coupons.freeShipping].filter((coupon) => coupon !== null),
     [coupons.discount, coupons.freeShipping],
   );
+
+  function handleEnderecoModeChange(mode: 'salvo' | 'novo') {
+    setEnderecoMode(mode);
+    if (mode === 'salvo' && savedFormRef.current) {
+      setForm(savedFormRef.current);
+    } else if (mode === 'novo') {
+      setForm((f) => ({ ...f, zipCode: '', address: '', number: '', complement: '', district: '', city: '', state: '' }));
+      setFreteStatus('idle');
+      setShippingMethods(initialShippingMethods);
+    }
+  }
 
   function cupomLabel(c: { tipo: string; valor: number }) {
     if (c.tipo === 'FRETE_GRATIS') return 'Frete grátis';
@@ -399,6 +448,10 @@ export default function CheckoutPage() {
               selectedShippingId={selectedShippingId}
               selectedPaymentId={selectedPaymentId}
               freteStatus={freteStatus}
+              logado={!!session?.user}
+              temEnderecoSalvo={temEnderecoSalvo}
+              enderecoMode={enderecoMode}
+              onEnderecoModeChange={handleEnderecoModeChange}
               onChange={updateForm}
               onShippingChange={setSelectedShippingId}
               onPaymentChange={setSelectedPaymentId}

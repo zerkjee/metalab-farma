@@ -18,6 +18,10 @@ interface CheckoutFormProps {
   selectedShippingId: ShippingMethodId;
   selectedPaymentId: PaymentMethodId;
   freteStatus: FreteStatus;
+  logado: boolean;
+  temEnderecoSalvo: boolean;
+  enderecoMode: 'salvo' | 'novo';
+  onEnderecoModeChange: (mode: 'salvo' | 'novo') => void;
   submitting?: boolean;
   onChange: <K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) => void;
   onShippingChange: (id: ShippingMethodId) => void;
@@ -58,12 +62,17 @@ export default function CheckoutForm({
   selectedShippingId,
   selectedPaymentId,
   freteStatus,
+  logado,
+  temEnderecoSalvo,
+  enderecoMode,
+  onEnderecoModeChange,
   submitting = false,
   onChange,
   onShippingChange,
   onPaymentChange,
   onSubmit,
 }: CheckoutFormProps) {
+  const mostrarFormEndereco = !temEnderecoSalvo || enderecoMode === 'novo';
 
   const lookupCep = useCallback(async (rawCep: string) => {
     const digits = rawCep.replace(/\D/g, '');
@@ -89,151 +98,138 @@ export default function CheckoutForm({
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-5">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Dados do cliente</p>
-          <h2 className="mt-1 text-xl font-black text-gray-950">Identificação e entrega</h2>
+          <h2 className="mt-1 text-xl font-black text-gray-950">Identificação</h2>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {/* Nome — span 2 */}
-          <label className="md:col-span-2">
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Nome completo</span>
-            <input
-              value={values.fullName}
-              onChange={(e) => onChange('fullName', e.target.value)}
-              placeholder="Maria Silva"
-              required
-              className={inputCls}
-            />
-          </label>
+        {logado ? (
+          /* Logado: exibe dados do perfil somente-leitura */
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="md:col-span-2 rounded-xl bg-gray-50 px-4 py-3">
+              <p className="text-xs font-semibold text-gray-400">Nome completo</p>
+              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.fullName}</p>
+            </div>
+            <div className="rounded-xl bg-gray-50 px-4 py-3">
+              <p className="text-xs font-semibold text-gray-400">E-mail</p>
+              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.email}</p>
+            </div>
+            <div className="rounded-xl bg-gray-50 px-4 py-3">
+              <p className="text-xs font-semibold text-gray-400">CPF</p>
+              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.cpf}</p>
+            </div>
+            <div className="rounded-xl bg-gray-50 px-4 py-3">
+              <p className="text-xs font-semibold text-gray-400">Telefone</p>
+              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.phone || '—'}</p>
+            </div>
+          </div>
+        ) : (
+          /* Não logado: formulário completo */
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="md:col-span-2">
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Nome completo</span>
+              <input value={values.fullName} onChange={(e) => onChange('fullName', e.target.value)} placeholder="Maria Silva" required className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">E-mail</span>
+              <input type="email" value={values.email} onChange={(e) => onChange('email', e.target.value)} placeholder="maria@email.com" required className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Telefone</span>
+              <input type="tel" value={values.phone} onChange={(e) => onChange('phone', phoneMask(e.target.value))} placeholder="(11) 99999-9999" inputMode="numeric" required className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">CPF</span>
+              <input value={values.cpf} onChange={(e) => onChange('cpf', cpfMask(e.target.value))} placeholder="000.000.000-00" inputMode="numeric" required className={inputCls} />
+            </label>
+          </div>
+        )}
+      </section>
 
-          {/* Email */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">E-mail</span>
-            <input
-              type="email"
-              value={values.email}
-              onChange={(e) => onChange('email', e.target.value)}
-              placeholder="maria@email.com"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* Telefone */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Telefone</span>
-            <input
-              type="tel"
-              value={values.phone}
-              onChange={(e) => onChange('phone', phoneMask(e.target.value))}
-              placeholder="(11) 99999-9999"
-              inputMode="numeric"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* CPF */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">CPF</span>
-            <input
-              value={values.cpf}
-              onChange={(e) => onChange('cpf', cpfMask(e.target.value))}
-              placeholder="000.000.000-00"
-              inputMode="numeric"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* CEP com auto-fill */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">CEP</span>
-            <input
-              value={values.zipCode}
-              onChange={(e) => {
-                const masked = cepMask(e.target.value);
-                onChange('zipCode', masked);
-                if (masked.replace(/\D/g, '').length === 8) lookupCep(masked);
-              }}
-              placeholder="00000-000"
-              inputMode="numeric"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* Endereço — span 2 */}
-          <label className="md:col-span-2">
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Endereço</span>
-            <input
-              value={values.address}
-              onChange={(e) => onChange('address', e.target.value)}
-              placeholder="Rua das Fórmulas"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* Número */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Número</span>
-            <input
-              value={values.number}
-              onChange={(e) => onChange('number', e.target.value)}
-              placeholder="120"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* Complemento */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Complemento</span>
-            <input
-              value={values.complement}
-              onChange={(e) => onChange('complement', e.target.value)}
-              placeholder="Apto 402"
-              className={inputCls}
-            />
-          </label>
-
-          {/* Bairro */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Bairro</span>
-            <input
-              value={values.district}
-              onChange={(e) => onChange('district', e.target.value)}
-              placeholder="Centro"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* Cidade */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Cidade</span>
-            <input
-              value={values.city}
-              onChange={(e) => onChange('city', e.target.value)}
-              placeholder="São Paulo"
-              required
-              className={inputCls}
-            />
-          </label>
-
-          {/* Estado */}
-          <label>
-            <span className="mb-1 block text-xs font-semibold text-gray-500">Estado</span>
-            <input
-              value={values.state}
-              onChange={(e) => onChange('state', e.target.value.toUpperCase().slice(0, 2))}
-              placeholder="SP"
-              maxLength={2}
-              required
-              className={inputCls}
-            />
-          </label>
+      {/* ── Endereço de entrega ── */}
+      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="mb-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Entrega</p>
+          <h2 className="mt-1 text-xl font-black text-gray-950">Endereço de entrega</h2>
         </div>
+
+        {temEnderecoSalvo && (
+          <div className="mb-5 flex gap-2">
+            {(['salvo', 'novo'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => onEnderecoModeChange(mode)}
+                className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-all ${
+                  enderecoMode === mode
+                    ? 'border-[#6b21a8] bg-[#6b21a8]/5 text-[#6b21a8]'
+                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-[#6b21a8]/30'
+                }`}
+              >
+                {mode === 'salvo' ? 'Meu endereço' : 'Outro endereço'}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!mostrarFormEndereco ? (
+          /* Endereço salvo: exibe resumo */
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="md:col-span-2 rounded-xl bg-gray-50 px-4 py-3">
+              <p className="text-xs font-semibold text-gray-400">Logradouro</p>
+              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.address}, {values.number}{values.complement ? ` — ${values.complement}` : ''}</p>
+            </div>
+            <div className="rounded-xl bg-gray-50 px-4 py-3">
+              <p className="text-xs font-semibold text-gray-400">Bairro / Cidade</p>
+              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.district}, {values.city} — {values.state}</p>
+            </div>
+            <div className="rounded-xl bg-gray-50 px-4 py-3">
+              <p className="text-xs font-semibold text-gray-400">CEP</p>
+              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.zipCode}</p>
+            </div>
+          </div>
+        ) : (
+          /* Formulário de endereço */
+          <div className="grid gap-4 md:grid-cols-2">
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">CEP</span>
+              <input
+                value={values.zipCode}
+                onChange={(e) => {
+                  const masked = cepMask(e.target.value);
+                  onChange('zipCode', masked);
+                  if (masked.replace(/\D/g, '').length === 8) lookupCep(masked);
+                }}
+                placeholder="00000-000"
+                inputMode="numeric"
+                required
+                className={inputCls}
+              />
+            </label>
+            <label className="md:col-span-2">
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Endereço</span>
+              <input value={values.address} onChange={(e) => onChange('address', e.target.value)} placeholder="Rua das Fórmulas" required className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Número</span>
+              <input value={values.number} onChange={(e) => onChange('number', e.target.value)} placeholder="120" required className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Complemento</span>
+              <input value={values.complement} onChange={(e) => onChange('complement', e.target.value)} placeholder="Apto 402" className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Bairro</span>
+              <input value={values.district} onChange={(e) => onChange('district', e.target.value)} placeholder="Centro" required className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Cidade</span>
+              <input value={values.city} onChange={(e) => onChange('city', e.target.value)} placeholder="São Paulo" required className={inputCls} />
+            </label>
+            <label>
+              <span className="mb-1 block text-xs font-semibold text-gray-500">Estado</span>
+              <input value={values.state} onChange={(e) => onChange('state', e.target.value.toUpperCase().slice(0, 2))} placeholder="SP" maxLength={2} required className={inputCls} />
+            </label>
+          </div>
+        )}
       </section>
 
       {/* ── Entrega ── */}

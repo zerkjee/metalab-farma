@@ -37,6 +37,15 @@ export const registroSchema = z.object({
     .regex(/^\d{11}$/, "CPF deve ter 11 dígitos")
     .refine(validarCPF, "CPF inválido"),
   telefone: z.string().optional(),
+  endereco: z.object({
+    cep: z.string().regex(/^\d{8}$/, "CEP inválido"),
+    logradouro: z.string().min(3),
+    numero: z.string().min(1),
+    complemento: z.string().optional(),
+    bairro: z.string().min(2),
+    cidade: z.string().min(2),
+    estado: z.string().length(2),
+  }),
 }).refine((d) => d.senha === d.confirmarSenha, {
   message: "Senhas não conferem",
   path: ["confirmarSenha"],
