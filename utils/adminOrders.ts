@@ -86,7 +86,7 @@ const productPool: AdminOrderItem[] = [
   { sku: 'MTL-0004', name: 'Agua Inglesa', image: '/products/agua_inglesa.png', qty: 1, unitPrice: 49.90 },
 ];
 
-function buildTimeline(status: AdminOrderStatus, baseDate: string): AdminOrderTimelineStep[] {
+export function buildTimeline(status: AdminOrderStatus, baseDate: string): AdminOrderTimelineStep[] {
   if (status === 'cancelado') {
     return [
       { status: 'aguardando_pagamento', label: 'Pedido criado', date: baseDate, done: true },
@@ -252,10 +252,16 @@ export function mapApiOrder(p: Record<string, unknown>): AdminOrderDetail {
     total: Number(p.total ?? 0),
     payment: String(p.metodoPagamento ?? 'PIX'),
     paymentCode: String(p.pixQrCode ?? ''),
-    coupon: null,
+    coupon: (() => {
+      const c = p.cupom as Record<string, unknown> | null | undefined;
+      return c?.codigo ? String(c.codigo) : null;
+    })(),
     status: statusMap[String(p.status)] ?? 'aguardando_pagamento',
-    date: String(p.criadoEm ?? new Date().toISOString()).slice(0, 10),
-    timeline: [],
+    date: String(p.criadoEm ?? new Date().toISOString()),
+    timeline: buildTimeline(
+      statusMap[String(p.status)] ?? 'aguardando_pagamento',
+      new Date(String(p.criadoEm ?? '')).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
+    ),
     history: [],
     notes: '',
     trackingCode: String(p.codigoRastreio ?? ''),

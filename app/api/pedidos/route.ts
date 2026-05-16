@@ -203,9 +203,10 @@ export async function GET() {
       where: isAdmin ? {} : { usuarioId: session.user.id },
       include: {
         itens: { include: { produto: { select: { nome: true, imagemUrl: true } } } },
+        cupom: { select: { codigo: true } },
       },
       orderBy: { criadoEm: "desc" },
-      take: isAdmin ? 100 : 20,
+      ...(isAdmin ? {} : { take: 20 }),
     })
 
     return NextResponse.json(pedidos)
