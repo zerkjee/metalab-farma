@@ -155,7 +155,8 @@ export default function CheckoutPage() {
           estado: form.state,
         },
         frete: { preco: selectedShipping.price },
-        cupomCodigo: coupons.discount?.code ?? coupons.freeShipping?.code ?? undefined,
+        cupomCodigo: coupons.discount?.code ?? undefined,
+        cupomFreteCodigo: coupons.freeShipping?.code ?? undefined,
         metodoPagamento: selectedPaymentId,
       };
 

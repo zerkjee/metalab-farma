@@ -20,6 +20,7 @@ const pedidoSchema = z.object({
   endereco: enderecoSchema,
   frete: z.object({ preco: z.number().min(0) }).optional(),
   cupomCodigo: z.string().regex(/^[A-Za-z0-9_-]{3,20}$/).optional(),
+  cupomFreteCodigo: z.string().regex(/^[A-Za-z0-9_-]{3,20}$/).optional(),
   metodoPagamento: z.enum(["PIX", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO"]).default("PIX"),
 })
 
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
     }
 
-    const { itens, cliente, endereco, frete, cupomCodigo, metodoPagamento }: PedidoInput = parsed.data
+    const { itens, cliente, endereco, frete, cupomCodigo, cupomFreteCodigo, metodoPagamento }: PedidoInput = parsed.data
 
     // Buscar produtos por id ou slug
     const ids = itens.map((i) => i.produtoId).filter(Boolean) as string[]
@@ -83,16 +84,13 @@ export async function POST(request: NextRequest) {
       return acc + Number(prod.preco) * item.quantidade
     }, 0)
 
-    // Validar cupom se informado
+    // Validar cupons
     let descontoTotal = 0
     let freteGratis = false
     let cupomId: string | undefined
 
     if (cupomCodigo) {
-      const cupom = await prisma.cupom.findUnique({
-        where: { codigo: cupomCodigo.toUpperCase() },
-      })
-
+      const cupom = await prisma.cupom.findUnique({ where: { codigo: cupomCodigo.toUpperCase() } })
       if (cupom && cupom.ativo) {
         cupomId = cupom.id
         if (cupom.tipo === "PERCENTUAL") {
@@ -102,6 +100,14 @@ export async function POST(request: NextRequest) {
         } else if (cupom.tipo === "FRETE_GRATIS") {
           freteGratis = true
         }
+      }
+    }
+
+    if (cupomFreteCodigo && !freteGratis) {
+      const cupomFrete = await prisma.cupom.findUnique({ where: { codigo: cupomFreteCodigo.toUpperCase() } })
+      if (cupomFrete && cupomFrete.ativo && cupomFrete.tipo === "FRETE_GRATIS") {
+        freteGratis = true
+        if (!cupomId) cupomId = cupomFrete.id
       }
     }
 
@@ -143,12 +149,15 @@ export async function POST(request: NextRequest) {
       include: { itens: true },
     })
 
-    // Incrementar uso do cupom
-    if (cupomId) {
-      await prisma.cupom.update({
-        where: { id: cupomId },
-        data: { usoAtual: { increment: 1 } },
-      })
+    // Incrementar uso dos cupons
+    const cupomIdsParaIncrementar = new Set<string>()
+    if (cupomId) cupomIdsParaIncrementar.add(cupomId)
+    if (cupomFreteCodigo && freteGratis) {
+      const cf = await prisma.cupom.findUnique({ where: { codigo: cupomFreteCodigo.toUpperCase() }, select: { id: true } })
+      if (cf) cupomIdsParaIncrementar.add(cf.id)
+    }
+    for (const id of cupomIdsParaIncrementar) {
+      await prisma.cupom.update({ where: { id }, data: { usoAtual: { increment: 1 } } })
     }
 
     // Enviar email de confirmação (não bloqueia resposta)
