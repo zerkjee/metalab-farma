@@ -8,6 +8,7 @@ import {
   FileText,
   PackageCheck,
   Printer,
+  Save,
   Search,
   Send,
   Truck,
@@ -95,6 +96,9 @@ export default function AdminPedidos() {
   const [page, setPage] = useState(1);
   const [quickOrder, setQuickOrder] = useState<AdminOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [trackingInput, setTrackingInput] = useState('');
+  const [trackingSaving, setTrackingSaving] = useState(false);
+  const [trackingSaved, setTrackingSaved] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -169,6 +173,25 @@ export default function AdminPedidos() {
       };
     }));
     setQuickOrder((current) => current && current.id === id ? { ...current, status } : current);
+  }
+
+  async function saveTracking(id: string) {
+    const code = trackingInput.trim();
+    if (!code) return;
+    setTrackingSaving(true);
+    try {
+      await fetch(`/api/pedidos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigoRastreio: code }),
+      });
+      setOrders((current) => current.map((o) => o.id === id ? { ...o, trackingCode: code } : o));
+      setQuickOrder((current) => current && current.id === id ? { ...current, trackingCode: code } : current);
+      setTrackingSaved(true);
+      setTimeout(() => setTrackingSaved(false), 3000);
+    } catch { /* ignore */ } finally {
+      setTrackingSaving(false);
+    }
   }
 
   function copyCode(code: string) {
@@ -322,7 +345,7 @@ export default function AdminPedidos() {
                       <td className="px-5 py-4">
                         <div className="flex justify-end gap-1.5">
                           <button
-                            onClick={() => setQuickOrder(order)}
+                            onClick={() => { setQuickOrder(order); setTrackingInput(order.trackingCode ?? ''); setTrackingSaved(false); }}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-purple-300 transition-all hover:bg-purple-600/10"
                             title="Detalhes rápidos"
                           >
@@ -427,6 +450,35 @@ export default function AdminPedidos() {
               <Timeline order={quickOrder} />
 
               <div className="mt-4 space-y-2">
+                {/* Código de rastreio */}
+                <div>
+                  <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Rastreio</p>
+                  <div className="flex gap-2">
+                    <input
+                      value={trackingInput}
+                      onChange={(e) => { setTrackingInput(e.target.value.toUpperCase()); setTrackingSaved(false); }}
+                      placeholder="BR123456789BR"
+                      className="flex-1 min-w-0 rounded-xl border border-slate-600 bg-slate-800 px-3 py-2 text-sm font-mono text-slate-200 outline-none placeholder:text-slate-600 focus:border-purple-500"
+                    />
+                    <button
+                      onClick={() => saveTracking(quickOrder.id)}
+                      disabled={trackingSaving || !trackingInput.trim()}
+                      className="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-600 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Save className="h-3.5 w-3.5" strokeWidth={2} />
+                      {trackingSaving ? 'Salvando…' : trackingSaved ? 'Salvo!' : 'Salvar'}
+                    </button>
+                  </div>
+                  {trackingInput.trim() && (
+                    <button
+                      onClick={() => copyCode(trackingInput)}
+                      className="mt-1.5 text-[11px] text-slate-500 hover:text-purple-300 transition-colors"
+                    >
+                      Copiar código de rastreio
+                    </button>
+                  )}
+                </div>
+
                 <select
                   value={quickOrder.status}
                   onChange={(event) => updateStatus(quickOrder.id, event.target.value as AdminOrderStatus)}
