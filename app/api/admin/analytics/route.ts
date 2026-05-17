@@ -17,8 +17,10 @@ export async function GET() {
     const inicio14d = new Date(hoje)
     inicio14d.setDate(hoje.getDate() - 13)
     inicio14d.setHours(0, 0, 0, 0)
+    const inicioDia = new Date(hoje)
+    inicioDia.setHours(0, 0, 0, 0)
 
-    const [pedidos14d, itensPorProduto, pedidosPorStatus, pedidosPorMetodo] = await Promise.all([
+    const [pedidos14d, itensPorProduto, pedidosPorStatus, pedidosPorMetodo, ticketAgg, clientesPorPedidos, pedidosHoje, totalPedidos] = await Promise.all([
       // Pedidos pagos dos últimos 14 dias para o gráfico de receita
       prisma.pedido.findMany({
         where: { pago: true, criadoEm: { gte: inicio14d } },
@@ -45,6 +47,26 @@ export async function GET() {
         where: { pago: true },
         _count: { id: true },
       }),
+
+      // Ticket médio global
+      prisma.pedido.aggregate({
+        where: { pago: true },
+        _avg: { total: true },
+      }),
+
+      // Clientes com pedidos pagos — para calcular LTV e taxa de recompra
+      prisma.pedido.groupBy({
+        by: ["usuarioId"],
+        where: { pago: true, usuarioId: { not: null } },
+        _count: { id: true },
+        _sum: { total: true },
+      }),
+
+      // Pedidos criados hoje
+      prisma.pedido.count({ where: { criadoEm: { gte: inicioDia } } }),
+
+      // Total de pedidos (funil)
+      prisma.pedido.count(),
     ])
 
     // Montar gráfico de receita por dia (últimos 14 dias)
@@ -120,11 +142,33 @@ export async function GET() {
         cor: metodoCores[m.metodoPagamento!] ?? "#94a3b8",
       }))
 
+    // LTV e taxa de recompra
+    const totalClientesComPedido = clientesPorPedidos.length
+    const receitaTotalClientes = clientesPorPedidos.reduce((s, c) => s + Number(c._sum.total ?? 0), 0)
+    const ltvMedio = totalClientesComPedido > 0 ? receitaTotalClientes / totalClientesComPedido : 0
+    const clientesRecompra = clientesPorPedidos.filter((c) => c._count.id >= 2).length
+    const taxaRecompra = totalClientesComPedido > 0
+      ? Math.round((clientesRecompra / totalClientesComPedido) * 100)
+      : 0
+
+    const ticketMedio = Number(ticketAgg._avg.total ?? 0)
+
+    // Funil de conversão
+    const totalPago = pedidosPorStatus.find((s) => s.status === 'PAGAMENTO_APROVADO')?._count.id ?? 0
+    const conversaoFunil = totalPedidos > 0 ? Math.round((totalPago / totalPedidos) * 100) : 0
+
     return NextResponse.json({
       receitaDiaria,
       topProdutos,
       porStatus,
       metodosPagamento,
+      ltvMedio,
+      taxaRecompra,
+      ticketMedio,
+      pedidosHoje,
+      totalPedidos,
+      totalPago,
+      conversaoFunil,
     })
   } catch (error) {
     console.error("[GET /api/admin/analytics]", error)

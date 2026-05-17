@@ -8,6 +8,13 @@ interface AnalyticsData {
   topProdutos: { nome: string; vendas: number; receita: number; pct: number; cor: string }[];
   porStatus: { label: string; value: number; cor: string }[];
   metodosPagamento: { label: string; pct: number; cor: string }[];
+  ltvMedio: number;
+  taxaRecompra: number;
+  ticketMedio: number;
+  pedidosHoje: number;
+  totalPedidos: number;
+  totalPago: number;
+  conversaoFunil: number;
 }
 
 function fmtCurrency(v: number) {
@@ -34,24 +41,58 @@ export default function AdminAnalytics() {
 
       <div>
         <h2 className="text-white font-black text-lg">Analytics</h2>
-        <p className="text-slate-500 text-xs">Últimos 14 dias — dados reais do banco</p>
+        <p className="text-slate-500 text-xs">Dados reais — últimos 14 dias + métricas acumuladas</p>
       </div>
 
-      {/* KPI row */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* KPI row — receita e volume */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Faturamento 14d', value: loading ? '—' : fmtCurrency(totalReceita), icon: '💰' },
-          { label: 'Unidades vendidas', value: loading ? '—' : String(totalVendas), icon: '📦' },
-          { label: 'Métodos de pagto', value: loading ? '—' : String(data?.metodosPagamento.length ?? 0), icon: '💳' },
+          { label: 'Faturamento 14d',   value: loading ? '—' : fmtCurrency(totalReceita), sub: 'pedidos pagos' },
+          { label: 'Ticket médio',       value: loading ? '—' : fmtCurrency(data?.ticketMedio ?? 0), sub: 'por pedido' },
+          { label: 'Unidades vendidas',  value: loading ? '—' : String(totalVendas), sub: '14 dias' },
+          { label: 'Pedidos hoje',       value: loading ? '—' : String(data?.pedidosHoje ?? 0), sub: 'criados hoje' },
         ].map((k) => (
           <div key={k.label} className="rounded-2xl border border-slate-700/50 p-5" style={{ background: '#1e293b' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">{k.icon}</span>
-              <p className="text-slate-400 text-xs">{k.label}</p>
-            </div>
+            <p className="text-slate-400 text-xs mb-2">{k.label}</p>
             <p className="text-2xl font-black text-white">{k.value}</p>
+            <p className="text-slate-600 text-xs mt-1">{k.sub}</p>
           </div>
         ))}
+      </div>
+
+      {/* KPI row — retenção */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-slate-700/50 p-5" style={{ background: '#1e293b' }}>
+          <p className="text-slate-400 text-xs mb-1">LTV médio por cliente</p>
+          <p className="text-2xl font-black text-emerald-400">{loading ? '—' : fmtCurrency(data?.ltvMedio ?? 0)}</p>
+          <p className="text-slate-600 text-xs mt-1">receita total ÷ clientes únicos</p>
+        </div>
+        <div className="rounded-2xl border border-slate-700/50 p-5" style={{ background: '#1e293b' }}>
+          <p className="text-slate-400 text-xs mb-1">Taxa de recompra</p>
+          <p className="text-2xl font-black text-sky-400">{loading ? '—' : `${data?.taxaRecompra ?? 0}%`}</p>
+          <p className="text-slate-600 text-xs mt-1">clientes com 2+ pedidos</p>
+        </div>
+        <div className="rounded-2xl border border-slate-700/50 p-5" style={{ background: '#1e293b' }}>
+          <div className="flex justify-between mb-2">
+            <p className="text-slate-400 text-xs">Funil de conversão</p>
+            <p className="text-violet-400 font-black text-sm">{loading ? '—' : `${data?.conversaoFunil ?? 0}%`}</p>
+          </div>
+          <div className="flex flex-col gap-1.5 text-xs text-slate-400">
+            <div className="flex justify-between">
+              <span>Pedidos criados</span>
+              <span className="font-bold text-slate-300">{loading ? '—' : data?.totalPedidos ?? 0}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Pagos/aprovados</span>
+              <span className="font-bold text-emerald-400">{loading ? '—' : data?.totalPago ?? 0}</span>
+            </div>
+          </div>
+          {!loading && (
+            <div className="mt-2 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-full bg-violet-500 rounded-full" style={{ width: `${data?.conversaoFunil ?? 0}%` }} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Gráfico de receita diária */}
@@ -151,8 +192,8 @@ export default function AdminAnalytics() {
       <div className="rounded-2xl border border-slate-700/30 p-5 flex items-center gap-4" style={{ background: '#1e293b' }}>
         <span className="text-2xl">📊</span>
         <div>
-          <p className="text-slate-300 text-sm font-semibold">Análise de visitantes e conversão</p>
-          <p className="text-slate-500 text-xs">Em breve — requer integração com Vercel Analytics ou Google Analytics.</p>
+          <p className="text-slate-300 text-sm font-semibold">Tráfego e conversão por sessão</p>
+          <p className="text-slate-500 text-xs">Disponível após configurar <code className="text-violet-400">NEXT_PUBLIC_GA4_ID</code> na Vercel — os eventos add_to_cart, begin_checkout e purchase já estão sendo rastreados.</p>
         </div>
       </div>
 

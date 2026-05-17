@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { sendOrderConfirmationEmail } from "@/lib/resend"
+import { enqueueOrderEmail } from "@/lib/qstash"
 import { logger } from "@/lib/logger"
 import crypto from "crypto"
 
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       ])
 
       logger.info("Pedido pago com sucesso", { route: "webhook", pedidoNumero: pedido.numero, paymentId })
-      void sendOrderConfirmationEmail({
+      void enqueueOrderEmail({
         numero: pedido.numero,
         compradorNome: pedido.compradorNome,
         compradorEmail: pedido.compradorEmail,

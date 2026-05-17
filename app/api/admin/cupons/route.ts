@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logAudit, getClientIp } from "@/lib/audit"
 import { z } from "zod"
 
 const cupomSchema = z.object({
@@ -29,7 +30,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await requireAdmin())) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
+  const session = await requireAdmin()
+  if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   try {
     const body = await request.json()
     const data = cupomSchema.parse(body)
@@ -42,6 +44,15 @@ export async function POST(request: NextRequest) {
         validade: data.validade ? new Date(data.validade) : null,
         ativo: data.ativo,
       },
+    })
+    void logAudit({
+      adminId: session.user.id!,
+      adminEmail: session.user.email!,
+      acao: 'cupom.criado',
+      recurso: 'Cupom',
+      recursoId: cupom.id,
+      detalhe: { codigo: cupom.codigo, tipo: cupom.tipo, valor: Number(cupom.valor) },
+      ip: getClientIp(request),
     })
     return NextResponse.json({ ...cupom, valor: Number(cupom.valor) }, { status: 201 })
   } catch (error) {

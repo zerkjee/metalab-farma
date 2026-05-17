@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
-import { sendOrderConfirmationEmail } from "@/lib/resend"
+import { enqueueOrderEmail } from "@/lib/qstash"
 import { logger } from "@/lib/logger"
 import { enderecoSchema } from "@/lib/validations"
 
@@ -161,8 +161,7 @@ export async function POST(request: NextRequest) {
       await prisma.cupom.update({ where: { id }, data: { usoAtual: { increment: 1 } } })
     }
 
-    // Enviar email de confirmação (não bloqueia resposta)
-    void sendOrderConfirmationEmail({
+    void enqueueOrderEmail({
       numero: pedido.numero,
       compradorNome: pedido.compradorNome,
       compradorEmail: pedido.compradorEmail,

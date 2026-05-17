@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logAudit, getClientIp } from '@/lib/audit';
 import { senhaSchema } from '@/lib/validations';
 
 const criarAdminSchema = z.object({
@@ -35,6 +36,16 @@ export async function POST(req: NextRequest) {
   const usuario = await prisma.usuario.create({
     data: { nome, email, senha: hash, papel },
     select: { id: true, nome: true, email: true, papel: true, criadoEm: true },
+  });
+
+  void logAudit({
+    adminId: session.user.id!,
+    adminEmail: session.user.email!,
+    acao: 'admin.criado',
+    recurso: 'Admin',
+    recursoId: usuario.id,
+    detalhe: { email: usuario.email, papel: usuario.papel },
+    ip: getClientIp(req),
   });
 
   return NextResponse.json(usuario, { status: 201 });
@@ -75,5 +86,14 @@ export async function DELETE(req: NextRequest) {
   }
 
   await prisma.usuario.update({ where: { id }, data: { ativo: false } });
+  void logAudit({
+    adminId: session.user.id!,
+    adminEmail: session.user.email!,
+    acao: 'admin.removido',
+    recurso: 'Admin',
+    recursoId: id,
+    detalhe: { email: usuario.email, papel: usuario.papel },
+    ip: getClientIp(req),
+  });
   return NextResponse.json({ ok: true });
 }

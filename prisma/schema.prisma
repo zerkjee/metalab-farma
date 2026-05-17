@@ -303,3 +303,22 @@ model Banner {
 
   @@map("banners")
 }
+
+// ─── AUDITORIA ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  criadoEm  DateTime @default(now())
+  adminId    String
+  adminEmail String
+  acao       String
+  recurso    String
+  recursoId  String?
+  detalhe    String?  @db.Text
+  ip         String?
+
+  @@index([adminId])
+  @@index([criadoEm])
+  @@index([acao])
+  @@map("audit_logs")
+}

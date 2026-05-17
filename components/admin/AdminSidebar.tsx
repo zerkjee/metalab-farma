@@ -16,6 +16,7 @@ const nav: NavItem[] = [
   { label: 'Banners',      href: '/admin/banners',        icon: '🖼️' },
   { label: 'Analytics',    href: '/admin/analytics',      icon: '📈' },
   { label: 'Admins',       href: '/admin/criar-admin',    icon: '🔑', superAdminOnly: true },
+  { label: 'Auditoria',   href: '/admin/audit',          icon: '🔒', superAdminOnly: true },
 ];
 
 export default function AdminSidebar() {
