@@ -66,8 +66,10 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // Agendar e-mail de PIX expirado para 35 min (30 min expiração + 5 min buffer)
-      void enqueueJob('/api/jobs/pix-expiry', { pedidoId: pedido.id }, 35 * 60)
+      // Agendar e-mail de recovery em 35 min (30 min PIX + 5 min buffer)
+      void enqueueJob('/api/jobs/pix-expiry', { pedidoId: pedido.id, stage: 'email' }, 35 * 60)
+      // Safety net: cancela pedido e libera estoque em 2h se webhook MP nunca chegar
+      void enqueueJob('/api/jobs/pix-expiry', { pedidoId: pedido.id, stage: 'cancel' }, 2 * 60 * 60)
 
       return NextResponse.json({
         tipo: "PIX",

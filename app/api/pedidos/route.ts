@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { enqueueOrderEmail } from "@/lib/qstash"
 import { logger } from "@/lib/logger"
 import { enderecoSchema } from "@/lib/validations"
+import { pedidoRatelimit, getIp } from "@/lib/rateLimit"
+import type { Cupom } from "@prisma/client"
 
 const pedidoSchema = z.object({
   itens: z.array(z.object({
@@ -28,15 +31,27 @@ const pedidoSchema = z.object({
 type PedidoInput = z.infer<typeof pedidoSchema>
 
 function gerarNumeroPedido() {
-  const now = new Date()
-  const ano = now.getFullYear()
-  const seq = String(Date.now()).slice(-5)
+  const ano = new Date().getFullYear()
+  // 6 chars de random base36 (~2 bilhões de combinações) — colisão desprezível
+  const seq = crypto.randomBytes(4).readUInt32BE(0).toString(36).toUpperCase().slice(0, 6).padEnd(6, '0')
   return `MTL-${ano}-${seq}`
+}
+
+function cupomValido(cupom: Cupom | null): cupom is Cupom {
+  if (!cupom || !cupom.ativo) return false
+  if (cupom.validade && new Date(cupom.validade) < new Date()) return false
+  if (cupom.usoMaximo !== null && cupom.usoAtual >= cupom.usoMaximo) return false
+  return true
 }
 
 // POST /api/pedidos — criar pedido
 export async function POST(request: NextRequest) {
   try {
+    const { success } = await pedidoRatelimit.limit(getIp(request))
+    if (!success) {
+      return NextResponse.json({ erro: "Muitas tentativas. Aguarde alguns minutos." }, { status: 429 })
+    }
+
     const session = await auth()
     const body = await request.json()
 
@@ -85,80 +100,120 @@ export async function POST(request: NextRequest) {
       return acc + Number(prod.preco) * item.quantidade
     }, 0)
 
-    // Validar cupons
+    // Resolver cupons com revalidação completa (ativo, validade, usoMaximo)
     let descontoTotal = 0
     let freteGratis = false
-    let cupomId: string | undefined
+    const cupomIds = new Set<string>()
 
     if (cupomCodigo) {
       const cupom = await prisma.cupom.findUnique({ where: { codigo: cupomCodigo.toUpperCase() } })
-      if (cupom && cupom.ativo) {
-        cupomId = cupom.id
-        if (cupom.tipo === "PERCENTUAL") {
-          descontoTotal = (subtotal * Number(cupom.valor)) / 100
-        } else if (cupom.tipo === "VALOR_FIXO") {
-          descontoTotal = Math.min(Number(cupom.valor), subtotal)
-        } else if (cupom.tipo === "FRETE_GRATIS") {
-          freteGratis = true
-        }
+      if (!cupomValido(cupom)) {
+        return NextResponse.json({ erro: "Cupom inválido ou expirado" }, { status: 400 })
+      }
+      cupomIds.add(cupom.id)
+      if (cupom.tipo === "PERCENTUAL") {
+        descontoTotal = (subtotal * Number(cupom.valor)) / 100
+      } else if (cupom.tipo === "VALOR_FIXO") {
+        descontoTotal = Math.min(Number(cupom.valor), subtotal)
+      } else if (cupom.tipo === "FRETE_GRATIS") {
+        freteGratis = true
       }
     }
 
-    if (cupomFreteCodigo && !freteGratis) {
+    if (cupomFreteCodigo) {
       const cupomFrete = await prisma.cupom.findUnique({ where: { codigo: cupomFreteCodigo.toUpperCase() } })
-      if (cupomFrete && cupomFrete.ativo && cupomFrete.tipo === "FRETE_GRATIS") {
-        freteGratis = true
-        if (!cupomId) cupomId = cupomFrete.id
+      if (!cupomValido(cupomFrete) || cupomFrete.tipo !== "FRETE_GRATIS") {
+        return NextResponse.json({ erro: "Cupom de frete inválido ou expirado" }, { status: 400 })
       }
+      freteGratis = true
+      cupomIds.add(cupomFrete.id)
     }
 
     const valorFrete = freteGratis ? 0 : Number(frete?.preco ?? 0)
     const total = subtotal - descontoTotal + valorFrete
 
-    // Criar pedido no banco
-    const pedido = await prisma.pedido.create({
-      data: {
-        numero: gerarNumeroPedido(),
-        status: "AGUARDANDO_PAGAMENTO",
-        subtotal,
-        desconto: descontoTotal,
-        frete: valorFrete,
-        total,
-        metodoPagamento: (metodoPagamento ?? "PIX") as "PIX" | "CARTAO_CREDITO" | "CARTAO_DEBITO" | "BOLETO",
-        compradorNome: cliente.nome,
-        compradorEmail: cliente.email,
-        compradorCpf: cliente.cpf.replace(/\D/g, ""),
-        compradorTelefone: cliente.telefone,
-        enderecoSnap: JSON.stringify(endereco),
-        usuarioId: session?.user?.id ?? null,
-        cupomId: cupomId ?? null,
-        itens: {
-          create: itens.map((item) => {
+    // Transação atômica: criar pedido + decrementar estoque (com guard) + incrementar uso de cupons
+    // Retry até 3x em colisão de numero (P2002 em Pedido.numero @unique)
+    const cupomIdPrincipal = cupomIds.values().next().value
+    let pedido: Awaited<ReturnType<typeof prisma.pedido.create>> & { itens: { produtoNome: string; quantidade: number; precoUnit: unknown }[] }
+    let tentativa = 0
+    while (true) {
+      tentativa++
+      try {
+        pedido = await prisma.$transaction(async (tx) => {
+          // Decrementa estoque com guard atômico (rejeita se faltar)
+          for (const item of itens) {
             const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
-            return {
-              produtoId: prod.id,
-              quantidade: item.quantidade,
-              precoUnit: Number(prod.preco),
-              subtotal: Number(prod.preco) * item.quantidade,
-              produtoNome: prod.nome,
-              produtoSku: prod.sku,
-              produtoImagem: prod.imagemUrl,
+            const result = await tx.produto.updateMany({
+              where: { id: prod.id, estoque: { gte: item.quantidade } },
+              data: { estoque: { decrement: item.quantidade } },
+            })
+            if (result.count === 0) {
+              throw new Error(`OUT_OF_STOCK:${prod.nome}`)
             }
-          }),
-        },
-      },
-      include: { itens: true },
-    })
+          }
 
-    // Incrementar uso dos cupons
-    const cupomIdsParaIncrementar = new Set<string>()
-    if (cupomId) cupomIdsParaIncrementar.add(cupomId)
-    if (cupomFreteCodigo && freteGratis) {
-      const cf = await prisma.cupom.findUnique({ where: { codigo: cupomFreteCodigo.toUpperCase() }, select: { id: true } })
-      if (cf) cupomIdsParaIncrementar.add(cf.id)
-    }
-    for (const id of cupomIdsParaIncrementar) {
-      await prisma.cupom.update({ where: { id }, data: { usoAtual: { increment: 1 } } })
+          // Incrementa uso dos cupons (revalida usoMaximo aqui dentro da transação)
+          for (const id of cupomIds) {
+            const cupom = await tx.cupom.findUnique({ where: { id } })
+            if (!cupomValido(cupom)) {
+              throw new Error("COUPON_INVALID")
+            }
+            await tx.cupom.update({ where: { id }, data: { usoAtual: { increment: 1 } } })
+          }
+
+          // Cria pedido
+          return tx.pedido.create({
+            data: {
+              numero: gerarNumeroPedido(),
+              status: "AGUARDANDO_PAGAMENTO",
+              subtotal,
+              desconto: descontoTotal,
+              frete: valorFrete,
+              total,
+              metodoPagamento: (metodoPagamento ?? "PIX") as "PIX" | "CARTAO_CREDITO" | "CARTAO_DEBITO" | "BOLETO",
+              compradorNome: cliente.nome,
+              compradorEmail: cliente.email,
+              compradorCpf: cliente.cpf.replace(/\D/g, ""),
+              compradorTelefone: cliente.telefone,
+              enderecoSnap: JSON.stringify(endereco),
+              usuarioId: session?.user?.id ?? null,
+              cupomId: cupomIdPrincipal ?? null,
+              itens: {
+                create: itens.map((item) => {
+                  const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
+                  return {
+                    produtoId: prod.id,
+                    quantidade: item.quantidade,
+                    precoUnit: Number(prod.preco),
+                    subtotal: Number(prod.preco) * item.quantidade,
+                    produtoNome: prod.nome,
+                    produtoSku: prod.sku,
+                    produtoImagem: prod.imagemUrl,
+                  }
+                }),
+              },
+            },
+            include: { itens: true },
+          })
+        })
+        break
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : ''
+        if (msg.startsWith('OUT_OF_STOCK:')) {
+          return NextResponse.json({ erro: `${msg.slice('OUT_OF_STOCK:'.length)}: estoque insuficiente` }, { status: 400 })
+        }
+        if (msg === 'COUPON_INVALID') {
+          return NextResponse.json({ erro: "Cupom esgotou enquanto processava o pedido" }, { status: 400 })
+        }
+        // P2002 = unique constraint violation (provavelmente no numero) → retry
+        const isUniqueViolation = (e as { code?: string })?.code === 'P2002'
+        if (isUniqueViolation && tentativa < 3) {
+          logger.warn("Colisão de numero pedido — retry", { tentativa })
+          continue
+        }
+        throw e
+      }
     }
 
     // Marcar CartSession como convertido (fire-and-forget)

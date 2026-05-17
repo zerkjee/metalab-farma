@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { logger } from '@/lib/logger'
+import { resgateRatelimit, getIp } from '@/lib/rateLimit'
 import type { LevelId } from '@/types/loyalty'
 
 // Tabela de resgates: pontos → valor em R$ (cupom de valor fixo)
@@ -38,6 +39,11 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const { success } = await resgateRatelimit.limit(getIp(request))
+    if (!success) {
+      return NextResponse.json({ erro: 'Muitas tentativas de resgate. Aguarde uma hora.' }, { status: 429 })
+    }
+
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ erro: 'Não autenticado' }, { status: 401 })
 

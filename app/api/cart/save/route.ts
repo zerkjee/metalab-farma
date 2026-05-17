@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { enqueueJob } from '@/lib/qstash'
+import { cartRatelimit, getIp } from '@/lib/rateLimit'
 
 export async function POST(request: NextRequest) {
   try {
+    const { success } = await cartRatelimit.limit(getIp(request))
+    if (!success) return NextResponse.json({ ok: true })
+
     const body = await request.json() as {
       email: string
       nome?: string

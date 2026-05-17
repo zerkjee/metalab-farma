@@ -77,52 +77,62 @@ export async function POST(request: NextRequest) {
     const pagamento = await paymentApi.get({ id: paymentId })
 
     if (pagamento.status === "approved") {
+      // Idempotência atômica via updateMany com guard (pago=false)
+      const updated = await prisma.pedido.updateMany({
+        where: { pagamentoId: String(pagamento.id), pago: false },
+        data: { pago: true, pagoEm: new Date(), status: "PAGAMENTO_APROVADO" },
+      })
+
+      // Se updated.count === 0, outro webhook já processou — nada a fazer
+      if (updated.count === 0) {
+        logger.info("Webhook ignorado (pedido já pago)", { route: "webhook", paymentId })
+        return NextResponse.json({ ok: true })
+      }
+
       const pedido = await prisma.pedido.findFirst({
         where: { pagamentoId: String(pagamento.id) },
         include: { itens: true },
       })
 
-      if (!pedido || pedido.pago) {
-        return NextResponse.json({ ok: true })
+      if (pedido) {
+        logger.info("Pedido pago com sucesso", { route: "webhook", pedidoNumero: pedido.numero, paymentId })
+        void enqueueOrderEmail({
+          numero: pedido.numero,
+          compradorNome: pedido.compradorNome,
+          compradorEmail: pedido.compradorEmail,
+          total: Number(pedido.total),
+          metodoPagamento: "PIX",
+          itens: pedido.itens.map((item: { produtoNome: string; quantidade: number; precoUnit: unknown }) => ({
+            nome: item.produtoNome,
+            quantidade: item.quantidade,
+            precoUnit: Number(item.precoUnit),
+          })),
+        })
       }
-
-      await prisma.$transaction([
-        prisma.pedido.update({
-          where: { id: pedido.id },
-          data: {
-            pago: true,
-            pagoEm: new Date(),
-            status: "PAGAMENTO_APROVADO",
-          },
-        }),
-        ...pedido.itens.map((item: { produtoId: string; quantidade: number }) =>
-          prisma.produto.update({
-            where: { id: item.produtoId },
-            data: { estoque: { decrement: item.quantidade } },
-          })
-        ),
-      ])
-
-      logger.info("Pedido pago com sucesso", { route: "webhook", pedidoNumero: pedido.numero, paymentId })
-      void enqueueOrderEmail({
-        numero: pedido.numero,
-        compradorNome: pedido.compradorNome,
-        compradorEmail: pedido.compradorEmail,
-        total: Number(pedido.total),
-        metodoPagamento: "PIX",
-        itens: pedido.itens.map((item: { produtoNome: string; quantidade: number; precoUnit: unknown }) => ({
-          nome: item.produtoNome,
-          quantidade: item.quantidade,
-          precoUnit: Number(item.precoUnit),
-        })),
-      })
     }
 
     if (pagamento.status === "cancelled" || pagamento.status === "rejected") {
-      await prisma.pedido.updateMany({
-        where: { pagamentoId: String(pagamento.id), pago: false },
-        data: { status: "CANCELADO" },
+      // Restaurar estoque dos pedidos não-pagos que serão cancelados
+      const pedidos = await prisma.pedido.findMany({
+        where: { pagamentoId: String(pagamento.id), pago: false, status: { not: "CANCELADO" } },
+        include: { itens: true },
       })
+
+      for (const pedido of pedidos) {
+        await prisma.$transaction([
+          prisma.pedido.update({
+            where: { id: pedido.id },
+            data: { status: "CANCELADO" },
+          }),
+          ...pedido.itens.map((item) =>
+            prisma.produto.update({
+              where: { id: item.produtoId },
+              data: { estoque: { increment: item.quantidade } },
+            })
+          ),
+        ])
+        logger.info("Pedido cancelado — estoque restaurado", { route: "webhook", pedidoNumero: pedido.numero, paymentId, status: pagamento.status })
+      }
     }
 
     return NextResponse.json({ ok: true })

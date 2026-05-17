@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import { freteRatelimit, getIp } from "@/lib/rateLimit"
 
 const querySchema = z.object({
   cep: z.string().regex(/^\d{8}$/),
@@ -14,6 +15,11 @@ const SERVICE_MAP: Record<number, { id: string; label: string; description: stri
 }
 
 export async function GET(req: NextRequest) {
+  const { success } = await freteRatelimit.limit(getIp(req))
+  if (!success) {
+    return NextResponse.json({ erro: "Muitas consultas. Aguarde alguns minutos." }, { status: 429 })
+  }
+
   const { searchParams } = new URL(req.url)
   const parsed = querySchema.safeParse({ cep: searchParams.get("cep") })
 

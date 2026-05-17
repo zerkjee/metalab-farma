@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { logger } from '@/lib/logger'
+import { avaliacaoRatelimit, getIp } from '@/lib/rateLimit'
 
 const createSchema = z.object({
   produtoId: z.string().min(1),
@@ -72,6 +73,11 @@ export async function GET(request: NextRequest) {
 // POST /api/avaliacoes — criar (login + ter comprado o produto)
 export async function POST(request: NextRequest) {
   try {
+    const { success } = await avaliacaoRatelimit.limit(getIp(request))
+    if (!success) {
+      return NextResponse.json({ erro: 'Muitas avaliações. Aguarde antes de enviar outra.' }, { status: 429 })
+    }
+
     const session = await auth()
     if (!session?.user?.id) {
       return NextResponse.json({ erro: 'Login necessário para avaliar' }, { status: 401 })

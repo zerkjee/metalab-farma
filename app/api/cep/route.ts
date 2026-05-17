@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cepRatelimit, getIp } from "@/lib/rateLimit"
 
 export async function GET(request: NextRequest) {
+  const { success } = await cepRatelimit.limit(getIp(request))
+  if (!success) {
+    return NextResponse.json({ erro: "Muitas consultas. Aguarde alguns minutos." }, { status: 429 })
+  }
+
   const cep = new URL(request.url).searchParams.get("cep")?.replace(/\D/g, "")
 
   if (!cep || cep.length !== 8) {
