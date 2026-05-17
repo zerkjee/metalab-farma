@@ -153,7 +153,7 @@ export default function CheckoutPage() {
 
   const selectedShipping = useMemo(
     () => shippingMethods.find((method) => method.id === selectedShippingId) ?? shippingMethods[0],
-    [selectedShippingId],
+    [selectedShippingId, shippingMethods],
   );
   const totals = useMemo(() => calculateCartTotals({
     items,

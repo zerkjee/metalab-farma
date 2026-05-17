@@ -207,13 +207,18 @@ export default function BannerCarousel() {
   const [paused, setPaused] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const transitioningRef = useRef(false);
 
   const goTo = useCallback((index: number) => {
-    if (transitioning) return;
+    if (transitioningRef.current) return;
+    transitioningRef.current = true;
     setTransitioning(true);
     setCurrent(index);
-    setTimeout(() => setTransitioning(false), 600);
-  }, [transitioning]);
+    setTimeout(() => {
+      transitioningRef.current = false;
+      setTransitioning(false);
+    }, 600);
+  }, []);
 
   const prev = useCallback(() => goTo((current - 1 + slides.length) % slides.length), [current, goTo]);
   const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo]);
