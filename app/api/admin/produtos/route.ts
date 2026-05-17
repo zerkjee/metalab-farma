@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
       totalPaginas: Math.ceil(total / porPagina),
     })
   } catch (error) {
-    console.error("[GET /api/admin/produtos]", error)
+    logger.error("Erro listando produtos admin", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

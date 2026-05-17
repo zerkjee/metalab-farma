@@ -3,6 +3,7 @@ import { Receiver } from '@upstash/qstash'
 import { prisma } from '@/lib/prisma'
 import { sendAbandonedCartEmail } from '@/lib/resend'
 import { logger } from '@/lib/logger'
+import { maskEmail } from '@/lib/mask'
 
 const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
 
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
         total: Number(cart.total),
         cupomCodigo: cart.cupomCodigo ?? undefined,
       })
-      logger.info('E-mail carrinho abandonado (1h) enviado', { cartSessionId, email: cart.email })
+      logger.info('E-mail carrinho abandonado (1h) enviado', { cartSessionId, emailMasked: maskEmail(cart.email) })
     } else {
       // 24h: gerar cupom de 10% e enviar
       const codigo = generateCouponCode()
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
         cupomDesconto: '10%',
       })
 
-      logger.info('E-mail carrinho abandonado (24h) com cupom enviado', { cartSessionId, email: cart.email, codigo })
+      logger.info('E-mail carrinho abandonado (24h) com cupom enviado', { cartSessionId, emailMasked: maskEmail(cart.email), codigo })
     }
 
     return NextResponse.json({ ok: true })

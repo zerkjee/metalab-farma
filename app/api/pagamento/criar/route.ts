@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { pagamentoRatelimit } from "@/lib/rateLimit"
 import { enqueueJob } from "@/lib/qstash"
+import { logger } from "@/lib/logger"
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,8 +83,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ erro: "Método de pagamento não suportado" }, { status: 400 })
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : String(error)
-    console.error("[POST /api/pagamento/criar]", msg)
+    logger.error("Falha criando pagamento PIX", error)
     return NextResponse.json({ erro: "Erro ao criar pagamento" }, { status: 500 })
   }
 }

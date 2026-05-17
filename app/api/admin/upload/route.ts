@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 import { v2 as cloudinary } from "cloudinary"
 
 cloudinary.config({
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: result.secure_url })
   } catch (error) {
-    console.error("[POST /api/admin/upload]", error)
+    logger.error("Falha no upload Cloudinary", error)
     return NextResponse.json({ erro: "Erro ao fazer upload" }, { status: 500 })
   }
 }

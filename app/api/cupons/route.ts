@@ -3,6 +3,7 @@ import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { cupomRatelimit } from "@/lib/rateLimit"
+import { logger } from "@/lib/logger"
 
 const cupomSchema = z.object({
   codigo: z.string().min(3).max(20).regex(/^[A-Za-z0-9_-]+$/, "Código inválido"),
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
       freteGratis,
     })
   } catch (error) {
-    console.error("[POST /api/cupons]", error)
+    logger.error("Erro validando cupom público", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { registroSchema } from "@/lib/validations"
 import { registroRatelimit } from "@/lib/rateLimit"
+import { logger } from "@/lib/logger"
+import { maskEmail } from "@/lib/mask"
 import { z } from "zod"
 import { Prisma } from "@prisma/client"
 
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
       select: { id: true, email: true, nome: true },
     })
 
+    logger.info("Novo usuário cadastrado", { userId: usuario.id, emailMasked: maskEmail(usuario.email) })
     return NextResponse.json(usuario, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
       const msg = field === "cpf" ? "CPF já cadastrado" : field === "email" ? "Email já cadastrado" : "Dados já cadastrados"
       return NextResponse.json({ erro: msg }, { status: 409 })
     }
-    console.error("[POST /api/auth/registro]", error)
+    logger.error("Erro no registro de usuário", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

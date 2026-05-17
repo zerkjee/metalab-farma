@@ -189,8 +189,11 @@ export async function sendAbandonedCartEmail(data: AbandonedCartData) {
 // ─── CONFIRMAÇÃO DE PEDIDO ───────────────────────────────────────────────────
 
 export async function sendOrderConfirmationEmail(data: OrderEmailData) {
+  const { logger } = await import("@/lib/logger")
+  const { maskEmail } = await import("@/lib/mask")
+
   if (!process.env.RESEND_API_KEY) {
-    console.warn("[Resend] RESEND_API_KEY não configurada — email não enviado")
+    logger.warn("RESEND_API_KEY não configurada — email não enviado", { pedidoNumero: data.numero })
     return
   }
 
@@ -206,8 +209,12 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
       html: buildOrderEmailHtml(data),
     })
     const emailId = (result as { data?: { id?: string }; id?: string })?.data?.id ?? (result as { id?: string })?.id ?? "?"
-    console.log(`[Resend] Email enviado para ${data.compradorEmail} — id: ${emailId}`)
+    logger.info("Email de confirmação enviado", {
+      pedidoNumero: data.numero,
+      emailIdResend: emailId,
+      destinatarioMasked: maskEmail(data.compradorEmail),
+    })
   } catch (error) {
-    console.error("[Resend] Erro ao enviar email de confirmação:", error)
+    logger.error("Falha enviando email de confirmação", error)
   }
 }

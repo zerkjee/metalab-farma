@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 const produtoUpdateSchema = z.object({
   nome: z.string().min(1).optional(),
@@ -55,7 +56,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     return NextResponse.json(produto)
   } catch (error) {
-    console.error("[GET /api/produtos/:id]", error)
+    logger.error("Erro buscando produto por id", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
@@ -86,7 +87,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(produto)
   } catch (error) {
-    console.error("[PUT /api/produtos/:id]", error)
+    logger.error("Erro atualizando produto", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
@@ -108,7 +109,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
     return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error("[DELETE /api/produtos/:id]", error)
+    logger.error("Erro deletando produto", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

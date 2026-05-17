@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -31,7 +32,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     return NextResponse.json(pedido)
   } catch (error) {
-    console.error("[GET /api/pedidos/:id]", error)
+    logger.error("Erro buscando pedido por id", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
@@ -58,6 +59,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(pedido)
   } catch (error) {
+    logger.error("Erro atualizando pedido", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

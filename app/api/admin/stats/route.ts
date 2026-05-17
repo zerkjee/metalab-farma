@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 import { StatusPedido } from "@prisma/client"
 
 export async function GET() {
@@ -125,7 +126,7 @@ export async function GET() {
       })),
     })
   } catch (error) {
-    console.error("[GET /api/admin/stats]", error)
+    logger.error("Erro carregando admin stats", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

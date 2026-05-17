@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 function fmtDia(date: Date) {
   return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
@@ -171,7 +172,7 @@ export async function GET() {
       conversaoFunil,
     })
   } catch (error) {
-    console.error("[GET /api/admin/analytics]", error)
+    logger.error("Erro carregando analytics", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

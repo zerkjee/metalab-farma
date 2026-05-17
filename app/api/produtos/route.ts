@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { produtoSchema } from "@/lib/validations"
+import { logger } from "@/lib/logger"
 import { z } from "zod"
 
 // GET /api/produtos — público
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
       totalPaginas: Math.ceil(total / porPagina),
     })
   } catch (error) {
-    console.error("[GET /api/produtos]", error)
+    logger.error("Erro listando produtos", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ erro: "Dados inválidos", detalhes: error.issues }, { status: 400 })
     }
-    console.error("[POST /api/produtos]", error)
+    logger.error("Erro criando produto", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

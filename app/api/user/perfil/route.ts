@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 // GET /api/user/perfil — dados do usuário logado + endereço principal
 export async function GET() {
@@ -37,7 +38,7 @@ export async function GET() {
       enderecoPrincipal: usuario.enderecos[0] ?? null,
     })
   } catch (error) {
-    console.error("[GET /api/user/perfil]", error)
+    logger.error("Erro carregando perfil do usuário", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

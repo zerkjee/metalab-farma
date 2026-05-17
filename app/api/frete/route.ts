@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { freteRatelimit, getIp } from "@/lib/rateLimit"
+import { logger } from "@/lib/logger"
+import { maskCep } from "@/lib/mask"
 
 const querySchema = z.object({
   cep: z.string().regex(/^\d{8}$/),
@@ -64,7 +66,7 @@ export async function GET(req: NextRequest) {
 
     if (!res.ok) {
       const txt = await res.text()
-      console.error("[Frete] Melhor Envio erro:", res.status, txt.slice(0, 200))
+      logger.error("Melhor Envio: erro upstream", { status: res.status, body: txt.slice(0, 200), cepMasked: maskCep(parsed.data.cep) })
       return NextResponse.json({ erro: "Erro ao calcular frete" }, { status: 502 })
     }
 
@@ -98,7 +100,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(opcoes)
   } catch (err) {
-    console.error("[Frete] Exceção:", err)
+    logger.error("Falha calculando frete", err)
     return NextResponse.json({ erro: "Erro interno ao calcular frete" }, { status: 500 })
   }
 }

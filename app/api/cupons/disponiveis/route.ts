@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { logger } from "@/lib/logger"
 
 // GET /api/cupons/disponiveis — lista cupons válidos para exibição no checkout
 // Público: só retorna campos seguros (sem contadores internos)
@@ -33,7 +34,7 @@ export async function GET() {
 
     return NextResponse.json(disponiveis)
   } catch (error) {
-    console.error("[GET /api/cupons/disponiveis]", error)
+    logger.error("Erro listando cupons disponíveis", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
