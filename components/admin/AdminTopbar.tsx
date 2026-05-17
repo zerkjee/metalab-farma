@@ -12,6 +12,7 @@ const titles: Record<string, string> = {
   '/admin/pedidos':      'Gestão de Pedidos',
   '/admin/clientes':     'Gestão de Clientes',
   '/admin/cupons':       'Gestão de Cupons',
+  '/admin/avaliacoes':   'Moderação de Avaliações',
   '/admin/banners':      'Gestão de Banners',
   '/admin/analytics':    'Analytics',
   '/admin/audit':        'Auditoria',

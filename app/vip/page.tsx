@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import LevelBadge from '@/components/loyalty/LevelBadge';
+import PointsRedemption from '@/components/loyalty/PointsRedemption';
 import { levels, achievements, getLevelConfig, getNextLevel, getProgressToNext } from '@/data/loyalty';
 import type { LevelId } from '@/types/loyalty';
 import { fmtCurrency as formatCurrency, fmtDate as formatDate } from '@/utils/formatters';
@@ -15,6 +16,8 @@ import { fmtCurrency as formatCurrency, fmtDate as formatDate } from '@/utils/fo
 interface UserStats {
   level: LevelId;
   points: number;
+  pontosAcumulados: number;
+  pontosResgatados: number;
   multiplier: number;
   totalPedidos: number;
   totalGasto: number;
@@ -291,44 +294,12 @@ export default function VipPage() {
             </div>
           )}
 
-          {/* Cashback (preview, sem dados reais ainda) */}
+          {/* Resgate de Pontos */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-            <GlassCard className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h2 className="text-white font-black text-lg">Cashback</h2>
-                  <p className="text-white/40 text-xs mt-0.5">{levelCfg.cashbackPct}% em todas as compras</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-black text-emerald-400">
-                    {fakeUser.cashbackBalance > 0 ? formatCurrency(fakeUser.cashbackBalance) : 'R$ 0,00'}
-                  </p>
-                  <p className="text-white/30 text-xs">disponível</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mb-5">
-                <div className="bg-white/5 rounded-xl p-3.5 text-center">
-                  <p className="text-emerald-400 font-black text-2xl">{levelCfg.cashbackPct}%</p>
-                  <p className="text-white/40 text-xs mt-0.5">sua taxa</p>
-                </div>
-                <div className="bg-white/5 rounded-xl p-3.5 text-center">
-                  <p className="text-white font-black text-lg">{formatCurrency(fakeUser.totalSpent)}</p>
-                  <p className="text-white/40 text-xs mt-0.5">total gasto</p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-white/8 bg-white/3 px-4 py-3">
-                <p className="text-white/40 text-xs text-center leading-relaxed">
-                  Sistema de resgates disponível em breve. Seus pontos são acumulados automaticamente e <span className="text-amber-400/70 font-semibold">renovam a cada 6 meses</span>.
-                </p>
-                {stats?.period?.nextReset && (
-                  <p className="text-center text-[11px] text-white/25 mt-2">
-                    Próxima renovação: {formatDate(stats.period.nextReset)}
-                  </p>
-                )}
-              </div>
-            </GlassCard>
+            <PointsRedemption stats={stats} levelCfg={levelCfg} onRedeemed={() => {
+              // Recarrega stats após resgate
+              fetch('/api/user/stats').then((r) => r.ok && r.json()).then((d) => d && setStats(d)).catch(() => {});
+            }} />
 
             {/* Conquistas (4 primeiras) */}
             <GlassCard className="p-6">

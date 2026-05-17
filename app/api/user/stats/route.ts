@@ -51,15 +51,17 @@ export async function GET() {
     }),
     prisma.usuario.findUnique({
       where: { id: session.user.id },
-      select: { criadoEm: true },
+      select: { criadoEm: true, pontosResgatados: true },
     }),
   ]);
 
   const totalGasto = pedidos.reduce((sum, p) => sum + Number(p.total), 0);
   const totalPedidos = pedidos.length;
   const level = calcLevel(totalGasto);
-  // Displayed points = R$ spent × level multiplier (retroactive reward on level-up)
-  const points = Math.floor(totalGasto * MULTIPLIER[level]);
+  // Pontos acumulados no período (R$ gasto × multiplicador) menos pontos já resgatados
+  const pontosAcumulados = Math.floor(totalGasto * MULTIPLIER[level]);
+  const pontosResgatados = usuario?.pontosResgatados ?? 0;
+  const points = Math.max(0, pontosAcumulados - pontosResgatados);
 
   // Next reset = periodStart + 6 months from today (i.e., 6 months ahead)
   const nextReset = new Date();
@@ -68,6 +70,8 @@ export async function GET() {
   return NextResponse.json({
     level,
     points,
+    pontosAcumulados,
+    pontosResgatados,
     multiplier: MULTIPLIER[level],
     totalPedidos,
     totalGasto,

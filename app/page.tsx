@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import BannerCarousel from "@/components/BannerCarousel";
+import CampaignBanners from "@/components/CampaignBanners";
 
 export const metadata: Metadata = {
   title: "Metalab Store | Suplementos Alimentares com Qualidade e Procedência",
@@ -66,6 +67,7 @@ export default async function Home() {
     <>
       <Header />
       <BannerCarousel />
+      <CampaignBanners />
       <TrustSection />
       <QualitySection />
       <WhyMetalab />

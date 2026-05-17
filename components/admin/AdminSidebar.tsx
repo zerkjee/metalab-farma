@@ -13,6 +13,7 @@ const nav: NavItem[] = [
   { label: 'Pedidos',      href: '/admin/pedidos',        icon: '🛍️' },
   { label: 'Clientes',     href: '/admin/clientes',       icon: '👥' },
   { label: 'Cupons',       href: '/admin/cupons',         icon: '🎫' },
+  { label: 'Avaliações',  href: '/admin/avaliacoes',     icon: '⭐' },
   { label: 'Banners',      href: '/admin/banners',        icon: '🖼️' },
   { label: 'Analytics',    href: '/admin/analytics',      icon: '📈' },
   { label: 'Admins',       href: '/admin/criar-admin',    icon: '🔑', superAdminOnly: true },

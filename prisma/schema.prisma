@@ -57,6 +57,7 @@ model Usuario {
   ativo     Boolean  @default(true)
   telefone  String?
   cpf       String?  @unique
+  pontosResgatados Int @default(0)
   criadoEm DateTime @default(now())
 
   accounts   Account[]
@@ -298,6 +299,10 @@ model Banner {
   subtitulo String?
   imagemUrl String
   linkUrl   String?
+  cta       String?
+  bg        String?
+  accent    String?
+  campanha  String?
   ordem     Int     @default(0)
   ativo     Boolean @default(true)
 
