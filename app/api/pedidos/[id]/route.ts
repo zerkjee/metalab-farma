@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
+import { auditFromSession } from "@/lib/audit"
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -54,6 +55,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         status: body.status,
         codigoRastreio: body.codigoRastreio,
         enviadoEm: body.status === "ENVIADO" ? new Date() : undefined,
+      },
+    })
+
+    auditFromSession(session, request, {
+      acao: body.status === "REEMBOLSADO" ? "pedido.reembolsado" : "pedido.atualizado",
+      recurso: "pedido",
+      recursoId: pedido.id,
+      detalhe: {
+        numero: pedido.numero,
+        status: body.status,
+        codigoRastreio: body.codigoRastreio ?? undefined,
       },
     })
 

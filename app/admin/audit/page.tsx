@@ -22,26 +22,47 @@ interface AuditResponse {
 }
 
 const acaoCor: Record<string, string> = {
-  'cupom.criado':    'text-emerald-400',
-  'cupom.atualizado':'text-sky-400',
-  'cupom.deletado':  'text-red-400',
-  'admin.criado':    'text-violet-400',
-  'admin.removido':  'text-orange-400',
+  'cupom.criado':         'text-emerald-400',
+  'cupom.atualizado':     'text-sky-400',
+  'cupom.deletado':       'text-red-400',
+  'admin.criado':         'text-violet-400',
+  'admin.removido':       'text-orange-400',
+  'produto.criado':       'text-emerald-400',
+  'produto.atualizado':   'text-sky-400',
+  'produto.desativado':   'text-red-400',
+  'banner.criado':        'text-emerald-400',
+  'banner.atualizado':    'text-sky-400',
+  'banner.deletado':      'text-red-400',
+  'avaliacao.aprovada':   'text-emerald-400',
+  'avaliacao.reprovada':  'text-amber-400',
+  'avaliacao.deletada':   'text-red-400',
+  'pedido.atualizado':    'text-sky-400',
+  'pedido.reembolsado':   'text-orange-400',
+  'upload.criado':        'text-violet-400',
 };
 
 export default function AuditPage() {
   const [data, setData] = useState<AuditResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [pagina, setPagina] = useState(1);
+  const [filtroAcao, setFiltroAcao] = useState('');
+  const [filtroAplicado, setFiltroAplicado] = useState('');
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/admin/audit?pagina=${pagina}`)
+    const q = filtroAplicado ? `&acao=${encodeURIComponent(filtroAplicado)}` : '';
+    fetch(`/api/admin/audit?pagina=${pagina}${q}`)
       .then((r) => r.json())
       .then((d) => { if (!d.erro) setData(d); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [pagina]);
+  }, [pagina, filtroAplicado]);
+
+  function aplicarFiltro(e: React.FormEvent) {
+    e.preventDefault();
+    setPagina(1);
+    setFiltroAplicado(filtroAcao.trim());
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -50,10 +71,37 @@ export default function AuditPage() {
         <p className="text-slate-500 text-xs">Ações administrativas registradas — visível apenas para SUPER_ADMIN</p>
       </div>
 
+      {/* Busca por ação */}
+      <form onSubmit={aplicarFiltro} className="flex items-center gap-2">
+        <input
+          type="text"
+          value={filtroAcao}
+          onChange={(e) => setFiltroAcao(e.target.value)}
+          placeholder="Filtrar por ação (ex: cupom, produto, banner)"
+          className="flex-1 max-w-md px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors"
+        >
+          Buscar
+        </button>
+        {filtroAplicado && (
+          <button
+            type="button"
+            onClick={() => { setFiltroAcao(''); setFiltroAplicado(''); setPagina(1); }}
+            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+          >
+            Limpar
+          </button>
+        )}
+      </form>
+
       {/* Contagem */}
       {data && (
         <p className="text-slate-400 text-xs">
-          {data.total} registro{data.total !== 1 ? 's' : ''} no total
+          {data.total} registro{data.total !== 1 ? 's' : ''}
+          {filtroAplicado && ` (filtro: "${filtroAplicado}")`}
         </p>
       )}
 
@@ -81,7 +129,11 @@ export default function AuditPage() {
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {data?.logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-800/50 transition-colors">
+                  <tr
+                    key={log.id}
+                    className="hover:bg-slate-800/50 transition-colors"
+                    title={log.detalhe ? `Detalhe: ${log.detalhe}` : undefined}
+                  >
                     <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{fmtDate(log.criadoEm)}</td>
                     <td className="px-4 py-3 text-slate-300 max-w-[160px] truncate">{log.adminEmail}</td>
                     <td className="px-4 py-3">

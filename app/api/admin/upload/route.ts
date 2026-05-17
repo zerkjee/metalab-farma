@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
+import { auditFromSession } from "@/lib/audit"
 import { v2 as cloudinary } from "cloudinary"
 
 cloudinary.config({
@@ -41,6 +42,13 @@ export async function POST(request: NextRequest) {
     const result = await cloudinary.uploader.upload(base64, {
       folder: "metalab/produtos",
       transformation: [{ width: 1200, height: 1200, crop: "limit" }, { quality: "auto" }, { fetch_format: "auto" }],
+    })
+
+    auditFromSession(session, request, {
+      acao: "upload.criado",
+      recurso: "upload",
+      recursoId: result.public_id,
+      detalhe: { url: result.secure_url, sizeBytes: file.size, mime: file.type, folder: "metalab/produtos" },
     })
 
     return NextResponse.json({ url: result.secure_url })

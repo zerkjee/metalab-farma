@@ -3,6 +3,7 @@ import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
+import { auditFromSession } from "@/lib/audit"
 
 const produtoUpdateSchema = z.object({
   nome: z.string().min(1).optional(),
@@ -85,6 +86,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
       data: parsed.data,
     })
 
+    auditFromSession(session, request, {
+      acao: "produto.atualizado",
+      recurso: "produto",
+      recursoId: produto.id,
+      detalhe: { campos: Object.keys(parsed.data) },
+    })
+
     return NextResponse.json(produto)
   } catch (error) {
     logger.error("Erro atualizando produto", error)
@@ -93,7 +101,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/produtos/:id — apenas admin (soft delete)
-export async function DELETE(_req: NextRequest, { params }: Params) {
+export async function DELETE(request: NextRequest, { params }: Params) {
   try {
     const session = await auth()
     if (!session?.user?.role?.includes("ADMIN")) {
@@ -105,6 +113,12 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     await prisma.produto.update({
       where: { id },
       data: { ativo: false },
+    })
+
+    auditFromSession(session, request, {
+      acao: "produto.desativado",
+      recurso: "produto",
+      recursoId: id,
     })
 
     return NextResponse.json({ ok: true })

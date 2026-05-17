@@ -37,3 +37,24 @@ export function getClientIp(req: Request): string | null {
     null
   )
 }
+
+// Helper para evitar boilerplate: extrai adminId/email de uma session e dispara o audit.
+// Fire-and-forget. Silencioso se a session não tiver os campos (não impede a rota de seguir).
+export function auditFromSession(
+  session: { user?: { id?: string; email?: string | null } } | null | undefined,
+  req: Request,
+  params: { acao: string; recurso: string; recursoId?: string; detalhe?: Record<string, unknown> },
+): void {
+  const adminId = session?.user?.id
+  const adminEmail = session?.user?.email
+  if (!adminId || !adminEmail) return
+  void logAudit({
+    adminId,
+    adminEmail,
+    acao: params.acao,
+    recurso: params.recurso,
+    recursoId: params.recursoId,
+    detalhe: params.detalhe,
+    ip: getClientIp(req),
+  })
+}

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { produtoSchema } from "@/lib/validations"
 import { logger } from "@/lib/logger"
+import { auditFromSession } from "@/lib/audit"
 import { z } from "zod"
 
 // GET /api/produtos — público
@@ -65,6 +66,12 @@ export async function POST(request: NextRequest) {
     const data = produtoSchema.parse(body)
 
     const produto = await prisma.produto.create({ data: data as Prisma.ProdutoUncheckedCreateInput })
+    auditFromSession(session, request, {
+      acao: "produto.criado",
+      recurso: "produto",
+      recursoId: produto.id,
+      detalhe: { nome: produto.nome, slug: produto.slug, preco: Number(produto.preco), estoque: produto.estoque },
+    })
     return NextResponse.json(produto, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
