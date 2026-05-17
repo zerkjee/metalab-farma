@@ -1,19 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Review } from '@/types/review';
 import StarRating from './StarRating';
+import { fmtDate } from '@/utils/formatters';
 
 interface ReviewCardProps {
   review: Review;
   compact?: boolean;
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-}
-
-export default function ReviewCard({ review, compact = false }: ReviewCardProps) {
+function ReviewCard({ review, compact = false }: ReviewCardProps) {
   const [helpful, setHelpful] = useState(review.helpfulCount);
   const [voted, setVoted] = useState(false);
 
@@ -42,7 +39,7 @@ export default function ReviewCard({ review, compact = false }: ReviewCardProps)
         </div>
         <div className="flex flex-col items-end gap-1">
           <StarRating rating={review.rating} size="sm" />
-          <span className="text-xs text-gray-400">{formatDate(review.date)}</span>
+          <span className="text-xs text-gray-400">{fmtDate(review.date)}</span>
         </div>
       </div>
 
@@ -100,3 +97,5 @@ export default function ReviewCard({ review, compact = false }: ReviewCardProps)
     </div>
   );
 }
+
+export default memo(ReviewCard);

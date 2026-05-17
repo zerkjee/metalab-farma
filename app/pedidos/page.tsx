@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp, PackageSearch, ShoppingBag } from 'lucide-react';
+import { fmtCurrency, fmtDate } from '@/utils/formatters';
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
@@ -33,18 +34,6 @@ interface Order {
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-
-function fmtCurrency(v: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
-}
-
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
 
 const STATUS_META: Record<string, { label: string; bg: string; text: string }> = {
   AGUARDANDO_PAGAMENTO: { label: 'Aguardando pagamento', bg: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-700' },

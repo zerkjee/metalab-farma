@@ -4,13 +4,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
+import { fmtCurrency as formatCurrency } from '@/utils/formatters';
 
 export default function CartDrawer() {
   const [couponCode, setCouponCode] = useState('');

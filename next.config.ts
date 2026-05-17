@@ -28,18 +28,10 @@ const nextConfig: NextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
   images: {
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      // Cloudinary — imagens de produtos
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
-      // Supabase Storage — alternativa para imagens
-      {
-        protocol: "https",
-        hostname: "*.supabase.co",
-      },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
 };

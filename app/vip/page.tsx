@@ -10,6 +10,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import LevelBadge from '@/components/loyalty/LevelBadge';
 import { levels, achievements, getLevelConfig, getNextLevel, getProgressToNext } from '@/data/loyalty';
 import type { LevelId } from '@/types/loyalty';
+import { fmtCurrency as formatCurrency, fmtDate as formatDate } from '@/utils/formatters';
 
 interface UserStats {
   level: LevelId;
@@ -44,14 +45,6 @@ const statusLabel: Record<string, { label: string; color: string }> = {
   CANCELADO: { label: 'Cancelado', color: 'text-red-400' },
   REEMBOLSADO: { label: 'Reembolsado', color: 'text-orange-400' },
 };
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function formatCurrency(v: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
-}
 
 function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
