@@ -10,6 +10,8 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations precisam de session mode (5432) — use DIRECT_URL local quando disponível.
+    // Em Vercel, runtime usa DATABASE_URL (pgBouncer 6543); migrations rodam manualmente do dev.
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });
