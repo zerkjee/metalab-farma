@@ -158,11 +158,8 @@ export default function AdminPedidos() {
   };
 
   function updateStatus(id: string, status: AdminOrderStatus) {
-    fetch(`/api/pedidos/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: statusApiMap[status] }),
-    }).catch(() => {});
+    const prevOrders = orders;
+    const prevQuick = quickOrder;
 
     setOrders((current) => current.map((order) => {
       if (order.id !== id) return order;
@@ -173,6 +170,18 @@ export default function AdminPedidos() {
       };
     }));
     setQuickOrder((current) => current && current.id === id ? { ...current, status } : current);
+
+    fetch(`/api/pedidos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: statusApiMap[status] }),
+    }).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    }).catch(() => {
+      setOrders(prevOrders);
+      setQuickOrder(prevQuick);
+      alert('Falha ao atualizar o status. Verifique a conexão e tente novamente.');
+    });
   }
 
   async function saveTracking(id: string) {

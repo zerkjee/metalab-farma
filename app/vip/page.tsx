@@ -89,10 +89,9 @@ export default function VipPage() {
     if (sessionStatus !== 'authenticated') return;
 
     fetch('/api/user/stats')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data) setStats(data);
-      })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((data) => setStats(data))
+      .catch(() => { /* stats indisponíveis — página continua sem elas */ })
       .finally(() => setLoadingStats(false));
   }, [sessionStatus, router]);
 

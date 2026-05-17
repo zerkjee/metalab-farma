@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import CartDrawer from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,8 +35,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[#fafafa]">
         <SessionProviderWrapper>
           <CartProvider>
-            {children}
-            <CartDrawer />
+            <ErrorBoundary section="Aplicação">
+              {children}
+              <CartDrawer />
+            </ErrorBoundary>
           </CartProvider>
         </SessionProviderWrapper>
       </body>

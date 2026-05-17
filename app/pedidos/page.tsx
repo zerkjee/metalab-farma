@@ -173,6 +173,7 @@ export default function PedidosPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -182,10 +183,14 @@ export default function PedidosPage() {
 
   useEffect(() => {
     if (status !== 'authenticated') return;
+    setFetchError(false);
     fetch('/api/pedidos')
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((data) => setOrders(Array.isArray(data) ? data : []))
-      .catch(() => setOrders([]))
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, [status]);
 
@@ -219,6 +224,20 @@ export default function PedidosPage() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-24 animate-pulse rounded-2xl bg-gray-200" />
             ))}
+          </div>
+        ) : fetchError ? (
+          <div className="flex flex-col items-center gap-5 rounded-3xl border border-red-100 bg-red-50 py-16 px-8 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-3xl">⚠️</div>
+            <div>
+              <p className="text-lg font-black text-gray-950">Erro ao carregar pedidos</p>
+              <p className="mt-1 text-sm text-gray-500">Verifique sua conexão e tente novamente.</p>
+            </div>
+            <button
+              onClick={() => { setFetchError(false); setLoading(true); fetch('/api/pedidos').then((r) => r.json()).then((data) => setOrders(Array.isArray(data) ? data : [])).catch(() => setFetchError(true)).finally(() => setLoading(false)); }}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-600 transition-all hover:bg-red-50"
+            >
+              Tentar novamente
+            </button>
           </div>
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-center gap-5 rounded-3xl border border-gray-100 bg-white py-16 px-8 text-center shadow-sm">
