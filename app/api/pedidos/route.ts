@@ -161,6 +161,12 @@ export async function POST(request: NextRequest) {
       await prisma.cupom.update({ where: { id }, data: { usoAtual: { increment: 1 } } })
     }
 
+    // Marcar CartSession como convertido (fire-and-forget)
+    void prisma.cartSession.updateMany({
+      where: { email: cliente.email, convertido: false },
+      data: { convertido: true },
+    })
+
     void enqueueOrderEmail({
       numero: pedido.numero,
       compradorNome: pedido.compradorNome,

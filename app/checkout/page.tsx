@@ -86,6 +86,7 @@ export default function CheckoutPage() {
   const [temEnderecoSalvo, setTemEnderecoSalvo] = useState(false);
   const savedFormRef = useRef<CheckoutFormValues | null>(null);
   const beginCheckoutFired = useRef(false);
+  const cartSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!session?.user) return;
@@ -168,6 +169,29 @@ export default function CheckoutPage() {
     beginCheckoutFired.current = true;
     trackBeginCheckout(totals.total, items.reduce((s, i) => s + i.quantity, 0));
   }, [hydrated, items, totals.total]);
+
+  useEffect(() => {
+    if (!hydrated || items.length === 0) return;
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+    if (!emailValid) return;
+
+    if (cartSaveTimer.current) clearTimeout(cartSaveTimer.current);
+    cartSaveTimer.current = setTimeout(() => {
+      void fetch('/api/cart/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email,
+          nome: form.fullName || undefined,
+          itens: items.map((i) => ({ nome: i.name, quantidade: i.quantity, precoUnit: i.unitPrice })),
+          total: totals.total,
+          cupomCodigo: coupons.discount?.code ?? undefined,
+        }),
+      })
+    }, 3000)
+
+    return () => { if (cartSaveTimer.current) clearTimeout(cartSaveTimer.current) }
+  }, [form.email, form.fullName, items, totals.total, coupons.discount, hydrated]);
 
   const appliedCoupons = useMemo(
     () => [coupons.discount, coupons.freeShipping].filter((coupon) => coupon !== null),

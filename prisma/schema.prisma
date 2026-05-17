@@ -304,6 +304,24 @@ model Banner {
   @@map("banners")
 }
 
+// ─── CARRINHO ABANDONADO ─────────────────────────────────────────────────────
+
+model CartSession {
+  id           String   @id @default(cuid())
+  email        String
+  nome         String?
+  itens        Json
+  total        Decimal  @db.Decimal(10, 2)
+  cupomCodigo  String?
+  convertido   Boolean  @default(false)
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([email])
+  @@index([convertido, atualizadoEm])
+  @@map("cart_sessions")
+}
+
 // ─── AUDITORIA ───────────────────────────────────────────────────────────────
 
 model AuditLog {

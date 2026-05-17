@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { pagamentoRatelimit } from "@/lib/rateLimit"
+import { enqueueJob } from "@/lib/qstash"
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,6 +65,9 @@ export async function POST(request: NextRequest) {
           pixQrCodeBase64: result.point_of_interaction?.transaction_data?.qr_code_base64,
         },
       })
+
+      // Agendar e-mail de PIX expirado para 35 min (30 min expiração + 5 min buffer)
+      void enqueueJob('/api/jobs/pix-expiry', { pedidoId: pedido.id }, 35 * 60)
 
       return NextResponse.json({
         tipo: "PIX",
