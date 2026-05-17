@@ -2,7 +2,7 @@
 
 import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 
 function formatCurrency(value: number) {
@@ -28,6 +28,34 @@ export default function CartDrawer() {
     applyCoupon,
     removeCoupon,
   } = useCart();
+
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflowY = 'scroll';
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflowY = '';
+      if (scrollY) window.scrollTo(0, parseInt(scrollY) * -1);
+    }
+    return () => {
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.overflowY = '';
+      if (scrollY) window.scrollTo(0, parseInt(scrollY) * -1);
+    };
+  }, [isOpen]);
 
   async function handleApplyCoupon() {
     if (!couponCode.trim() || isApplyingCoupon) return;
