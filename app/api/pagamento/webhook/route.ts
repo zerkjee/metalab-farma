@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendOrderConfirmationEmail } from "@/lib/resend"
+import { logger } from "@/lib/logger"
 import crypto from "crypto"
 
 function verifyMPSignature(
@@ -9,7 +10,7 @@ function verifyMPSignature(
 ): { valid: boolean; reason?: string } {
   const secret = process.env.MP_WEBHOOK_SECRET
   if (!secret) {
-    console.warn("[WEBHOOK] MP_WEBHOOK_SECRET não configurado — verificação pulada")
+    logger.warn("MP_WEBHOOK_SECRET não configurado — verificação pulada", { route: "webhook" })
     return { valid: true }
   }
 
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     const { valid, reason } = verifyMPSignature(request, paymentId)
     if (!valid) {
-      console.warn(`[WEBHOOK] Assinatura inválida: ${reason}`)
+      logger.warn("Assinatura inválida no webhook MP", { route: "webhook", paymentId, reason })
       return NextResponse.json({ erro: "Assinatura inválida" }, { status: 401 })
     }
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
         ),
       ])
 
-      console.log(`[WEBHOOK] Pedido ${pedido.numero} pago com sucesso`)
+      logger.info("Pedido pago com sucesso", { route: "webhook", pedidoNumero: pedido.numero, paymentId })
       void sendOrderConfirmationEmail({
         numero: pedido.numero,
         compradorNome: pedido.compradorNome,
@@ -126,8 +127,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error("[WEBHOOK /api/pagamento/webhook]", error)
-    // Sempre retorna 200 para o MP não retentar infinitamente
+    logger.error("Erro no handler do webhook MP", error)
     return NextResponse.json({ ok: true })
   }
 }

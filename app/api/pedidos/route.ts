@@ -3,6 +3,7 @@ import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { sendOrderConfirmationEmail } from "@/lib/resend"
+import { logger } from "@/lib/logger"
 import { enderecoSchema } from "@/lib/validations"
 
 const pedidoSchema = z.object({
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const parsed = pedidoSchema.safeParse(body)
     if (!parsed.success) {
-      console.error("[POST /api/pedidos] Zod issues:", JSON.stringify(parsed.error.issues))
+      logger.warn("Dados inválidos ao criar pedido", { route: "POST /api/pedidos", issues: parsed.error.issues })
       return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
     }
 
@@ -174,6 +175,8 @@ export async function POST(request: NextRequest) {
       })),
     })
 
+    logger.info("Pedido criado", { route: "POST /api/pedidos", pedidoNumero: pedido.numero, total: Number(pedido.total) })
+
     return NextResponse.json(
       {
         pedidoId: pedido.id,
@@ -184,7 +187,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error("[POST /api/pedidos]", error)
+    logger.error("Erro ao criar pedido", error)
     return NextResponse.json({ erro: "Erro ao criar pedido" }, { status: 500 })
   }
 }

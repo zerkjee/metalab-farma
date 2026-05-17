@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import BannerCarousel from "@/components/BannerCarousel";
+
+export const metadata: Metadata = {
+  title: "Metalab Store | Suplementos Alimentares com Qualidade e Procedência",
+  description:
+    "Suplementos alimentares com tecnologia, cuidado e confiança em cada fórmula. Produtos para complementar sua rotina alimentar. Sem indicação terapêutica.",
+  openGraph: {
+    title: "Metalab Store | Suplementos Alimentares",
+    description: "Suplementos alimentares com qualidade e procedência garantida.",
+    type: "website",
+  },
+};
 import TrustSection from "@/components/TrustSection";
 import QualitySection from "@/components/QualitySection";
 import WhyMetalab from "@/components/WhyMetalab";

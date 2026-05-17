@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { calculateCartTotals } from '@/services/cartTotals';
 import { couponSlot, emptyCouponState, validateCoupon } from '@/services/coupons';
+import { trackAddToCart, trackCouponApplied } from '@/lib/analytics';
 import type {
   AddCartProductInput,
   ApplyCouponFn,
@@ -160,6 +161,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       };
     });
     setIsOpen(true);
+    trackAddToCart({ id: product.id, name: product.nome, price: product.preco, quantity });
   }, []);
 
   const increaseItem = useCallback((productId: string) => {
@@ -205,6 +207,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           [slot]: result.coupon ?? null,
         },
       }));
+      trackCouponApplied(code);
     }
 
     return result;

@@ -6,6 +6,7 @@ import ProductDetailHero from '@/components/ProductDetailHero';
 import ComposicaoSection from '@/components/ComposicaoSection';
 import ProductReviews from '@/components/reviews/ProductReviews';
 import PurchaseNotification from '@/components/social-proof/PurchaseNotification';
+import TrackViewItem from '@/components/analytics/TrackViewItem';
 import { products as localProducts } from '@/data/products';
 import { getProductDetail } from '@/utils/productDetails';
 import { Product } from '@/types/product';
@@ -47,18 +48,31 @@ async function getProduto(idParam: string): Promise<Product | null> {
   return localProducts.find((p) => p.id === idParam || p.slug === idParam) ?? null
 }
 
+const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
+
 export async function generateMetadata({ params }: ProductPageProps) {
   const { id: idParam } = await params
   const produto = await getProduto(idParam)
 
   if (!produto) return { title: 'Produto não encontrado' }
 
+  const description = produto.descricaoCurta ?? `${produto.nome} — Suplemento alimentar de qualidade e procedência garantida.`
+
   return {
-    title: `${produto.nome} | Metalab Store`,
-    description: produto.descricaoCurta ?? `${produto.nome} - Suplemento alimentar de qualidade e procedência garantida.`,
+    title: produto.nome,
+    description,
     openGraph: {
       title: produto.nome,
-      description: produto.descricaoCurta ?? 'Suplemento alimentar de qualidade e procedência garantida.',
+      description,
+      type: 'website' as const,
+      url: `${BASE}/produtos/${produto.slug}`,
+      ...(produto.imagemUrl ? { images: [{ url: produto.imagemUrl, alt: produto.nome }] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+      title: produto.nome,
+      description,
+      ...(produto.imagemUrl ? { images: [produto.imagemUrl] } : {}),
     },
   }
 }
@@ -74,8 +88,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#6b21a8'
   const corSecundaria = detail?.cor_secundaria ?? '#f3f4f6'
 
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: produto.nome,
+    description: produto.descricaoCurta ?? produto.nome,
+    brand: { '@type': 'Brand', name: produto.marca },
+    ...(produto.imagemUrl ? { image: produto.imagemUrl } : {}),
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'BRL',
+      price: produto.preco.toFixed(2),
+      availability: produto.estoque > 0
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      url: `${BASE}/produtos/${produto.slug}`,
+    },
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: produto.nome },
+    ],
+  }
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <TrackViewItem id={produto.id} name={produto.nome} price={produto.preco} />
       <ScrollToTop />
       <Header />
 

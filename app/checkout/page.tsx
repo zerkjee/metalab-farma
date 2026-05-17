@@ -3,6 +3,7 @@
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
 import { useSession } from 'next-auth/react';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
@@ -84,6 +85,7 @@ export default function CheckoutPage() {
   const [enderecoMode, setEnderecoMode] = useState<'salvo' | 'novo'>('salvo');
   const [temEnderecoSalvo, setTemEnderecoSalvo] = useState(false);
   const savedFormRef = useRef<CheckoutFormValues | null>(null);
+  const beginCheckoutFired = useRef(false);
 
   useEffect(() => {
     if (!session?.user) return;
@@ -160,6 +162,13 @@ export default function CheckoutPage() {
     coupons,
     shippingPrice: selectedShipping.price,
   }), [coupons, items, selectedShipping.price]);
+
+  useEffect(() => {
+    if (!hydrated || items.length === 0 || beginCheckoutFired.current) return;
+    beginCheckoutFired.current = true;
+    trackBeginCheckout(totals.total, items.reduce((s, i) => s + i.quantity, 0));
+  }, [hydrated, items, totals.total]);
+
   const appliedCoupons = useMemo(
     () => [coupons.discount, coupons.freeShipping].filter((coupon) => coupon !== null),
     [coupons.discount, coupons.freeShipping],
@@ -265,6 +274,16 @@ export default function CheckoutPage() {
         customer: form,
         shipping: selectedShipping,
         coupons: appliedCoupons,
+      });
+      trackPurchase({
+        orderId: data.pedidoId,
+        value: data.total,
+        items: items.map((item) => ({
+          id: item.productId,
+          name: item.name,
+          price: item.unitPrice,
+          quantity: item.quantity,
+        })),
       });
       clearCart();
     } catch {
