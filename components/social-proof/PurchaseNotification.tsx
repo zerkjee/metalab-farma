@@ -1,43 +1,41 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { purchaseNotifications } from '@/data/reviews';
 import { PurchaseNotif } from '@/types/review';
 
 export default function PurchaseNotification() {
   const [notif, setNotif] = useState<PurchaseNotif | null>(null);
   const [visible, setVisible] = useState(false);
-  const [index, setIndex] = useState(0);
+  const indexRef = useRef(0);
 
-  const show = useCallback(() => {
-    const next = purchaseNotifications[index % purchaseNotifications.length];
+  // useRef evita stale closure: show nunca precisa de deps de estado
+  const show = useRef(() => {
+    const next = purchaseNotifications[indexRef.current % purchaseNotifications.length];
+    indexRef.current++;
     setNotif(next);
     setVisible(true);
-    setIndex((i) => i + 1);
-
-    const hideTimer = setTimeout(() => setVisible(false), 5000);
-    return hideTimer;
-  }, [index]);
+    return setTimeout(() => setVisible(false), 5000);
+  });
 
   useEffect(() => {
     const firstTimer = setTimeout(() => {
-      const hideTimer = show();
+      const hideTimer = show.current();
       return () => clearTimeout(hideTimer);
     }, 4000);
-
     return () => clearTimeout(firstTimer);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!visible && notif) {
       const nextTimer = setTimeout(() => {
-        const hideTimer = show();
+        const hideTimer = show.current();
         return () => clearTimeout(hideTimer);
       }, 8000);
       return () => clearTimeout(nextTimer);
     }
-  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible, notif]);
 
   if (!notif) return null;
 

@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export async function GET() {
+  try {
   const session = await auth()
   if (!session?.user?.role?.includes('ADMIN')) {
     return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
@@ -11,17 +12,16 @@ export async function GET() {
 
   const since = new Date(Date.now() - 6 * 60 * 60 * 1000) // últimas 6h
 
-  try {
   const [novoPedidos, pagamentosAprovados, estoqueBaixo] = await Promise.all([
     prisma.pedido.findMany({
       where: { criadoEm: { gte: since }, status: 'AGUARDANDO_PAGAMENTO' },
-      select: { id: true, numero: true, compradorNome: true, total: true, criadoEm: true },
+      select: { id: true, numero: true, compradorNome: true, criadoEm: true },
       orderBy: { criadoEm: 'desc' },
       take: 10,
     }),
     prisma.pedido.findMany({
       where: { pagoEm: { gte: since }, pago: true },
-      select: { id: true, numero: true, compradorNome: true, total: true, pagoEm: true, criadoEm: true },
+      select: { id: true, numero: true, compradorNome: true, pagoEm: true, criadoEm: true },
       orderBy: { pagoEm: 'desc' },
       take: 10,
     }),
