@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import LineChart from '@/components/admin/LineChart';
+import { fmtCurrency } from '@/data/admin';
 
 interface AnalyticsData {
   receitaDiaria: { label: string; value: number }[];
@@ -17,9 +18,6 @@ interface AnalyticsData {
   conversaoFunil: number;
 }
 
-function fmtCurrency(v: number) {
-  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
 
 export default function AdminAnalytics() {
   const [data, setData] = useState<AnalyticsData | null>(null);

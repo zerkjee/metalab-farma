@@ -8,9 +8,8 @@ export interface OrderEmailData {
   pixQrCode?: string
 }
 
-function fmtCurrency(v: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
-}
+const _fmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
+function fmtCurrency(v: number) { return _fmt.format(v) }
 
 function buildOrderEmailHtml(data: OrderEmailData) {
   const isPix = data.metodoPagamento === "PIX"
