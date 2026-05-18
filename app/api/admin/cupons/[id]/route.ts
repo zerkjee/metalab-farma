@@ -3,6 +3,7 @@ import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logAudit, getClientIp } from "@/lib/audit"
+import { Prisma } from "@prisma/client"
 
 const updateSchema = z.object({
   codigo: z.string().min(2).max(20).optional(),
@@ -50,7 +51,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
       ip: getClientIp(request),
     })
     return NextResponse.json({ ...cupom, valor: Number(cupom.valor) })
-  } catch {
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ erro: "Código de cupom já existe" }, { status: 409 })
+    }
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
