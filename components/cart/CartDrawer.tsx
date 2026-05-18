@@ -1,6 +1,7 @@
 'use client';
 
 import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
@@ -114,9 +115,11 @@ export default function CartDrawer() {
                         className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-white"
                       >
                         {item.imageUrl ? (
-                          <img
+                          <Image
                             src={item.imageUrl}
                             alt={item.name}
+                            width={80}
+                            height={80}
                             className="h-full w-full object-contain p-2"
                           />
                         ) : (

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import { purchaseNotifications } from '@/data/reviews';
 import { PurchaseNotif } from '@/types/review';
@@ -56,7 +57,7 @@ export default function PurchaseNotification() {
           style={{ border: `2px solid ${notif.productColor}20` }}
         >
           {notif.productImage ? (
-            <img src={notif.productImage} alt={notif.productName} className="w-full h-full object-contain p-1" />
+            <Image src={notif.productImage} alt={notif.productName} width={48} height={48} className="w-full h-full object-contain p-1" />
           ) : (
             <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: notif.productColor }} />
           )}
@@ -80,6 +81,7 @@ export default function PurchaseNotification() {
         {/* Close */}
         <button
           onClick={() => setVisible(false)}
+          aria-label="Fechar notificação"
           className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-gray-300 hover:text-gray-500 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

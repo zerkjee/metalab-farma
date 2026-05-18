@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, User, LogOut, Package } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -23,6 +23,13 @@ const adminAccess = {
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
   const pathname = usePathname();
   const isAdminActive = pathname?.startsWith(adminAccess.href);
   const { hydrated, totals, toggleCart } = useCart();
@@ -134,6 +141,9 @@ export default function Header() {
             <button
               className="md:hidden p-2 text-gray-600"
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {menuOpen
@@ -146,7 +156,7 @@ export default function Header() {
 
         {/* Nav mobile */}
         {menuOpen && (
-          <div className="md:hidden border-t border-gray-100 py-4 flex flex-col gap-4">
+          <div id="mobile-nav" className="md:hidden border-t border-gray-100 py-4 flex flex-col gap-4">
             {navItems.map((item) => (
               <Link
                 key={item.label}
