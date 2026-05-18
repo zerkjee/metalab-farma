@@ -54,7 +54,6 @@ interface AdminStats {
 const CIRC = 2 * Math.PI * 36;
 
 export default function AdminDashboard() {
-  const [chartTab] = useState<'revenue'>('revenue');
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [showReembolsos, setShowReembolsos] = useState(false);

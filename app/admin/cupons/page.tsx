@@ -89,28 +89,6 @@ function couponToApiPayload(values: AdminCouponFormValues) {
   };
 }
 
-function formToCoupon(values: AdminCouponFormValues, existing?: AdminCoupon): AdminCoupon {
-  const kind = values.kind;
-  const discountMode = kind === 'free_shipping'
-    ? 'fixed'
-    : values.fixedValue > 0 && values.percentage === 0 ? 'fixed' : 'percent';
-
-  return {
-    id: existing?.id ?? `coupon-${Date.now()}`,
-    code: normalizeCode(values.code),
-    name: values.name.trim(),
-    kind,
-    discountMode,
-    percentage: kind === 'discount' ? Number(values.percentage) || 0 : 0,
-    fixedValue: kind === 'discount' ? Number(values.fixedValue) || 0 : 0,
-    validUntil: values.validUntil,
-    usageLimit: Number(values.usageLimit) || 0,
-    usedTotal: existing?.usedTotal ?? 0,
-    minimumOrderValue: Number(values.minimumOrderValue) || 0,
-    status: values.status,
-    createdAt: existing?.createdAt ?? new Date().toISOString().slice(0, 10),
-  };
-}
 
 function couponToForm(coupon: AdminCoupon): AdminCouponFormValues {
   return {

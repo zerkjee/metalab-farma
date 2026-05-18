@@ -507,7 +507,6 @@ export default function CheckoutPage() {
               onShippingChange={setSelectedShippingId}
               onPaymentChange={setSelectedPaymentId}
               onSubmit={finishOrder}
-              submitting={submitting}
             />
           </div>
           <OrderSummary
@@ -521,6 +520,7 @@ export default function CheckoutPage() {
             total={totals.total}
             coupons={coupons}
             freteStatus={freteStatus}
+            submitting={submitting}
           />
         </section>
       </main>

@@ -34,6 +34,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     const isOwner = session?.user?.id && session.user.id === pedido.usuarioId
 
     if (isAdmin || isOwner) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { usuarioId: _, ...dados } = pedido
       return NextResponse.json(dados)
     }

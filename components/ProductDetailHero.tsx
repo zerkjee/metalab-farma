@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
+import { fmtCurrency } from '@/utils/formatters';
 
 interface ProductDetailHeroProps {
   product: Product;
@@ -14,11 +16,7 @@ export default function ProductDetailHero({
 }: ProductDetailHeroProps) {
   const { addItem } = useCart();
   const preco = typeof product.preco === 'number' ? product.preco : parseFloat(String(product.preco));
-
-  const precoFormatado = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(preco);
+  const precoFormatado = fmtCurrency(preco);
 
   const temEstoque = product.estoque > 0;
 
@@ -29,10 +27,14 @@ export default function ProductDetailHero({
           {/* Imagem */}
           <div className="flex items-center justify-center bg-gray-50 rounded-2xl p-8 h-full min-h-96">
             {product.imagemUrl ? (
-              <img
-                src={product.imagemUrl!}
+              <Image
+                src={product.imagemUrl}
                 alt={product.nome}
+                width={480}
+                height={480}
                 className="w-full h-full object-contain max-h-96"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
               />
             ) : (
               <div className="flex flex-col items-center gap-4 text-gray-400">

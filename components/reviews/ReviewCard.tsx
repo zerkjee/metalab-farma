@@ -68,6 +68,7 @@ function ReviewCard({ review, compact = false }: ReviewCardProps) {
         <div className="flex gap-2">
           {review.photos.map((photo, i) => (
             <div key={i} className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element -- foto de avaliação com domínio dinâmico */}
               <img src={photo} alt="Foto da avaliação" className="w-full h-full object-cover" />
             </div>
           ))}

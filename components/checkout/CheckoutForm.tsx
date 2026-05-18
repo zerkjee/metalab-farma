@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { fmtCurrency } from '@/utils/formatters';
 import type {
   CheckoutForm as CheckoutFormValues,
   FreteStatus,
@@ -22,7 +23,6 @@ interface CheckoutFormProps {
   temEnderecoSalvo: boolean;
   enderecoMode: 'salvo' | 'novo';
   onEnderecoModeChange: (mode: 'salvo' | 'novo') => void;
-  submitting?: boolean;
   onChange: <K extends keyof CheckoutFormValues>(key: K, value: CheckoutFormValues[K]) => void;
   onShippingChange: (id: ShippingMethodId) => void;
   onPaymentChange: (id: PaymentMethodId) => void;
@@ -48,9 +48,6 @@ function cepMask(v: string) {
     .replace(/(\d{5})(\d{1,3})$/, '$1-$2');
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
 
 const inputCls = 'w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-950 outline-none transition-colors placeholder:text-gray-400 focus:border-[#6b21a8] focus:bg-white';
 
@@ -66,7 +63,6 @@ export default function CheckoutForm({
   temEnderecoSalvo,
   enderecoMode,
   onEnderecoModeChange,
-  submitting = false,
   onChange,
   onShippingChange,
   onPaymentChange,
@@ -279,7 +275,7 @@ export default function CheckoutForm({
                       <p className="mt-1 text-sm leading-5 text-gray-500">{method.description}</p>
                       <p className="mt-2 text-xs font-semibold text-gray-400">{method.estimate}</p>
                     </div>
-                    <span className="shrink-0 text-sm font-black text-[#6b21a8]">{formatCurrency(method.price)}</span>
+                    <span className="shrink-0 text-sm font-black text-[#6b21a8]">{fmtCurrency(method.price)}</span>
                   </div>
                 </button>
               );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp, PackageSearch, ShoppingBag } from 'lucide-react';
 import { fmtCurrency, fmtDate } from '@/utils/formatters';
@@ -105,9 +106,11 @@ function OrderCard({ order }: { order: Order }) {
             {order.itens.map((item) => (
               <li key={item.id} className="flex items-center gap-3">
                 {item.produtoImagem ? (
-                  <img
+                  <Image
                     src={item.produtoImagem}
                     alt={item.produtoNome}
+                    width={48}
+                    height={48}
                     className="h-12 w-12 rounded-xl object-cover border border-gray-100 shrink-0"
                   />
                 ) : (

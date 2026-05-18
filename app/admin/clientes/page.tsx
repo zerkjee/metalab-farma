@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fmtCurrency, fmtDate } from '@/data/admin';
+import { fmtDate } from '@/data/admin';
 import StatusBadge from '@/components/admin/StatusBadge';
 import Modal from '@/components/admin/Modal';
 

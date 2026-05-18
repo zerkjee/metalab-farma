@@ -19,6 +19,7 @@ interface OrderSummaryProps {
   total: number;
   coupons: CouponState;
   freteStatus: FreteStatus;
+  submitting?: boolean;
 }
 
 export default function OrderSummary({
@@ -32,6 +33,7 @@ export default function OrderSummary({
   total,
   coupons,
   freteStatus,
+  submitting = false,
 }: OrderSummaryProps) {
   const freteCalculado = freteStatus === 'done';
   return (
@@ -105,11 +107,12 @@ export default function OrderSummary({
       <button
         type="submit"
         form={formId}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90 active:scale-[0.99]"
+        disabled={submitting}
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
         style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
       >
         <LockKeyhole className="h-4 w-4" strokeWidth={1.8} />
-        Finalizar pedido
+        {submitting ? 'Processando...' : 'Finalizar pedido'}
       </button>
 
       <p className="mt-3 text-center text-[11px] leading-5 text-gray-400">

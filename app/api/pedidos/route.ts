@@ -273,7 +273,7 @@ export async function GET() {
     })
 
     return NextResponse.json(pedidos)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

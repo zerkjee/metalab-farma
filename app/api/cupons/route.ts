@@ -91,7 +91,7 @@ export async function GET() {
     })
 
     return NextResponse.json(cupons)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

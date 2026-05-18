@@ -4,13 +4,7 @@ import { CheckCircle2, Copy, PackageCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import type { RealOrder } from '@/types/checkout';
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
-}
+import { fmtCurrency } from '@/utils/formatters';
 
 export default function CheckoutSuccess({ order }: { order: RealOrder }) {
   const [copied, setCopied] = useState(false);
@@ -68,7 +62,7 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
           </div>
           <div className="rounded-2xl bg-white px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Total</p>
-            <p className="mt-1 text-xl font-black text-[#6b21a8]">{formatCurrency(order.total)}</p>
+            <p className="mt-1 text-xl font-black text-[#6b21a8]">{fmtCurrency(order.total)}</p>
           </div>
         </div>
 
@@ -114,6 +108,7 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
 
               {order.pixQrCodeBase64 && (
                 <div className="mt-4 flex justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- data: URL não é suportado por next/image */}
                   <img
                     src={`data:image/png;base64,${order.pixQrCodeBase64}`}
                     alt="QR Code Pix"
