@@ -317,8 +317,9 @@ export const productStatusColors: Record<ProductStatus, { bg: string; text: stri
   sem_estoque: { bg: 'bg-red-500/15',     text: 'text-red-400',     label: 'Sem estoque' },
 };
 
+const _currencyFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 export function fmtCurrency(v: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  return _currencyFmt.format(v);
 }
 export function fmtDate(d: string) {
   return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
