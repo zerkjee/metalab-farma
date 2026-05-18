@@ -47,7 +47,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
   }
 
-  const parsed = updateSchema.safeParse(await request.json())
+  const parsed = updateSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos' }, { status: 400 })
 
   try {

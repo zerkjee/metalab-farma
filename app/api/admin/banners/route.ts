@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   const session = await requireAdmin()
   if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
 
-  const parsed = bannerSchema.safeParse(await request.json())
+  const parsed = bannerSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos', detalhes: parsed.error.issues }, { status: 400 })
 
   try {
@@ -75,7 +75,7 @@ export async function PATCH(request: NextRequest) {
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ erro: 'id obrigatório' }, { status: 400 })
 
-  const parsed = bannerSchema.partial().safeParse(await request.json())
+  const parsed = bannerSchema.partial().safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos' }, { status: 400 })
 
   try {

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 
+export const revalidate = 300 // 5 min: reviews só mudam quando admin aprova
+
 const AVATAR_COLORS = [
   '#7c3aed', '#059669', '#dc2626', '#d97706', '#0284c7',
   '#db2777', '#16a34a', '#9333ea', '#ea580c', '#0891b2',
