@@ -1,24 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { enqueueJob } from '@/lib/qstash'
 import { cartRatelimit, getIp } from '@/lib/rateLimit'
+import { logger } from '@/lib/logger'
+
+const cartSchema = z.object({
+  email: z.string().email(),
+  nome: z.string().max(80).optional(),
+  itens: z.array(z.object({
+    nome: z.string().max(200),
+    quantidade: z.number().int().min(1).max(99),
+    precoUnit: z.number().min(0),
+  })).min(1).max(50),
+  total: z.number().min(0),
+  cupomCodigo: z.string().max(20).optional(),
+})
 
 export async function POST(request: NextRequest) {
   try {
     const { success } = await cartRatelimit.limit(getIp(request))
     if (!success) return NextResponse.json({ ok: true })
 
-    const body = await request.json() as {
-      email: string
-      nome?: string
-      itens: { nome: string; quantidade: number; precoUnit: number }[]
-      total: number
-      cupomCodigo?: string
-    }
-
-    if (!body.email || !body.itens?.length) {
-      return NextResponse.json({ ok: true })
-    }
+    const parsed = cartSchema.safeParse(await request.json().catch(() => null))
+    if (!parsed.success) return NextResponse.json({ ok: true })
+    const body = parsed.data
 
     const existing = await prisma.cartSession.findFirst({
       where: { email: body.email, convertido: false },
@@ -56,7 +62,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ ok: true })
-  } catch {
+  } catch (error) {
+    logger.error('Erro salvando cart session', error)
     return NextResponse.json({ ok: true })
   }
 }

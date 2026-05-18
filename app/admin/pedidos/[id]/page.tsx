@@ -84,6 +84,7 @@ export default function AdminPedidoDetalhe() {
   const [trackingCode, setTrackingCode] = useState('');
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -128,6 +129,7 @@ export default function AdminPedidoDetalhe() {
   async function updateStatus(statusValue: AdminOrderStatus) {
     if (!order || saving) return;
     setSaving(true);
+    setSaveError('');
     try {
       const res = await fetch(`/api/pedidos/${order.id}`, {
         method: 'PATCH',
@@ -144,22 +146,33 @@ export default function AdminPedidoDetalhe() {
             ...order.history,
           ],
         });
+      } else {
+        setSaveError('Erro ao atualizar status. Tente novamente.');
       }
-    } catch {}
+    } catch {
+      setSaveError('Falha de conexão. Tente novamente.');
+    }
     setSaving(false);
   }
 
   async function saveTrackingCode() {
     if (!order || saving) return;
     setSaving(true);
+    setSaveError('');
     try {
       const res = await fetch(`/api/pedidos/${order.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ codigoRastreio: trackingCode }),
       });
-      if (res.ok) setOrder({ ...order, trackingCode });
-    } catch {}
+      if (res.ok) {
+        setOrder({ ...order, trackingCode });
+      } else {
+        setSaveError('Erro ao salvar rastreio. Tente novamente.');
+      }
+    } catch {
+      setSaveError('Falha de conexão. Tente novamente.');
+    }
     setSaving(false);
   }
 
@@ -353,6 +366,12 @@ export default function AdminPedidoDetalhe() {
                   </button>
                 </div>
               </div>
+
+              {saveError && (
+                <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400">
+                  {saveError}
+                </p>
+              )}
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-slate-950/60 p-3">
