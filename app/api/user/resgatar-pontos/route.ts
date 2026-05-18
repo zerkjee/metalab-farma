@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ erro: 'Não autenticado' }, { status: 401 })
 
-    const parsed = schema.safeParse(await request.json())
+    const parsed = schema.safeParse(await request.json().catch(() => null))
     if (!parsed.success) return NextResponse.json({ erro: parsed.error.issues[0]?.message ?? 'Dados inválidos' }, { status: 400 })
 
     const opcao = REDEMPTIONS.find((r) => r.pontos === parsed.data.pontos)!

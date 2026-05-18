@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: "Muitas tentativas. Tente novamente em alguns minutos." }, { status: 429 })
     }
 
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
     const parsed = cupomSchema.safeParse(body)
 
     if (!parsed.success) {

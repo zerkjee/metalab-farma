@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   const session = await requireAdmin()
   if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   try {
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
     const data = cupomSchema.parse(body)
     const cupom = await prisma.cupom.create({
       data: {

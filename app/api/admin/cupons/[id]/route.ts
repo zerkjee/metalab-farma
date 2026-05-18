@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
   if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   try {
     const { id } = await params
-    const parsed = updateSchema.safeParse(await request.json())
+    const parsed = updateSchema.safeParse(await request.json().catch(() => null))
     if (!parsed.success) return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
     const body = parsed.data
     const cupom = await prisma.cupom.update({
@@ -56,6 +56,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return NextResponse.json({ erro: "Código de cupom já existe" }, { status: 409 })
     }
+    logger.error("Erro atualizando cupom", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

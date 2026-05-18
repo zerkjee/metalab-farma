@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     const { id } = await params
-    const parsed = patchSchema.safeParse(await request.json())
+    const parsed = patchSchema.safeParse(await request.json().catch(() => null))
     if (!parsed.success) {
       return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
     }

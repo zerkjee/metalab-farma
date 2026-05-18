@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: 'Login necessário para avaliar' }, { status: 401 })
     }
 
-    const parsed = createSchema.safeParse(await request.json())
+    const parsed = createSchema.safeParse(await request.json().catch(() => null))
     if (!parsed.success) {
       return NextResponse.json({ erro: 'Dados inválidos' }, { status: 400 })
     }

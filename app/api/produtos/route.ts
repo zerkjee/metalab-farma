@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
     const data = produtoSchema.parse(body)
 
     const produto = await prisma.produto.create({ data: data as Prisma.ProdutoUncheckedCreateInput })

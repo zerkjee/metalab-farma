@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     const { id } = await params
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
 
     const parsed = produtoUpdateSchema.safeParse(body)
     if (!parsed.success) {

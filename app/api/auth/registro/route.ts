@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: "Muitas tentativas. Tente novamente em 1 hora." }, { status: 429 })
     }
 
-    const body = await request.json()
+    const body = await request.json().catch(() => null)
     const raw = registroSchema.parse(body)
     const data = { ...raw, email: raw.email.toLowerCase().trim() }
 
