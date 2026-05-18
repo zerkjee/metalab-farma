@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export const revalidate = 3600
 
@@ -25,7 +26,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
 
     return [...staticUrls, ...productUrls]
-  } catch {
+  } catch (error) {
+    logger.warn('Sitemap: falha buscando produtos — retornando URLs estáticas', { error })
     return staticUrls
   }
 }

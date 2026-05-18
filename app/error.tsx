@@ -17,7 +17,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           </div>
           <h1 className="text-2xl font-black text-gray-950">Algo deu errado</h1>
           <p className="mt-3 text-sm leading-6 text-gray-500">
-            Ocorreu um erro inesperado. Nossa equipe foi notificada. Você pode tentar novamente ou voltar para a loja.
+            Ocorreu um erro inesperado. Você pode tentar novamente ou voltar para a loja.
           </p>
           {error.digest && (
             <p className="mt-2 font-mono text-xs text-gray-400">#{error.digest}</p>
