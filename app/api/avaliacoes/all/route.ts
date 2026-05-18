@@ -27,7 +27,7 @@ export async function GET() {
           },
         },
         produto: {
-          select: { id: true, nome: true, imagemUrl: true, corPrincipal: true },
+          select: { id: true, slug: true, nome: true, imagemUrl: true, corPrincipal: true },
         },
       },
     })
@@ -38,6 +38,7 @@ export async function GET() {
       return {
         id: a.id,
         productId: a.produto.id,
+        productSlug: a.produto.slug,
         productName: a.produto.nome,
         productImage: a.produto.imagemUrl ?? null,
         productColor: a.produto.corPrincipal ?? '#7c3aed',

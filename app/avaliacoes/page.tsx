@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -10,6 +11,7 @@ import StarRating from '@/components/reviews/StarRating';
 interface ApiReview {
   id: string;
   productId: string;
+  productSlug: string;
   productName: string;
   productImage: string | null;
   productColor: string;
@@ -256,14 +258,14 @@ export default function AvaliacoesPage() {
               {paginated.map((r) => (
                 <div key={r.id}>
                   <div className="mb-1 px-1">
-                    <a
-                      href={`/produtos/${r.productId}`}
+                    <Link
+                      href={`/produtos/${r.productSlug}`}
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide transition-opacity hover:opacity-80"
                       style={{ color: r.productColor }}
                     >
                       <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: r.productColor }} />
                       {r.productName}
-                    </a>
+                    </Link>
                   </div>
                   <ReviewCard review={toCardReview(r)} />
                 </div>
