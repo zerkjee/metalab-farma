@@ -104,8 +104,8 @@ export default function AvaliacoesPage() {
   // Adapts API review to the shape ReviewCard expects
   function toCardReview(r: ApiReview) {
     return {
-      id: r.id as unknown as number,
-      productId: r.productId as unknown as number,
+      id: r.id,
+      productId: r.productId,
       productName: r.productName,
       productImage: r.productImage ?? undefined,
       productColor: r.productColor,

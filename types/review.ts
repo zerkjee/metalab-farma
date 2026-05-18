@@ -1,6 +1,6 @@
 export interface Review {
-  id: number;
-  productId: number;
+  id: string | number;
+  productId: string | number;
   productName: string;
   productImage?: string;
   productColor: string;
@@ -21,7 +21,7 @@ export interface Review {
 }
 
 export interface RatingSummary {
-  productId: number;
+  productId: string | number;
   averageRating: number;
   totalReviews: number;
   distribution: {
@@ -34,7 +34,7 @@ export interface RatingSummary {
 }
 
 export interface PurchaseNotif {
-  productId: number;
+  productId: string | number;
   productName: string;
   productImage?: string;
   productColor: string;

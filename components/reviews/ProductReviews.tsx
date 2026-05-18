@@ -35,8 +35,8 @@ const AVATAR_COLORS = ['#7c3aed', '#6b21a8', '#9333ea', '#a855f7', '#581c87'];
 function toReview(a: ApiAvaliacao, productId: string): Review {
   const colorIdx = (a.cliente.primeiroNome.charCodeAt(0) || 0) % AVATAR_COLORS.length;
   return {
-    id: parseInt(a.id.slice(-8), 36) || 0,
-    productId: parseInt(productId.slice(-8), 36) || 0,
+    id: a.id,
+    productId,
     productName: '',
     productColor: '#7c3aed',
     customerName: a.cliente.primeiroNome,
