@@ -8,12 +8,12 @@ function fmtDia(date: Date) {
 }
 
 export async function GET() {
-  const session = await auth()
-  if (!session?.user?.role?.includes("ADMIN")) {
-    return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
-  }
-
   try {
+    const session = await auth()
+    if (!session?.user?.role?.includes("ADMIN")) {
+      return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
+    }
+
     const hoje = new Date()
     const inicio14d = new Date(hoje)
     inicio14d.setDate(hoje.getDate() - 13)
