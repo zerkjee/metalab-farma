@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
+import { Prisma } from "@prisma/client"
 
 const produtoUpdateSchema = z.object({
   nome: z.string().min(1).optional(),
@@ -95,6 +96,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(produto)
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ erro: "Slug ou SKU já existe" }, { status: 409 })
+    }
     logger.error("Erro atualizando produto", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }

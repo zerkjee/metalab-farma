@@ -77,6 +77,9 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ erro: "Dados inválidos", detalhes: error.issues }, { status: 400 })
     }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ erro: "Slug ou SKU já existe" }, { status: 409 })
+    }
     logger.error("Erro criando produto", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }

@@ -1,9 +1,11 @@
+import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 import { resgateRatelimit, getIp } from '@/lib/rateLimit'
+import { Prisma } from '@prisma/client'
 import type { LevelId } from '@/types/loyalty'
 
 // Tabela de resgates: pontos → valor em R$ (cupom de valor fixo)
@@ -30,7 +32,7 @@ function calcLevel(totalGasto: number): LevelId {
 const MULTIPLIER: Record<LevelId, number> = { silver: 1.0, gold: 1.5, black: 2.0 }
 
 function generateCouponCode(prefix = 'VIP') {
-  return prefix + Math.random().toString(36).slice(2, 7).toUpperCase()
+  return prefix + crypto.randomBytes(3).toString('hex').toUpperCase()
 }
 
 export async function GET() {
@@ -73,26 +75,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: `Saldo insuficiente. Você tem ${saldo} pontos.` }, { status: 400 })
     }
 
-    // Cria cupom de valor fixo (uso único, 30 dias)
-    const codigo = generateCouponCode('VIP')
+    // Cria cupom de valor fixo (uso único, 30 dias) — retry até 3x em colisão de código
     const validade = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-
-    await prisma.$transaction([
-      prisma.cupom.create({
-        data: {
-          codigo,
-          tipo: 'VALOR_FIXO',
-          valor: opcao.valor,
-          ativo: true,
-          validade,
-          usoMaximo: 1,
-        },
-      }),
-      prisma.usuario.update({
-        where: { id: session.user.id },
-        data: { pontosResgatados: { increment: opcao.pontos } },
-      }),
-    ])
+    let codigo = ''
+    let tentativa = 0
+    while (true) {
+      tentativa++
+      codigo = generateCouponCode('VIP')
+      try {
+        await prisma.$transaction([
+          prisma.cupom.create({
+            data: {
+              codigo,
+              tipo: 'VALOR_FIXO',
+              valor: opcao.valor,
+              ativo: true,
+              validade,
+              usoMaximo: 1,
+            },
+          }),
+          prisma.usuario.update({
+            where: { id: session.user.id },
+            data: { pontosResgatados: { increment: opcao.pontos } },
+          }),
+        ])
+        break
+      } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002' && tentativa < 3) {
+          logger.warn('Colisão de código de cupom — retry', { tentativa })
+          continue
+        }
+        throw e
+      }
+    }
 
     logger.info('Pontos resgatados', {
       route: 'POST /api/user/resgatar-pontos',
