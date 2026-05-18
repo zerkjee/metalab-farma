@@ -12,7 +12,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: "Muitas tentativas. Tente novamente em alguns minutos." }, { status: 429 })
     }
 
-    const { pedidoId } = await request.json()
+    const body = await request.json().catch(() => null)
+    const pedidoId = typeof body?.pedidoId === 'string' ? body.pedidoId : null
+    if (!pedidoId) {
+      return NextResponse.json({ erro: 'pedidoId é obrigatório' }, { status: 400 })
+    }
 
     const pedido = await prisma.pedido.findUnique({
       where: { id: pedidoId },

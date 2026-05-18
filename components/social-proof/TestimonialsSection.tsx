@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import Link from 'next/link';
 import { getFeaturedReviews } from '@/data/reviews';
 import StarRating from '@/components/reviews/StarRating';
 
@@ -110,7 +111,7 @@ export default function TestimonialsSection() {
 
         {/* Link to full reviews page */}
         <div className="mt-10 text-center">
-          <a
+          <Link
             href="/avaliacoes"
             className="inline-flex items-center gap-2 text-sm font-bold text-[#6b21a8] hover:underline underline-offset-4 transition-all"
           >
@@ -118,7 +119,7 @@ export default function TestimonialsSection() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </a>
+          </Link>
         </div>
       </div>
     </section>
