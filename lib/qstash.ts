@@ -5,7 +5,7 @@ export const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel
 // Publica mensagem genérica no QStash. No-op em dev sem QSTASH_TOKEN.
 export async function enqueueJob(
   path: string,
-  body: Record<string, unknown>,
+  body: object,
   delaySeconds = 0,
 ): Promise<void> {
   const token = process.env.QSTASH_TOKEN
@@ -31,5 +31,5 @@ export async function enqueueOrderEmail(data: OrderEmailData): Promise<void> {
     return
   }
 
-  await enqueueJob('/api/jobs/email-pedido', data as unknown as Record<string, unknown>, 2)
+  await enqueueJob('/api/jobs/email-pedido', data, 2)
 }
