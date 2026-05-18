@@ -19,6 +19,7 @@ import { fmtCurrency } from '@/data/admin';
 import {
   AdminOrderDetail,
   AdminOrderStatus,
+  buildTimeline,
   formatOrderDate,
   mapApiOrder,
   orderStatusFlow,
@@ -66,12 +67,23 @@ function Timeline({ order }: { order: AdminOrderDetail }) {
   );
 }
 
+const statusToApi: Record<AdminOrderStatus, string> = {
+  aguardando_pagamento: 'AGUARDANDO_PAGAMENTO',
+  pagamento_aprovado: 'PAGAMENTO_APROVADO',
+  em_separacao: 'EM_SEPARACAO',
+  enviado: 'ENVIADO',
+  entregue: 'ENTREGUE',
+  cancelado: 'CANCELADO',
+};
+
 export default function AdminPedidoDetalhe() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [order, setOrder] = useState<AdminOrderDetail | null>(null);
   const [note, setNote] = useState('');
+  const [trackingCode, setTrackingCode] = useState('');
   const [fetching, setFetching] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +95,7 @@ export default function AdminPedidoDetalhe() {
           const mapped = mapApiOrder(data as Record<string, unknown>);
           setOrder(mapped);
           setNote(mapped.notes ?? '');
+          setTrackingCode(mapped.trackingCode ?? '');
         }
       })
       .catch(() => {})
@@ -112,17 +125,42 @@ export default function AdminPedidoDetalhe() {
 
   const status = orderStatusMeta[order.status];
 
-  function updateStatus(statusValue: AdminOrderStatus) {
-    if (!order) return;
-    setOrder({
-      ...order,
-      status: statusValue,
-      trackingCode: statusValue === 'enviado' && !order.trackingCode ? `BR${order.id.replace('#', '')}MLABR` : order.trackingCode,
-      history: [
-        { date: 'Agora', event: `Status alterado para ${orderStatusMeta[statusValue].label}`, actor: 'Admin Metalab' },
-        ...order.history,
-      ],
-    });
+  async function updateStatus(statusValue: AdminOrderStatus) {
+    if (!order || saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/pedidos/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: statusToApi[statusValue] }),
+      });
+      if (res.ok) {
+        setOrder({
+          ...order,
+          status: statusValue,
+          timeline: buildTimeline(statusValue, new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })),
+          history: [
+            { date: 'Agora', event: `Status alterado para ${orderStatusMeta[statusValue].label}`, actor: 'Admin Metalab' },
+            ...order.history,
+          ],
+        });
+      }
+    } catch {}
+    setSaving(false);
+  }
+
+  async function saveTrackingCode() {
+    if (!order || saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/pedidos/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigoRastreio: trackingCode }),
+      });
+      if (res.ok) setOrder({ ...order, trackingCode });
+    } catch {}
+    setSaving(false);
   }
 
   function copyCode(value: string) {
@@ -168,15 +206,17 @@ export default function AdminPedidoDetalhe() {
             Copiar código
           </button>
           <button
-            onClick={() => updateStatus('enviado')}
-            className="inline-flex items-center gap-2 rounded-xl bg-cyan-500/10 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition-all hover:bg-cyan-500/15"
+            onClick={() => void updateStatus('enviado')}
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-cyan-500/10 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition-all hover:bg-cyan-500/15 disabled:opacity-50"
           >
             <Send className="h-4 w-4" strokeWidth={1.8} />
             Marcar enviado
           </button>
           <button
-            onClick={() => updateStatus('cancelado')}
-            className="inline-flex items-center gap-2 rounded-xl bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition-all hover:bg-red-500/15"
+            onClick={() => void updateStatus('cancelado')}
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition-all hover:bg-red-500/15 disabled:opacity-50"
           >
             <Ban className="h-4 w-4" strokeWidth={1.8} />
             Cancelar
@@ -273,8 +313,9 @@ export default function AdminPedidoDetalhe() {
                 <label className="mb-1 block text-xs text-slate-400">Atualizar status</label>
                 <select
                   value={order.status}
-                  onChange={(event) => updateStatus(event.target.value as AdminOrderStatus)}
-                  className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+                  onChange={(event) => void updateStatus(event.target.value as AdminOrderStatus)}
+                  disabled={saving}
+                  className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500 disabled:opacity-50"
                 >
                   {(['aguardando_pagamento', 'pagamento_aprovado', 'em_separacao', 'enviado', 'entregue', 'cancelado'] as AdminOrderStatus[]).map((item) => (
                     <option key={item} value={item}>{orderStatusMeta[item].label}</option>
@@ -293,9 +334,24 @@ export default function AdminPedidoDetalhe() {
                 <p className="mt-1 text-sm font-bold text-white">{order.coupon ?? 'Sem cupom'}</p>
               </div>
 
-              <div className="rounded-xl bg-slate-950/60 p-3">
-                <p className="text-xs text-slate-500">Rastreamento</p>
-                <p className="mt-1 text-sm font-bold text-white">{order.trackingCode || 'Aguardando envio'}</p>
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">Código de rastreio</label>
+                <div className="flex gap-2">
+                  <input
+                    value={trackingCode}
+                    onChange={(e) => setTrackingCode(e.target.value)}
+                    placeholder="Aguardando envio"
+                    className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 outline-none focus:border-purple-500 placeholder:text-slate-600"
+                  />
+                  <button
+                    onClick={() => void saveTrackingCode()}
+                    disabled={saving}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-purple-500 disabled:opacity-50"
+                  >
+                    <Save className="h-3.5 w-3.5" strokeWidth={1.8} />
+                    Salvar
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
