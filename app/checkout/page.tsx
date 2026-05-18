@@ -90,10 +90,11 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!session?.user) return;
+    let cancelled = false;
     fetch('/api/user/perfil')
       .then((r) => r.json())
       .then((data) => {
-        if (data.erro) return;
+        if (cancelled || data.erro) return;
         const cpfFormatado = data.cpf
           ? data.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
           : '';
@@ -119,13 +120,16 @@ export default function CheckoutPage() {
         if (e) setTemEnderecoSalvo(true);
       })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, [session]);
 
   useEffect(() => {
+    let cancelled = false;
     fetch('/api/cupons/disponiveis')
       .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setCuponsDisponiveis(data); })
+      .then((data) => { if (!cancelled && Array.isArray(data)) setCuponsDisponiveis(data); })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
