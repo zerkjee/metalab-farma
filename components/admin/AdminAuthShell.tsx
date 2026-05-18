@@ -1,21 +1,36 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminTopbar from '@/components/admin/AdminTopbar';
 
 export default function AdminAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { status } = useSession();
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const isLogin = pathname === '/admin/login';
+
+  // Fallback client-side guard (middleware handles server-side redirect)
+  useEffect(() => {
+    if (isLogin || status === 'loading') return;
+    if (status === 'unauthenticated') {
+      router.replace('/admin/login');
+      return;
+    }
+    const role = session?.user?.role;
+    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
+      router.replace('/');
+    }
+  }, [isLogin, router, session, status]);
 
   if (isLogin) {
     return <>{children}</>;
   }
 
-  if (status === 'loading') {
+  if (status === 'loading' || status === 'unauthenticated') {
     return (
       <div
         className="min-h-screen flex items-center justify-center px-6"
