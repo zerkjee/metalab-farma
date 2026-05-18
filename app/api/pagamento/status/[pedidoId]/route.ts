@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { logger } from "@/lib/logger"
 
 type Params = { params: Promise<{ pedidoId: string }> }
 
@@ -41,7 +42,8 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // Unauthenticated or different user: only return polling data
     return NextResponse.json({ pago: pedido.pago, status: pedido.status })
-  } catch {
+  } catch (error) {
+    logger.error("Erro consultando status de pagamento", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth"
 import { logAudit, getClientIp } from "@/lib/audit"
 import { z } from "zod"
 import { Prisma } from "@prisma/client"
+import { logger } from "@/lib/logger"
 
 const cupomSchema = z.object({
   codigo: z.string().min(2).transform((s) => s.toUpperCase().trim()),
@@ -25,7 +26,8 @@ export async function GET() {
   try {
     const cupons = await prisma.cupom.findMany({ orderBy: { id: "desc" } })
     return NextResponse.json(cupons.map((c) => ({ ...c, valor: Number(c.valor) })))
-  } catch {
+  } catch (error) {
+    logger.error("Erro listando cupons admin", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

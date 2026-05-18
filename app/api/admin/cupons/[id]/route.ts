@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logAudit, getClientIp } from "@/lib/audit"
 import { Prisma } from "@prisma/client"
+import { logger } from "@/lib/logger"
 
 const updateSchema = z.object({
   codigo: z.string().min(2).max(20).optional(),
@@ -76,7 +77,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       ip: getClientIp(req),
     })
     return NextResponse.json({ ok: true })
-  } catch {
+  } catch (error) {
+    logger.error("Erro deletando cupom", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

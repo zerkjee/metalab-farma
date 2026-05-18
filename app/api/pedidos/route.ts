@@ -273,7 +273,8 @@ export async function GET() {
     })
 
     return NextResponse.json(pedidos)
-  } catch {
+  } catch (error) {
+    logger.error("Erro listando pedidos", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

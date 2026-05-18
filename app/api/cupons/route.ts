@@ -91,7 +91,8 @@ export async function GET() {
     })
 
     return NextResponse.json(cupons)
-  } catch {
+  } catch (error) {
+    logger.error("Erro listando cupons", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
