@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 
 const slides = [
   {
@@ -292,7 +293,7 @@ export default function BannerCarousel() {
                 className="flex flex-row flex-wrap gap-4 transition-all duration-500 delay-100"
                 style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(6px)' : 'translateY(0)' }}
               >
-                <a href={slide.cta.href}
+                <Link href={slide.cta.href}
                   className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200 hover:scale-105 hover:shadow-2xl whitespace-nowrap"
                   style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
                 >
@@ -300,12 +301,12 @@ export default function BannerCarousel() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
-                </a>
-                <a href={slide.ctaSecondary.href}
+                </Link>
+                <Link href={slide.ctaSecondary.href}
                   className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-white text-sm border border-white/30 hover:bg-white/10 transition-all duration-200 whitespace-nowrap"
                 >
                   {slide.ctaSecondary.label}
-                </a>
+                </Link>
               </div>
 
               {/* Mini badges */}

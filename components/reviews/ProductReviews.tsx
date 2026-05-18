@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import RatingDistribution from './RatingDistribution';
 import ReviewCard from './ReviewCard';
 import type { Review, RatingSummary } from '@/types/review';
@@ -78,6 +79,13 @@ export default function ProductReviews({ productId, color = '#6b21a8' }: Product
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [productId]);
+
+  useEffect(() => {
+    if (!showForm || submitting) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowForm(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showForm, submitting]);
 
   const reviews = (data?.avaliacoes ?? []).map((a) => toReview(a, productId));
   const filtered = reviews
@@ -224,13 +232,13 @@ export default function ProductReviews({ productId, color = '#6b21a8' }: Product
               Escrever avaliação
             </button>
           ) : (
-            <a
+            <Link
               href="/login"
               className="inline-block px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-95"
               style={{ backgroundColor: color }}
             >
               Faça login para avaliar
-            </a>
+            </Link>
           )}
         </div>
       </div>
