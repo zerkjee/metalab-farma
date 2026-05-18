@@ -18,7 +18,7 @@ const cupomSchema = z.object({
 export async function GET() {
   try {
     if (!(await requireAdmin())) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
-    const cupons = await prisma.cupom.findMany({ orderBy: { id: "desc" } })
+    const cupons = await prisma.cupom.findMany({ orderBy: { id: "desc" }, take: 200 })
     return NextResponse.json(cupons.map((c) => ({ ...c, valor: Number(c.valor) })))
   } catch (error) {
     logger.error("Erro listando cupons admin", error)

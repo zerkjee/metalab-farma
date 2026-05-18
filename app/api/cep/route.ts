@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cepRatelimit, getIp } from "@/lib/rateLimit"
+import { logger } from "@/lib/logger"
 
 export async function GET(request: NextRequest) {
   const { success } = await cepRatelimit.limit(getIp(request))
@@ -31,7 +32,8 @@ export async function GET(request: NextRequest) {
       cidade: data.localidade,
       estado: data.uf,
     })
-  } catch {
+  } catch (error) {
+    logger.error('Erro consultando ViaCEP', error)
     return NextResponse.json({ erro: "Erro ao buscar CEP" }, { status: 500 })
   }
 }

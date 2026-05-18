@@ -20,6 +20,7 @@ export async function GET() {
     const avaliacoes = await prisma.avaliacao.findMany({
       where: { aprovada: true },
       orderBy: { criadoEm: 'desc' },
+      take: 500,
       include: {
         usuario: {
           select: {

@@ -9,6 +9,7 @@ const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
 const staticUrls: MetadataRoute.Sitemap = [
   { url: BASE,                     lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
   { url: `${BASE}/avaliacoes`,     lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.6 },
+  { url: `${BASE}/vip`,            lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

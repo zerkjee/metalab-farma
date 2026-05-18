@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
           id: meta.id,
           label: meta.label,
           description: meta.description,
-          price: parseFloat(s.price!),
+          price: parseFloat(s.price ?? '0') || 0,
           estimate: `${min} a ${max} dias úteis`,
         }
       })
