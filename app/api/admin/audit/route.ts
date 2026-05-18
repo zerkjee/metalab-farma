@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   const session = await auth()
@@ -15,15 +16,20 @@ export async function GET(request: NextRequest) {
 
   const where = acao ? { acao: { contains: acao } } : {}
 
-  const [logs, total] = await Promise.all([
-    prisma.auditLog.findMany({
-      where,
-      orderBy: { criadoEm: 'desc' },
-      skip: (pagina - 1) * porPagina,
-      take: porPagina,
-    }),
-    prisma.auditLog.count({ where }),
-  ])
+  try {
+    const [logs, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        orderBy: { criadoEm: 'desc' },
+        skip: (pagina - 1) * porPagina,
+        take: porPagina,
+      }),
+      prisma.auditLog.count({ where }),
+    ])
 
-  return NextResponse.json({ logs, total, pagina, totalPaginas: Math.ceil(total / porPagina) })
+    return NextResponse.json({ logs, total, pagina, totalPaginas: Math.ceil(total / porPagina) })
+  } catch (error) {
+    logger.error('Erro listando audit logs', error)
+    return NextResponse.json({ erro: 'Erro interno' }, { status: 500 })
+  }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   const session = await auth()
@@ -10,6 +11,7 @@ export async function GET() {
 
   const since = new Date(Date.now() - 6 * 60 * 60 * 1000) // últimas 6h
 
+  try {
   const [novoPedidos, pagamentosAprovados, estoqueBaixo] = await Promise.all([
     prisma.pedido.findMany({
       where: { criadoEm: { gte: since }, status: 'AGUARDANDO_PAGAMENTO' },
@@ -56,4 +58,8 @@ export async function GET() {
   ].sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime())
 
   return NextResponse.json({ notifications, total: notifications.length })
+  } catch (error) {
+    logger.error('Erro buscando notificações admin', error)
+    return NextResponse.json({ erro: 'Erro interno' }, { status: 500 })
+  }
 }
