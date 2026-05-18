@@ -56,7 +56,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ erro: "Produto não encontrado" }, { status: 404 })
     }
 
-    return NextResponse.json(produto)
+    return NextResponse.json({
+      ...produto,
+      preco: Number(produto.preco),
+      precoOriginal: produto.precoOriginal != null ? Number(produto.precoOriginal) : null,
+    })
   } catch (error) {
     logger.error("Erro buscando produto por id", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
@@ -94,7 +98,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
       detalhe: { campos: Object.keys(parsed.data) },
     })
 
-    return NextResponse.json(produto)
+    return NextResponse.json({
+      ...produto,
+      preco: Number(produto.preco),
+      precoOriginal: produto.precoOriginal != null ? Number(produto.precoOriginal) : null,
+    })
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return NextResponse.json({ erro: "Slug ou SKU já existe" }, { status: 409 })

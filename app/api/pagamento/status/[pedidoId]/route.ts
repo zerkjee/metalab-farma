@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     if (isAdmin || isOwner) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { usuarioId: _, ...dados } = pedido
-      return NextResponse.json(dados)
+      return NextResponse.json({ ...dados, total: Number(dados.total) })
     }
 
     // Unauthenticated or different user: only return polling data

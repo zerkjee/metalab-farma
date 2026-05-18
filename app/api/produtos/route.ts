@@ -43,7 +43,11 @@ export async function GET(request: NextRequest) {
     ])
 
     return NextResponse.json({
-      produtos,
+      produtos: produtos.map((p) => ({
+        ...p,
+        preco: Number(p.preco),
+        precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
+      })),
       total,
       pagina,
       totalPaginas: Math.ceil(total / porPagina),
@@ -72,7 +76,11 @@ export async function POST(request: NextRequest) {
       recursoId: produto.id,
       detalhe: { nome: produto.nome, slug: produto.slug, preco: Number(produto.preco), estoque: produto.estoque },
     })
-    return NextResponse.json(produto, { status: 201 })
+    return NextResponse.json({
+      ...produto,
+      preco: Number(produto.preco),
+      precoOriginal: produto.precoOriginal != null ? Number(produto.precoOriginal) : null,
+    }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ erro: "Dados inválidos", detalhes: error.issues }, { status: 400 })

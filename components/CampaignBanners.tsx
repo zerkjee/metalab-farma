@@ -1,6 +1,11 @@
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
+
+function isExternal(url: string) {
+  return /^https?:\/\//.test(url)
+}
 
 export default async function CampaignBanners() {
   let banners: Awaited<ReturnType<typeof prisma.banner.findMany>> = []
@@ -52,11 +57,11 @@ export default async function CampaignBanners() {
                 </div>
               </div>
             )
-            return b.linkUrl ? (
-              <a key={b.id} href={b.linkUrl} className="block">{inner}</a>
-            ) : (
-              <div key={b.id}>{inner}</div>
-            )
+            if (!b.linkUrl) return <div key={b.id}>{inner}</div>
+            if (isExternal(b.linkUrl)) {
+              return <a key={b.id} href={b.linkUrl} target="_blank" rel="noopener noreferrer" className="block">{inner}</a>
+            }
+            return <Link key={b.id} href={b.linkUrl} className="block">{inner}</Link>
           })}
         </div>
       </div>
