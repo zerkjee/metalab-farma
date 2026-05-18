@@ -4,6 +4,7 @@ import {
   Ban,
   CheckCircle2,
   Copy,
+  Download,
   Eye,
   FileText,
   PackageCheck,
@@ -255,6 +256,14 @@ export default function AdminPedidos() {
       </div>
 
       <div className="flex flex-wrap gap-3">
+        <a
+          href={`/api/admin/pedidos/export${statusFilter !== 'todos' ? `?status=${statusFilter.toUpperCase()}` : ''}`}
+          download
+          className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-purple-600 hover:text-purple-300"
+        >
+          <Download className="h-4 w-4" strokeWidth={1.8} />
+          Exportar CSV
+        </a>
         <div className="flex min-w-56 flex-1 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2">
           <Search className="h-4 w-4 flex-shrink-0 text-slate-500" strokeWidth={1.8} />
           <input
