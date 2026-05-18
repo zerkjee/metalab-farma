@@ -18,56 +18,61 @@ export async function GET(request: NextRequest) {
   const produtoId = searchParams.get('produtoId')
   if (!produtoId) return NextResponse.json({ erro: 'produtoId é obrigatório' }, { status: 400 })
 
-  const avaliacoes = await prisma.avaliacao.findMany({
-    where: { produtoId, aprovada: true },
-    orderBy: { criadoEm: 'desc' },
-    include: {
-      usuario: {
-        select: {
-          nome: true,
-          enderecos: { select: { cidade: true, estado: true }, take: 1 },
+  try {
+    const avaliacoes = await prisma.avaliacao.findMany({
+      where: { produtoId, aprovada: true },
+      orderBy: { criadoEm: 'desc' },
+      include: {
+        usuario: {
+          select: {
+            nome: true,
+            enderecos: { select: { cidade: true, estado: true }, take: 1 },
+          },
         },
       },
-    },
-  })
+    })
 
-  const lista = avaliacoes.map((a) => {
-    const partes = a.usuario.nome.split(' ')
-    const ender = a.usuario.enderecos[0]
-    return {
-      id: a.id,
-      nota: a.nota,
-      titulo: a.titulo ?? '',
-      texto: a.texto ?? '',
-      data: a.criadoEm.toISOString(),
-      cliente: {
-        primeiroNome: partes[0],
-        iniciais: ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase(),
-        cidade: ender?.cidade ?? '',
-        estado: ender?.estado ?? '',
+    const lista = avaliacoes.map((a) => {
+      const partes = a.usuario.nome.split(' ')
+      const ender = a.usuario.enderecos[0]
+      return {
+        id: a.id,
+        nota: a.nota,
+        titulo: a.titulo ?? '',
+        texto: a.texto ?? '',
+        data: a.criadoEm.toISOString(),
+        cliente: {
+          primeiroNome: partes[0],
+          iniciais: ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase(),
+          cidade: ender?.cidade ?? '',
+          estado: ender?.estado ?? '',
+        },
+        verificada: true,
+      }
+    })
+
+    const agg = lista.reduce(
+      (acc, a) => {
+        acc.total++
+        acc.soma += a.nota
+        acc.dist[a.nota as 1 | 2 | 3 | 4 | 5]++
+        return acc
       },
-      verificada: true,
-    }
-  })
+      { total: 0, soma: 0, dist: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<1 | 2 | 3 | 4 | 5, number> },
+    )
 
-  const agg = lista.reduce(
-    (acc, a) => {
-      acc.total++
-      acc.soma += a.nota
-      acc.dist[a.nota as 1 | 2 | 3 | 4 | 5]++
-      return acc
-    },
-    { total: 0, soma: 0, dist: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<1 | 2 | 3 | 4 | 5, number> },
-  )
-
-  return NextResponse.json({
-    avaliacoes: lista,
-    resumo: {
-      total: agg.total,
-      media: agg.total ? +(agg.soma / agg.total).toFixed(1) : 0,
-      distribuicao: agg.dist,
-    },
-  })
+    return NextResponse.json({
+      avaliacoes: lista,
+      resumo: {
+        total: agg.total,
+        media: agg.total ? +(agg.soma / agg.total).toFixed(1) : 0,
+        distribuicao: agg.dist,
+      },
+    })
+  } catch (error) {
+    logger.error('Erro listando avaliações', error)
+    return NextResponse.json({ erro: 'Erro interno' }, { status: 500 })
+  }
 }
 
 // POST /api/avaliacoes — criar (login + ter comprado o produto)

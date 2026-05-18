@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
+
+const patchSchema = z.object({
+  status: z.enum(['AGUARDANDO_PAGAMENTO', 'PAGAMENTO_APROVADO', 'EM_SEPARACAO', 'ENVIADO', 'ENTREGUE', 'CANCELADO', 'REEMBOLSADO']).optional(),
+  codigoRastreio: z.string().max(100).nullable().optional(),
+})
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -47,25 +53,29 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     const { id } = await params
-    const body = await request.json()
+    const parsed = patchSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
+    }
+    const { status, codigoRastreio } = parsed.data
 
     const pedido = await prisma.pedido.update({
       where: { id },
       data: {
-        status: body.status,
-        codigoRastreio: body.codigoRastreio,
-        enviadoEm: body.status === "ENVIADO" ? new Date() : undefined,
+        ...(status !== undefined && { status }),
+        ...(codigoRastreio !== undefined && { codigoRastreio }),
+        ...(status === "ENVIADO" && { enviadoEm: new Date() }),
       },
     })
 
     auditFromSession(session, request, {
-      acao: body.status === "REEMBOLSADO" ? "pedido.reembolsado" : "pedido.atualizado",
+      acao: status === "REEMBOLSADO" ? "pedido.reembolsado" : "pedido.atualizado",
       recurso: "pedido",
       recursoId: pedido.id,
       detalhe: {
         numero: pedido.numero,
-        status: body.status,
-        codigoRastreio: body.codigoRastreio ?? undefined,
+        status,
+        codigoRastreio: codigoRastreio ?? undefined,
       },
     })
 
