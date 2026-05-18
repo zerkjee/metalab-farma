@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   { key: "X-Frame-Options",        value: "DENY" },
@@ -20,7 +21,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://*.facebook.com https://*.facebook.net https://*.mercadopago.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       // beacons: GA, FB, MP, ViaCEP, Melhor Envio, Supabase
-      "connect-src 'self' https://viacep.com.br https://*.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.analytics.google.com https://stats.g.doubleclick.net https://connect.facebook.net https://*.facebook.com https://melhorenvio.com.br https://www.melhorenvio.com.br",
+      "connect-src 'self' https://viacep.com.br https://*.supabase.co https://api.mercadopago.com https://*.mercadopago.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.analytics.google.com https://stats.g.doubleclick.net https://connect.facebook.net https://*.facebook.com https://melhorenvio.com.br https://www.melhorenvio.com.br https://*.ingest.sentry.io",
       // MP usa iframe para o checkout do PIX
       "frame-src 'self' https://*.mercadopago.com",
       "frame-ancestors 'none'",
@@ -43,4 +44,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: true,
+  telemetry: false,
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+});

@@ -21,9 +21,25 @@ function emit(level: Level, msg: string, ctx?: Ctx) {
   }
 }
 
+function captureSentry(msg: string, err?: unknown) {
+  if (typeof window !== 'undefined' || !process.env.SENTRY_DSN) return
+  void import('@sentry/nextjs')
+    .then(({ captureException, captureMessage }) => {
+      if (err instanceof Error) {
+        captureException(err, { extra: { logMsg: msg } })
+      } else {
+        captureMessage(msg, 'error')
+      }
+    })
+    .catch(() => {})
+}
+
 export const logger = {
   debug: (msg: string, ctx?: Ctx) => emit('debug', msg, ctx),
   info:  (msg: string, ctx?: Ctx) => emit('info',  msg, ctx),
   warn:  (msg: string, ctx?: Ctx) => emit('warn',  msg, ctx),
-  error: (msg: string, err?: unknown) => emit('error', msg, toCtx(err)),
+  error: (msg: string, err?: unknown) => {
+    emit('error', msg, toCtx(err))
+    captureSentry(msg, err)
+  },
 }
