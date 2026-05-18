@@ -9,7 +9,9 @@ import { signIn, useSession } from 'next-auth/react';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') ?? '/';
+  const rawCallback = searchParams.get('callbackUrl') ?? '/'
+  // Bloqueia open redirect: só aceita paths relativos que começam com /
+  const callbackUrl = rawCallback.startsWith('/') && !rawCallback.startsWith('//') ? rawCallback : '/';
   const { data: session, status: sessionStatus } = useSession();
 
   const [email, setEmail] = useState('');
