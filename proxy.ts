@@ -1,9 +1,13 @@
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+
+interface AuthRequest {
+  nextUrl: URL
+  auth: { user?: { role?: string } } | null
+}
 
 export const proxy = auth((req) => {
-  const { nextUrl, auth: session } = req as any
+  const { nextUrl, auth: session } = req as unknown as AuthRequest
   const isLoggedIn = !!session?.user
   const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN"
 

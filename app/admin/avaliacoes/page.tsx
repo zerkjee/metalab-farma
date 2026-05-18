@@ -22,7 +22,6 @@ export default function AdminAvaliacoesPage() {
   const [busy, setBusy] = useState<string | null>(null);
 
   async function load() {
-    setLoading(true);
     try {
       const res = await fetch(`/api/admin/avaliacoes?status=${tab}`);
       if (res.ok) {
@@ -34,7 +33,14 @@ export default function AdminAvaliacoesPage() {
     }
   }
 
-  useEffect(() => { load(); }, [tab]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/admin/avaliacoes?status=${tab}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (!cancelled && d?.avaliacoes) setAvaliacoes(d.avaliacoes); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [tab]);
 
   async function setAprovada(id: string, aprovada: boolean) {
     setBusy(id);

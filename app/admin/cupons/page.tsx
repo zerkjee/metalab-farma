@@ -338,14 +338,16 @@ export default function AdminCupons() {
   const [editingCoupon, setEditingCoupon] = useState<AdminCoupon | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     fetch('/api/admin/cupons')
       .then((r) => r.json())
       .then((data: unknown) => {
+        if (cancelled) return;
         if (Array.isArray(data)) setCoupons(data.map((c) => apiToCoupon(c as ApiCupom)));
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const filteredCoupons = useMemo(() => {

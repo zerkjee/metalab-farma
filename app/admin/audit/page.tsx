@@ -49,13 +49,14 @@ export default function AuditPage() {
   const [filtroAplicado, setFiltroAplicado] = useState('');
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     const q = filtroAplicado ? `&acao=${encodeURIComponent(filtroAplicado)}` : '';
     fetch(`/api/admin/audit?pagina=${pagina}${q}`)
       .then((r) => r.json())
-      .then((d) => { if (!d.erro) setData(d); })
+      .then((d) => { if (!cancelled && !d.erro) setData(d); })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [pagina, filtroAplicado]);
 
   function aplicarFiltro(e: React.FormEvent) {

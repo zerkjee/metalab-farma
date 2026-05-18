@@ -67,18 +67,16 @@ export default function ProductReviews({ productId, color = '#6b21a8' }: Product
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  async function loadReviews() {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/avaliacoes?produtoId=${productId}`);
-      if (res.ok) setData(await res.json());
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    loadReviews();
+    let cancelled = false;
+    fetch(`/api/avaliacoes?produtoId=${productId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d: ApiResponse | null) => {
+        if (!cancelled && d) setData(d);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [productId]);
 
   const reviews = (data?.avaliacoes ?? []).map((a) => toReview(a, productId));

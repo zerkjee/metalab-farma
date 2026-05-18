@@ -46,7 +46,13 @@ export default function CriarAdminPage() {
   }
 
   useEffect(() => {
-    if (isSuperAdmin) loadAdmins();
+    if (!isSuperAdmin) return;
+    let cancelled = false;
+    fetch('/api/admin/usuarios')
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (!cancelled && d) setAdmins(d); })
+      .finally(() => { if (!cancelled) setLoadingList(false); });
+    return () => { cancelled = true; };
   }, [isSuperAdmin]);
 
   const senhaValida = senhaReqs.every((r) => r.test(form.senha));

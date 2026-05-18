@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function HeroSection() {
   return (
     <section className="relative bg-gradient-to-r from-gray-900 to-gray-800 text-white overflow-hidden">
@@ -25,12 +27,12 @@ export default function HeroSection() {
             >
               Explorar Produtos
             </a>
-            <a
+            <Link
               href="/#produtos"
               className="inline-block bg-gray-700 text-white font-semibold py-3 px-8 rounded-lg hover:bg-gray-600 transition-all hover:shadow-lg"
             >
               Saiba Mais
-            </a>
+            </Link>
           </div>
         </div>
       </div>

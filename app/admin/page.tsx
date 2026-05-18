@@ -130,13 +130,16 @@ export default function AdminDashboard() {
   // Donut chart com dados de status reais
   const statusChartData = analytics?.porStatus ?? [];
   const totalStatus = statusChartData.reduce((s, d) => s + d.value, 0) || 1;
-  let offset = 0;
-  const segments = statusChartData.map((d) => {
-    const pct2 = d.value / totalStatus;
-    const seg = { ...d, color: d.cor, dasharray: `${pct2 * CIRC} ${CIRC}`, dashoffset: -offset * CIRC };
-    offset += pct2;
-    return seg;
-  });
+  // Acumula offset via reduce em vez de let — React 19 strict mode não aceita reassign após render
+  const segments = statusChartData.reduce<{ acc: number; out: Array<typeof statusChartData[number] & { color: string; dasharray: string; dashoffset: number }> }>(
+    (state, d) => {
+      const pct2 = d.value / totalStatus;
+      state.out.push({ ...d, color: d.cor, dasharray: `${pct2 * CIRC} ${CIRC}`, dashoffset: -state.acc * CIRC });
+      state.acc += pct2;
+      return state;
+    },
+    { acc: 0, out: [] },
+  ).out;
 
   const recentOrders = stats?.recentOrders?.slice(0, 5) ?? [];
 

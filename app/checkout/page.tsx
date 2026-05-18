@@ -129,17 +129,24 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    const digits = form.zipCode.replace(/\D/g, '');
-    if (digits.length !== 8) {
-      setFreteStatus('idle');
-      setShippingMethods(initialShippingMethods);
-      return;
-    }
-    setFreteStatus('loading');
+    let cancelled = false;
     const controller = new AbortController();
-    fetch(`/api/frete?cep=${digits}`, { signal: controller.signal })
-      .then((r) => r.json())
-      .then((data) => {
+    const digits = form.zipCode.replace(/\D/g, '');
+
+    // Tudo dentro de async fn — evita setState síncrono no body do effect (React 19 strict)
+    void (async () => {
+      if (digits.length !== 8) {
+        if (!cancelled) {
+          setFreteStatus('idle');
+          setShippingMethods(initialShippingMethods);
+        }
+        return;
+      }
+      if (!cancelled) setFreteStatus('loading');
+      try {
+        const res = await fetch(`/api/frete?cep=${digits}`, { signal: controller.signal });
+        const data = await res.json();
+        if (cancelled) return;
         if (Array.isArray(data) && data.length > 0) {
           setShippingMethods(data as ShippingMethod[]);
           setSelectedShippingId(data[0].id as ShippingMethodId);
@@ -147,11 +154,12 @@ export default function CheckoutPage() {
         } else {
           setFreteStatus('error');
         }
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') setFreteStatus('error');
-      });
-    return () => controller.abort();
+      } catch (err) {
+        if (!cancelled && (err as Error).name !== 'AbortError') setFreteStatus('error');
+      }
+    })();
+
+    return () => { cancelled = true; controller.abort(); };
   }, [form.zipCode]);
 
   const selectedShipping = useMemo(

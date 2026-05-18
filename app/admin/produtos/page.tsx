@@ -244,19 +244,19 @@ export default function AdminProdutos() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     const params = new URLSearchParams({ por_pagina: '100' });
     if (search) params.set('busca', search);
     fetch(`/api/admin/produtos?${params}`)
       .then((r) => r.json())
       .then((data: { produtos?: ApiProduto[]; total?: number }) => {
-        if (Array.isArray(data.produtos)) {
-          setProducts(data.produtos.map(apiToManaged));
-          setTotal(data.total ?? data.produtos.length);
-        }
+        if (cancelled || !Array.isArray(data.produtos)) return;
+        setProducts(data.produtos.map(apiToManaged));
+        setTotal(data.total ?? data.produtos.length);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [search]);
 
   const filtered = useMemo(() => {

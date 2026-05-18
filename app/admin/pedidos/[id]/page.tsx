@@ -74,10 +74,11 @@ export default function AdminPedidoDetalhe() {
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    setFetching(true);
+    let cancelled = false;
     fetch(`/api/pedidos/${params.id}`)
       .then((r) => r.json())
       .then((data: unknown) => {
+        if (cancelled) return;
         if (data && typeof data === 'object' && !('erro' in (data as object))) {
           const mapped = mapApiOrder(data as Record<string, unknown>);
           setOrder(mapped);
@@ -85,7 +86,8 @@ export default function AdminPedidoDetalhe() {
         }
       })
       .catch(() => {})
-      .finally(() => setFetching(false));
+      .finally(() => { if (!cancelled) setFetching(false); });
+    return () => { cancelled = true; };
   }, [params.id]);
 
   if (fetching) {

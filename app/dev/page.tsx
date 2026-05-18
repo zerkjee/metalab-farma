@@ -59,7 +59,15 @@ export default function DevPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!allowed) { router.replace('/admin'); return; }
-    loadHealth();
+    let cancelled = false;
+    fetch('/api/dev/health')
+      .then((r) => r.ok ? r.json() : null)
+      .then((d: HealthData | null) => {
+        if (!cancelled && d) { setHealth(d); setLastRefresh(new Date()); }
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [status, allowed, router]);
 
   if (status === 'loading') {

@@ -101,16 +101,16 @@ export default function AdminPedidos() {
   const [trackingSaved, setTrackingSaved] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     fetch('/api/pedidos')
       .then((r) => r.json())
       .then((data: unknown) => {
-        if (Array.isArray(data)) {
-          setOrders(data.map((p) => mapApiOrder(p as Record<string, unknown>)));
-        }
+        if (cancelled || !Array.isArray(data)) return;
+        setOrders(data.map((p) => mapApiOrder(p as Record<string, unknown>)));
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const metrics = useMemo(() => {

@@ -34,20 +34,20 @@ export default function AdminClientes() {
   const [selected, setSelected] = useState<ApiCliente | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     const params = new URLSearchParams({ pagina: String(pagina), por_pagina: '20' });
     if (search) params.set('busca', search);
     fetch(`/api/admin/clientes?${params}`)
       .then((r) => r.json())
       .then((data: ApiResponse) => {
-        if (data.clientes) {
-          setClientes(data.clientes);
-          setTotal(data.total ?? 0);
-          setTotalPaginas(data.totalPaginas ?? 1);
-        }
+        if (cancelled || !data.clientes) return;
+        setClientes(data.clientes);
+        setTotal(data.total ?? 0);
+        setTotalPaginas(data.totalPaginas ?? 1);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [pagina, search]);
 
   function handleSearch(e: React.FormEvent) {

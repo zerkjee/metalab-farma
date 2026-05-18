@@ -172,15 +172,21 @@ export default function PedidosPage() {
 
   useEffect(() => {
     if (status !== 'authenticated') return;
-    setFetchError(false);
+    let cancelled = false;
     fetch('/api/pedidos')
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
-      .then((data) => setOrders(Array.isArray(data) ? data : []))
-      .catch(() => setFetchError(true))
-      .finally(() => setLoading(false));
+      .then((data: unknown) => {
+        if (!cancelled) {
+          setFetchError(false);
+          setOrders(Array.isArray(data) ? (data as Order[]) : []);
+        }
+      })
+      .catch(() => { if (!cancelled) setFetchError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [status]);
 
   if (status === 'loading' || (status === 'unauthenticated')) {

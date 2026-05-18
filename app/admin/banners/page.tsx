@@ -105,7 +105,14 @@ export default function AdminBanners() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/admin/banners')
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (!cancelled && d?.banners) setBanners(d.banners); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   function openCreate() {
     setEditingId(null);
