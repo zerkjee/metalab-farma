@@ -24,10 +24,12 @@ export default function PointsRedemption({
   const [result, setResult] = useState<{ ok: boolean; text: string; codigo?: string } | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     fetch('/api/user/resgatar-pontos')
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d?.opcoes) setOptions(d.opcoes); })
+      .then((d) => { if (!cancelled && d?.opcoes) setOptions(d.opcoes); })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   async function resgatar(pontos: number) {
