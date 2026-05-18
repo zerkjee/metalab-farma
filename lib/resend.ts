@@ -116,7 +116,10 @@ export async function sendPixExpiryEmail(data: PixExpiryData) {
       subject: `PIX expirado — Pedido ${data.numero} aguarda seu pagamento`,
       html,
     })
-  } catch { /* falha silenciosa — não crítico */ }
+  } catch (error) {
+    const { logger } = await import('@/lib/logger')
+    logger.warn('Falha enviando email PIX expirado (não crítico)', { pedidoNumero: data.numero, error })
+  }
 }
 
 // ─── CARRINHO ABANDONADO ──────────────────────────────────────────────────────
@@ -182,7 +185,10 @@ export async function sendAbandonedCartEmail(data: AbandonedCartData) {
         : `${firstName}, seu carrinho ainda está aqui — Metalab Store`,
       html,
     })
-  } catch { /* falha silenciosa */ }
+  } catch (error) {
+    const { logger } = await import('@/lib/logger')
+    logger.warn('Falha enviando email carrinho abandonado (não crítico)', { email: data.email, error })
+  }
 }
 
 // ─── CONFIRMAÇÃO DE PEDIDO ───────────────────────────────────────────────────
