@@ -14,6 +14,7 @@ const IGNORED_PATTERNS = [
   /Non-Error promise rejection/i,
   /Load failed/i,
   /Failed to fetch/i,
+  /Network request failed/i,
   /NetworkError/i,
   /Loading chunk \d+ failed/i,
   /Importing a module script failed/i,

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { enqueueOrderEmail } from "@/lib/qstash"
 import { logger } from "@/lib/logger"
 import { enderecoSchema } from "@/lib/validations"
 import { pedidoRatelimit, getIp } from "@/lib/rateLimit"
-import type { Cupom } from "@prisma/client"
+import { gerarNumeroPedido, cupomValido, calcularDesconto, calcularTotal } from "@/lib/orderUtils"
+import type { CupomLike } from "@/lib/orderUtils"
 
 const pedidoSchema = z.object({
   itens: z.array(z.object({
@@ -29,20 +29,6 @@ const pedidoSchema = z.object({
 })
 
 type PedidoInput = z.infer<typeof pedidoSchema>
-
-function gerarNumeroPedido() {
-  const ano = new Date().getFullYear()
-  // 6 chars de random base36 (~2 bilhões de combinações) — colisão desprezível
-  const seq = crypto.randomBytes(4).readUInt32BE(0).toString(36).toUpperCase().slice(0, 6).padEnd(6, '0')
-  return `MTL-${ano}-${seq}`
-}
-
-function cupomValido(cupom: Cupom | null): cupom is Cupom {
-  if (!cupom || !cupom.ativo) return false
-  if (cupom.validade && new Date(cupom.validade) < new Date()) return false
-  if (cupom.usoMaximo !== null && cupom.usoAtual >= cupom.usoMaximo) return false
-  return true
-}
 
 // POST /api/pedidos — criar pedido
 export async function POST(request: NextRequest) {
@@ -107,30 +93,30 @@ export async function POST(request: NextRequest) {
 
     if (cupomCodigo) {
       const cupom = await prisma.cupom.findUnique({ where: { codigo: cupomCodigo.toUpperCase() } })
-      if (!cupomValido(cupom)) {
+      if (!cupomValido(cupom as CupomLike | null)) {
         return NextResponse.json({ erro: "Cupom inválido ou expirado" }, { status: 400 })
       }
-      cupomIds.add(cupom.id)
-      if (cupom.tipo === "PERCENTUAL") {
-        descontoTotal = (subtotal * Number(cupom.valor)) / 100
-      } else if (cupom.tipo === "VALOR_FIXO") {
-        descontoTotal = Math.min(Number(cupom.valor), subtotal)
-      } else if (cupom.tipo === "FRETE_GRATIS") {
-        freteGratis = true
-      }
+      cupomIds.add(cupom!.id)
+      const { desconto, freteGratis: fg } = calcularDesconto(cupom as CupomLike, subtotal)
+      descontoTotal = desconto
+      freteGratis = fg
     }
 
     if (cupomFreteCodigo) {
       const cupomFrete = await prisma.cupom.findUnique({ where: { codigo: cupomFreteCodigo.toUpperCase() } })
-      if (!cupomValido(cupomFrete) || cupomFrete.tipo !== "FRETE_GRATIS") {
+      if (!cupomValido(cupomFrete as CupomLike | null) || cupomFrete!.tipo !== "FRETE_GRATIS") {
         return NextResponse.json({ erro: "Cupom de frete inválido ou expirado" }, { status: 400 })
       }
       freteGratis = true
-      cupomIds.add(cupomFrete.id)
+      cupomIds.add(cupomFrete!.id)
     }
 
-    const valorFrete = freteGratis ? 0 : Number(frete?.preco ?? 0)
-    const total = subtotal - descontoTotal + valorFrete
+    const { valorFrete, total } = calcularTotal({
+      subtotal,
+      desconto: descontoTotal,
+      freteGratis,
+      fretePrco: Number(frete?.preco ?? 0),
+    })
 
     // Transação atômica: criar pedido + decrementar estoque (com guard) + incrementar uso de cupons
     // Retry até 3x em colisão de numero (P2002 em Pedido.numero @unique)
