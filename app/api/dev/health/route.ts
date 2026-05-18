@@ -26,9 +26,12 @@ async function checkRoute(path: string, baseUrl: string): Promise<{ path: string
 }
 
 export async function GET() {
-  const session = await auth();
-  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
-  if (!isSuperAdmin) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
+    }
+  } catch {
     return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
   }
 
