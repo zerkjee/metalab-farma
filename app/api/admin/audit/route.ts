@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const porPagina = 50
   const acao = searchParams.get('acao') ?? undefined
 
-  const where = acao ? { acao: { contains: acao } } : {}
+  const where = acao ? { acao: { contains: acao, mode: 'insensitive' as const } } : {}
 
   try {
     const [logs, total] = await Promise.all([
