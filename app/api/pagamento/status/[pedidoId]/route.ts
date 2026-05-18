@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
+import { pollingRatelimit, getIp } from "@/lib/rateLimit"
 
 type Params = { params: Promise<{ pedidoId: string }> }
 
@@ -11,6 +12,11 @@ type Params = { params: Promise<{ pedidoId: string }> }
 // - O QR Code já é retornado por /api/pagamento/criar, não precisa ser re-exposto aqui
 export async function GET(req: NextRequest, { params }: Params) {
   try {
+    const { success } = await pollingRatelimit.limit(getIp(req))
+    if (!success) {
+      return NextResponse.json({ erro: "Muitas requisições. Aguarde." }, { status: 429 })
+    }
+
     const { pedidoId } = await params
     const session = await auth()
 

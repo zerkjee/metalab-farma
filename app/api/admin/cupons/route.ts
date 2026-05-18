@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { logAudit, getClientIp } from "@/lib/audit"
 import { z } from "zod"
 import { Prisma } from "@prisma/client"
@@ -14,12 +14,6 @@ const cupomSchema = z.object({
   validade: z.string().optional().nullable(),
   ativo: z.boolean().default(true),
 })
-
-async function requireAdmin() {
-  const session = await auth()
-  if (!session?.user?.role?.includes("ADMIN")) return null
-  return session
-}
 
 export async function GET() {
   if (!(await requireAdmin())) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })

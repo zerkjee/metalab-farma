@@ -24,6 +24,8 @@ export const cepRatelimit       = makeRatelimit(Ratelimit.slidingWindow(60, "10 
 export const freteRatelimit     = makeRatelimit(Ratelimit.slidingWindow(60, "10 m"), "rl:frete")
 export const avaliacaoRatelimit = makeRatelimit(Ratelimit.slidingWindow(5,  "1 h"),  "rl:avaliacao")
 export const resgateRatelimit   = makeRatelimit(Ratelimit.slidingWindow(5,  "1 h"),  "rl:resgate")
+export const pollingRatelimit   = makeRatelimit(Ratelimit.slidingWindow(60, "1 m"),  "rl:polling")
+export const produtosRatelimit  = makeRatelimit(Ratelimit.slidingWindow(120,"10 m"), "rl:produtos")
 
 export function getIp(request: { headers: { get: (k: string) => string | null } }): string {
   return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous"

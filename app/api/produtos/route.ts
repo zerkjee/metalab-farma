@@ -5,11 +5,17 @@ import { auth } from "@/lib/auth"
 import { produtoSchema } from "@/lib/validations"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
+import { produtosRatelimit, getIp } from "@/lib/rateLimit"
 import { z } from "zod"
 
 // GET /api/produtos — público
 export async function GET(request: NextRequest) {
   try {
+    const { success } = await produtosRatelimit.limit(getIp(request))
+    if (!success) {
+      return NextResponse.json({ erro: "Muitas requisições. Aguarde." }, { status: 429 })
+    }
+
     const { searchParams } = new URL(request.url)
     const categoria = searchParams.get("categoria")
     const busca = searchParams.get("busca")

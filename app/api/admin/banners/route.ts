@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { requireAdmin } from '@/lib/adminGuard'
 import { logAudit, getClientIp } from '@/lib/audit'
 import { logger } from '@/lib/logger'
 
@@ -17,12 +17,6 @@ const bannerSchema = z.object({
   ordem: z.number().int().min(0).default(0),
   ativo: z.boolean().default(true),
 })
-
-async function requireAdmin() {
-  const session = await auth()
-  if (!session?.user?.role?.includes('ADMIN') || !session.user.id || !session.user.email) return null
-  return session
-}
 
 // GET /api/admin/banners
 export async function GET() {

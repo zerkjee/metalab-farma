@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { logAudit, getClientIp } from "@/lib/audit"
 import { Prisma } from "@prisma/client"
 import { logger } from "@/lib/logger"
@@ -16,12 +16,6 @@ const updateSchema = z.object({
 })
 
 type Params = { params: Promise<{ id: string }> }
-
-async function requireAdmin() {
-  const session = await auth()
-  if (!session?.user?.role?.includes("ADMIN")) return null
-  return session
-}
 
 export async function PUT(request: NextRequest, { params }: Params) {
   const session = await requireAdmin()
