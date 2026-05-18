@@ -11,8 +11,23 @@ import { products as localProducts } from '@/data/products';
 import { getProductDetail } from '@/utils/productDetails';
 import { Product } from '@/types/product';
 
+export const revalidate = 60
+
 interface ProductPageProps {
   params: Promise<{ id: string }>;
+}
+
+// Pré-gera páginas para todos os produtos ativos em build time (ISR: revalida a cada 60s)
+export async function generateStaticParams() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/produtos?por_pagina=100`, { cache: 'no-store' })
+    if (!res.ok) return []
+    const data = await res.json()
+    return ((data.produtos ?? []) as { slug: string }[]).map((p) => ({ id: p.slug }))
+  } catch {
+    return []
+  }
 }
 
 async function getProduto(idParam: string): Promise<Product | null> {
