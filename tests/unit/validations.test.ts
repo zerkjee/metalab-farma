@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { senhaSchema, enderecoSchema, cupomSchema } from '@/lib/validations'
+import { senhaSchema, enderecoSchema, cupomSchema, registroSchema } from '@/lib/validations'
 
 // ─── senhaSchema ──────────────────────────────────────────────────────────────
 
@@ -104,5 +104,74 @@ describe('cupomSchema', () => {
 
   it('rejeita código com menos de 3 chars', () => {
     expect(cupomSchema.safeParse({ ...BASE, codigo: 'AB' }).success).toBe(false)
+  })
+})
+
+// ─── registroSchema — CPF ─────────────────────────────────────────────────────
+
+describe('registroSchema — validação de CPF', () => {
+  const ENDERECO_VALIDO = {
+    cep: '31742227',
+    logradouro: 'Rua das Flores',
+    numero: '10',
+    bairro: 'Jardim',
+    cidade: 'BH',
+    estado: 'MG',
+  }
+
+  const BASE_REGISTRO = {
+    nome: 'Pedro Test',
+    email: 'pedro@test.com',
+    senha: 'Senha@123',
+    confirmarSenha: 'Senha@123',
+    endereco: ENDERECO_VALIDO,
+  }
+
+  it('aceita CPF válido sem formatação (12345678909)', () => {
+    const result = registroSchema.safeParse({ ...BASE_REGISTRO, cpf: '12345678909' })
+    expect(result.success).toBe(true)
+  })
+
+  it('aceita CPF válido alternativo (11144477735)', () => {
+    const result = registroSchema.safeParse({ ...BASE_REGISTRO, cpf: '11144477735' })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejeita CPF com todos os dígitos iguais (11111111111)', () => {
+    const result = registroSchema.safeParse({ ...BASE_REGISTRO, cpf: '11111111111' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejeita CPF com dígito verificador incorreto (12345678900)', () => {
+    const result = registroSchema.safeParse({ ...BASE_REGISTRO, cpf: '12345678900' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejeita CPF com máscara (123.456.789-09) — schema exige 11 dígitos sem formatação', () => {
+    const result = registroSchema.safeParse({ ...BASE_REGISTRO, cpf: '123.456.789-09' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejeita CPF com menos de 11 dígitos', () => {
+    const result = registroSchema.safeParse({ ...BASE_REGISTRO, cpf: '1234567890' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejeita CPF com letras', () => {
+    const result = registroSchema.safeParse({ ...BASE_REGISTRO, cpf: '1234567890A' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejeita quando confirmarSenha não bate com senha', () => {
+    const result = registroSchema.safeParse({
+      ...BASE_REGISTRO,
+      cpf: '12345678909',
+      confirmarSenha: 'Senha@456',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const paths = result.error.issues.map((i) => i.path.join('.'))
+      expect(paths).toContain('confirmarSenha')
+    }
   })
 })
