@@ -90,7 +90,7 @@ export async function GET() {
       orderBy: { id: "desc" },
     })
 
-    return NextResponse.json(cupons)
+    return NextResponse.json(cupons.map((c) => ({ ...c, valor: Number(c.valor) })))
   } catch (error) {
     logger.error("Erro listando cupons", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })

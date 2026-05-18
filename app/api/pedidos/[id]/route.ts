@@ -37,7 +37,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 
-    return NextResponse.json(pedido)
+    return NextResponse.json({
+      ...pedido,
+      subtotal: Number(pedido.subtotal),
+      desconto: Number(pedido.desconto),
+      frete: Number(pedido.frete),
+      total: Number(pedido.total),
+    })
   } catch (error) {
     logger.error("Erro buscando pedido por id", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
@@ -79,7 +85,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       },
     })
 
-    return NextResponse.json(pedido)
+    return NextResponse.json({
+      ...pedido,
+      subtotal: Number(pedido.subtotal),
+      desconto: Number(pedido.desconto),
+      frete: Number(pedido.frete),
+      total: Number(pedido.total),
+    })
   } catch (error) {
     logger.error("Erro atualizando pedido", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })

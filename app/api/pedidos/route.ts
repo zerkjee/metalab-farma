@@ -272,7 +272,15 @@ export async function GET() {
       ...(isAdmin ? {} : { take: 20 }),
     })
 
-    return NextResponse.json(pedidos)
+    return NextResponse.json(
+      pedidos.map((p) => ({
+        ...p,
+        subtotal: Number(p.subtotal),
+        desconto: Number(p.desconto),
+        frete: Number(p.frete),
+        total: Number(p.total),
+      }))
+    )
   } catch (error) {
     logger.error("Erro listando pedidos", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
