@@ -59,15 +59,17 @@ export default function AdminDashboard() {
   const [showReembolsos, setShowReembolsos] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     fetch('/api/admin/stats')
       .then((r) => r.json())
-      .then((data) => { if (!data.erro) setStats(data); })
+      .then((data) => { if (!cancelled && !data.erro) setStats(data); })
       .catch(() => {});
 
     fetch('/api/admin/analytics')
       .then((r) => r.json())
-      .then((data) => { if (!data.erro) setAnalytics(data); })
+      .then((data) => { if (!cancelled && !data.erro) setAnalytics(data); })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   const faturamento = stats?.faturamentoMes ?? 0;

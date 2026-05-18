@@ -84,11 +84,13 @@ export default function VipPage() {
     }
     if (sessionStatus !== 'authenticated') return;
 
+    let cancelled = false;
     fetch('/api/user/stats')
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((data) => setStats(data))
-      .catch(() => { /* stats indisponíveis — página continua sem elas */ })
-      .finally(() => setLoadingStats(false));
+      .then((data) => { if (!cancelled) setStats(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoadingStats(false); });
+    return () => { cancelled = true; };
   }, [sessionStatus, router]);
 
   if (sessionStatus === 'loading' || loadingStats) {

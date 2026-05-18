@@ -26,11 +26,13 @@ export default function AdminAnalytics() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     fetch('/api/admin/analytics')
       .then((r) => r.json())
-      .then((d) => { if (!d.erro) setData(d); })
+      .then((d) => { if (!cancelled && !d.erro) setData(d); })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const totalReceita = data?.receitaDiaria.reduce((s, d) => s + d.value, 0) ?? 0;
