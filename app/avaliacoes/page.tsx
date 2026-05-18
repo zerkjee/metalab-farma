@@ -1,35 +1,69 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import ReviewCard from '@/components/reviews/ReviewCard';
 import StarRating from '@/components/reviews/StarRating';
-import { reviews } from '@/data/reviews';
+
+interface ApiReview {
+  id: string;
+  productId: string;
+  productName: string;
+  productImage: string | null;
+  productColor: string;
+  customerName: string;
+  customerCity: string;
+  customerState: string;
+  customerInitials: string;
+  avatarColor: string;
+  rating: number;
+  title: string;
+  comment: string;
+  date: string;
+  verified: boolean;
+}
+
+interface Resumo {
+  total: number;
+  media: number;
+  distribuicao: Record<1 | 2 | 3 | 4 | 5, number>;
+}
 
 type FilterRating = 'all' | 1 | 2 | 3 | 4 | 5;
-type SortKey = 'recent' | 'helpful' | 'highest' | 'lowest';
+type SortKey = 'recent' | 'highest' | 'lowest';
 
 const PAGE_SIZE = 10;
 
-const overallAvg = +(reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
-const totalCount = reviews.length;
-const dist = [5, 4, 3, 2, 1].map((star) => ({
-  star,
-  count: reviews.filter((r) => r.rating === star).length,
-  pct: Math.round((reviews.filter((r) => r.rating === star).length / reviews.length) * 100),
-}));
-
 export default function AvaliacoesPage() {
+  const [allReviews, setAllReviews] = useState<ApiReview[]>([]);
+  const [resumo, setResumo] = useState<Resumo | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterRating>('all');
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [sort, setSort] = useState<SortKey>('recent');
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/avaliacoes/all')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d?.avaliacoes) {
+          setAllReviews(d.avaliacoes);
+          setResumo(d.resumo);
+        }
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   const filtered = useMemo(() => {
-    return reviews
+    return allReviews
       .filter((r) => {
         if (filter !== 'all' && r.rating !== filter) return false;
         if (onlyVerified && !r.verified) return false;
@@ -46,22 +80,46 @@ export default function AvaliacoesPage() {
       })
       .sort((a, b) => {
         if (sort === 'recent') return b.date.localeCompare(a.date);
-        if (sort === 'helpful') return b.helpfulCount - a.helpfulCount;
         if (sort === 'highest') return b.rating - a.rating;
         return a.rating - b.rating;
       });
-  }, [search, filter, onlyVerified, sort]);
+  }, [allReviews, search, filter, onlyVerified, sort]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  function changeFilter(val: FilterRating) {
-    setFilter(val);
-    setPage(1);
-  }
-  function changeSearch(val: string) {
-    setSearch(val);
-    setPage(1);
+  function changeFilter(val: FilterRating) { setFilter(val); setPage(1); }
+  function changeSearch(val: string) { setSearch(val); setPage(1); }
+
+  const overallAvg = resumo?.media ?? 0;
+  const totalCount = resumo?.total ?? 0;
+  const dist = ([5, 4, 3, 2, 1] as const).map((star) => ({
+    star,
+    count: resumo?.distribuicao[star] ?? 0,
+    pct: totalCount > 0 ? Math.round(((resumo?.distribuicao[star] ?? 0) / totalCount) * 100) : 0,
+  }));
+
+  // Adapts API review to the shape ReviewCard expects
+  function toCardReview(r: ApiReview) {
+    return {
+      id: r.id as unknown as number,
+      productId: r.productId as unknown as number,
+      productName: r.productName,
+      productImage: r.productImage ?? undefined,
+      productColor: r.productColor,
+      customerName: r.customerName,
+      customerCity: r.customerCity,
+      customerState: r.customerState,
+      customerInitials: r.customerInitials,
+      avatarColor: r.avatarColor,
+      rating: r.rating,
+      title: r.title,
+      comment: r.comment,
+      date: r.date,
+      verified: r.verified,
+      helpfulCount: 0,
+      totalVotes: 0,
+    };
   }
 
   return (
@@ -80,28 +138,36 @@ export default function AvaliacoesPage() {
 
           {/* Hero stats */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-            <div className="flex flex-col items-center">
-              <span className="text-6xl font-black">{overallAvg}</span>
-              <StarRating rating={overallAvg} size="lg" />
-              <span className="text-purple-300 text-sm mt-2">{totalCount} avaliações</span>
-            </div>
-
-            <div className="hidden sm:block w-px h-24 bg-white/20" />
-
-            <div className="flex flex-col gap-2 w-56">
-              {dist.map(({ star, count, pct }) => (
-                <div key={star} className="flex items-center gap-2.5">
-                  <span className="text-xs text-purple-300 w-3">{star}</span>
-                  <svg className="w-3 h-3 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="text-xs text-purple-300 w-5 text-right">{count}</span>
+            {loading ? (
+              <div className="h-24 w-48 bg-white/10 rounded-2xl animate-pulse" />
+            ) : totalCount === 0 ? (
+              <p className="text-purple-300 text-lg">Seja o primeiro a avaliar!</p>
+            ) : (
+              <>
+                <div className="flex flex-col items-center">
+                  <span className="text-6xl font-black">{overallAvg}</span>
+                  <StarRating rating={overallAvg} size="lg" />
+                  <span className="text-purple-300 text-sm mt-2">{totalCount} avaliações</span>
                 </div>
-              ))}
-            </div>
+
+                <div className="hidden sm:block w-px h-24 bg-white/20" />
+
+                <div className="flex flex-col gap-2 w-56">
+                  {dist.map(({ star, count, pct }) => (
+                    <div key={star} className="flex items-center gap-2.5">
+                      <span className="text-xs text-purple-300 w-3">{star}</span>
+                      <svg className="w-3 h-3 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-xs text-purple-300 w-5 text-right">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -163,26 +229,35 @@ export default function AvaliacoesPage() {
               className="text-xs font-medium text-gray-600 border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#6b21a8]/30 focus:border-[#6b21a8] shadow-sm"
             >
               <option value="recent">Mais recentes</option>
-              <option value="helpful">Mais úteis</option>
               <option value="highest">Maior nota</option>
               <option value="lowest">Menor nota</option>
             </select>
           </div>
 
+          {/* Loading skeleton */}
+          {loading && (
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-40 rounded-2xl bg-gray-200 animate-pulse" />
+              ))}
+            </div>
+          )}
+
           {/* Result count */}
-          <p className="text-sm text-gray-400 mb-6 font-medium">
-            {filtered.length} avaliação{filtered.length !== 1 ? 'ões' : ''} encontrada{filtered.length !== 1 ? 's' : ''}
-          </p>
+          {!loading && (
+            <p className="text-sm text-gray-400 mb-6 font-medium">
+              {filtered.length} avaliação{filtered.length !== 1 ? 'ões' : ''} encontrada{filtered.length !== 1 ? 's' : ''}
+            </p>
+          )}
 
           {/* Cards */}
-          {paginated.length > 0 ? (
+          {!loading && paginated.length > 0 && (
             <div className="flex flex-col gap-4">
               {paginated.map((r) => (
                 <div key={r.id}>
-                  {/* Product badge above card */}
                   <div className="mb-1 px-1">
                     <a
-                      href={`/produtos/local-${r.productId}`}
+                      href={`/produtos/${r.productId}`}
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide transition-opacity hover:opacity-80"
                       style={{ color: r.productColor }}
                     >
@@ -190,29 +265,41 @@ export default function AvaliacoesPage() {
                       {r.productName}
                     </a>
                   </div>
-                  <ReviewCard review={r} />
+                  <ReviewCard review={toCardReview(r)} />
                 </div>
               ))}
             </div>
-          ) : (
+          )}
+
+          {/* Empty state */}
+          {!loading && paginated.length === 0 && (
             <div className="text-center py-20 text-gray-400">
               <svg className="w-14 h-14 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="font-semibold text-gray-500 text-lg">Nenhuma avaliação encontrada</p>
-              <p className="text-sm mt-1">Tente outros filtros ou limpe a busca</p>
-              <button
-                onClick={() => { setSearch(''); setFilter('all'); setOnlyVerified(false); setPage(1); }}
-                className="mt-6 px-5 py-2.5 rounded-xl bg-[#6b21a8] text-white text-sm font-bold hover:opacity-90 transition-opacity"
-              >
-                Limpar filtros
-              </button>
+              {allReviews.length === 0 ? (
+                <>
+                  <p className="font-semibold text-gray-500 text-lg">Nenhuma avaliação ainda</p>
+                  <p className="text-sm mt-1">Compre um produto e deixe sua opinião!</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-gray-500 text-lg">Nenhuma avaliação encontrada</p>
+                  <p className="text-sm mt-1">Tente outros filtros ou limpe a busca</p>
+                  <button
+                    onClick={() => { setSearch(''); setFilter('all'); setOnlyVerified(false); setPage(1); }}
+                    className="mt-6 px-5 py-2.5 rounded-xl bg-[#6b21a8] text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                  >
+                    Limpar filtros
+                  </button>
+                </>
+              )}
             </div>
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {!loading && totalPages > 1 && (
             <div className="mt-12 flex items-center justify-center gap-2">
               <button
                 disabled={page === 1}
