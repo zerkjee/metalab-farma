@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 import type { LevelId } from '@/types/loyalty';
 
 // Thresholds match minPoints in data/loyalty.ts — based on R$ spent in the rolling 6-month window
@@ -28,6 +29,7 @@ export async function GET() {
   const periodStart = new Date();
   periodStart.setMonth(periodStart.getMonth() - PERIOD_MONTHS);
 
+  try {
   const [pedidos, usuario] = await Promise.all([
     prisma.pedido.findMany({
       where: {
@@ -92,4 +94,8 @@ export async function GET() {
       primeiroProduto: p.itens[0]?.produtoNome ?? null,
     })),
   });
+  } catch (error) {
+    logger.error('Erro buscando stats do usuário', error);
+    return NextResponse.json({ erro: 'Erro interno' }, { status: 500 });
+  }
 }
