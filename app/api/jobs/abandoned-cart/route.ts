@@ -1,9 +1,11 @@
+import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { Receiver } from '@upstash/qstash'
 import { prisma } from '@/lib/prisma'
 import { sendAbandonedCartEmail } from '@/lib/resend'
 import { logger } from '@/lib/logger'
 import { maskEmail } from '@/lib/mask'
+import { Prisma } from '@prisma/client'
 
 const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
 
@@ -16,7 +18,7 @@ const receiver =
     : null
 
 function generateCouponCode() {
-  return 'VOLTA' + Math.random().toString(36).slice(2, 7).toUpperCase()
+  return 'VOLTA' + crypto.randomBytes(3).toString('hex').toUpperCase()
 }
 
 export async function POST(request: NextRequest) {
@@ -58,20 +60,26 @@ export async function POST(request: NextRequest) {
       })
       logger.info('E-mail carrinho abandonado (1h) enviado', { cartSessionId, emailMasked: maskEmail(cart.email) })
     } else {
-      // 24h: gerar cupom de 10% e enviar
-      const codigo = generateCouponCode()
+      // 24h: gerar cupom de 10% e enviar — retry até 3x em colisão de código
       const expira = new Date(Date.now() + 48 * 60 * 60 * 1000)
-
-      await prisma.cupom.create({
-        data: {
-          codigo,
-          valor: 10,
-          tipo: 'PERCENTUAL',
-          ativo: true,
-          validade: expira,
-          usoMaximo: 1,
-        },
-      })
+      let codigo = ''
+      let tentativa = 0
+      while (true) {
+        tentativa++
+        codigo = generateCouponCode()
+        try {
+          await prisma.cupom.create({
+            data: { codigo, valor: 10, tipo: 'PERCENTUAL', ativo: true, validade: expira, usoMaximo: 1 },
+          })
+          break
+        } catch (e) {
+          if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002' && tentativa < 3) {
+            logger.warn('Colisão de código de cupom abandoned-cart — retry', { tentativa })
+            continue
+          }
+          throw e
+        }
+      }
 
       await sendAbandonedCartEmail({
         email: cart.email,
