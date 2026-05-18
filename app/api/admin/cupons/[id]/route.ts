@@ -18,9 +18,9 @@ const updateSchema = z.object({
 type Params = { params: Promise<{ id: string }> }
 
 export async function PUT(request: NextRequest, { params }: Params) {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   try {
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     const { id } = await params
     const parsed = updateSchema.safeParse(await request.json().catch(() => null))
     if (!parsed.success) return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
@@ -56,9 +56,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(req: NextRequest, { params }: Params) {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   try {
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     const { id } = await params
     const cupom = await prisma.cupom.findUnique({ where: { id }, select: { codigo: true } })
     await prisma.cupom.delete({ where: { id } })

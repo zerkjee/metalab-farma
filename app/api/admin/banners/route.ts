@@ -20,10 +20,10 @@ const bannerSchema = z.object({
 
 // GET /api/admin/banners
 export async function GET() {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-
   try {
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+
     const banners = await prisma.banner.findMany({ orderBy: { ordem: 'asc' } })
     return NextResponse.json({ banners })
   } catch (error) {
@@ -34,13 +34,13 @@ export async function GET() {
 
 // POST /api/admin/banners — criar
 export async function POST(request: NextRequest) {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-
-  const parsed = bannerSchema.safeParse(await request.json().catch(() => null))
-  if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos', detalhes: parsed.error.issues }, { status: 400 })
-
   try {
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+
+    const parsed = bannerSchema.safeParse(await request.json().catch(() => null))
+    if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos', detalhes: parsed.error.issues }, { status: 400 })
+
     const banner = await prisma.banner.create({ data: parsed.data })
 
     void logAudit({
@@ -62,17 +62,17 @@ export async function POST(request: NextRequest) {
 
 // PATCH /api/admin/banners?id=X
 export async function PATCH(request: NextRequest) {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-
-  const { searchParams } = new URL(request.url)
-  const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ erro: 'id obrigatório' }, { status: 400 })
-
-  const parsed = bannerSchema.partial().safeParse(await request.json().catch(() => null))
-  if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos' }, { status: 400 })
-
   try {
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ erro: 'id obrigatório' }, { status: 400 })
+
+    const parsed = bannerSchema.partial().safeParse(await request.json().catch(() => null))
+    if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos' }, { status: 400 })
+
     const banner = await prisma.banner.update({ where: { id }, data: parsed.data })
 
     void logAudit({
@@ -93,14 +93,14 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE /api/admin/banners?id=X
 export async function DELETE(request: NextRequest) {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-
-  const { searchParams } = new URL(request.url)
-  const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ erro: 'id obrigatório' }, { status: 400 })
-
   try {
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ erro: 'id obrigatório' }, { status: 400 })
+
     await prisma.banner.delete({ where: { id } })
 
     void logAudit({

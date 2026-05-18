@@ -16,8 +16,8 @@ const cupomSchema = z.object({
 })
 
 export async function GET() {
-  if (!(await requireAdmin())) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   try {
+    if (!(await requireAdmin())) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     const cupons = await prisma.cupom.findMany({ orderBy: { id: "desc" } })
     return NextResponse.json(cupons.map((c) => ({ ...c, valor: Number(c.valor) })))
   } catch (error) {
@@ -27,9 +27,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await requireAdmin()
-  if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   try {
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     const body = await request.json().catch(() => null)
     const data = cupomSchema.parse(body)
     const cupom = await prisma.cupom.create({
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return NextResponse.json({ erro: "Código de cupom já existe" }, { status: 409 })
     }
+    logger.error("Erro criando cupom", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }
