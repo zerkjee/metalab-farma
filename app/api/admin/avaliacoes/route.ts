@@ -12,17 +12,17 @@ const updateSchema = z.object({
 
 // GET /api/admin/avaliacoes?status=pendentes|aprovadas|todas
 export async function GET(request: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.role?.includes('ADMIN')) {
-    return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-  }
-
-  const { searchParams } = new URL(request.url)
-  const status = searchParams.get('status') ?? 'pendentes'
-
-  const where = status === 'aprovadas' ? { aprovada: true } : status === 'todas' ? {} : { aprovada: false }
-
   try {
+    const session = await auth()
+    if (!session?.user?.role?.includes('ADMIN')) {
+      return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get('status') ?? 'pendentes'
+
+    const where = status === 'aprovadas' ? { aprovada: true } : status === 'todas' ? {} : { aprovada: false }
+
     const avaliacoes = await prisma.avaliacao.findMany({
       where,
       orderBy: { criadoEm: 'desc' },
@@ -42,15 +42,15 @@ export async function GET(request: NextRequest) {
 
 // PATCH /api/admin/avaliacoes — aprovar / reprovar
 export async function PATCH(request: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.role?.includes('ADMIN') || !session.user.id || !session.user.email) {
-    return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-  }
-
-  const parsed = updateSchema.safeParse(await request.json().catch(() => null))
-  if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos' }, { status: 400 })
-
   try {
+    const session = await auth()
+    if (!session?.user?.role?.includes('ADMIN') || !session.user.id || !session.user.email) {
+      return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+    }
+
+    const parsed = updateSchema.safeParse(await request.json().catch(() => null))
+    if (!parsed.success) return NextResponse.json({ erro: 'Dados inválidos' }, { status: 400 })
+
     const updated = await prisma.avaliacao.update({
       where: { id: parsed.data.id },
       data: { aprovada: parsed.data.aprovada },
@@ -76,16 +76,16 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE /api/admin/avaliacoes?id=X
 export async function DELETE(request: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.role?.includes('ADMIN') || !session.user.id || !session.user.email) {
-    return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-  }
-
-  const { searchParams } = new URL(request.url)
-  const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ erro: 'id obrigatório' }, { status: 400 })
-
   try {
+    const session = await auth()
+    if (!session?.user?.role?.includes('ADMIN') || !session.user.id || !session.user.email) {
+      return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ erro: 'id obrigatório' }, { status: 400 })
+
     await prisma.avaliacao.delete({ where: { id } })
 
     void logAudit({

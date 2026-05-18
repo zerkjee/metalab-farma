@@ -20,6 +20,7 @@ const MULTIPLIER: Record<LevelId, number> = {
 const PERIOD_MONTHS = 6;
 
 export async function GET() {
+  try {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ erro: 'Não autenticado' }, { status: 401 });
@@ -29,7 +30,6 @@ export async function GET() {
   const periodStart = new Date();
   periodStart.setMonth(periodStart.getMonth() - PERIOD_MONTHS);
 
-  try {
   const [pedidos, usuario] = await Promise.all([
     prisma.pedido.findMany({
       where: {

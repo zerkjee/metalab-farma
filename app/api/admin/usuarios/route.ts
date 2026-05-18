@@ -15,20 +15,20 @@ const criarAdminSchema = z.object({
 }).strict();
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (session?.user?.role !== 'SUPER_ADMIN') {
-    return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
-  }
-
-  const body = await req.json().catch(() => null);
-  const parsed = criarAdminSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ erro: 'Dados inválidos', detalhes: parsed.error.issues }, { status: 400 });
-  }
-
-  const { nome, email, senha, papel } = parsed.data;
-
   try {
+    const session = await auth();
+    if (session?.user?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
+    }
+
+    const body = await req.json().catch(() => null);
+    const parsed = criarAdminSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ erro: 'Dados inválidos', detalhes: parsed.error.issues }, { status: 400 });
+    }
+
+    const { nome, email, senha, papel } = parsed.data;
+
     const exists = await prisma.usuario.findUnique({ where: { email } });
     if (exists) {
       return NextResponse.json({ erro: 'Email já cadastrado' }, { status: 409 });
@@ -58,12 +58,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (session?.user?.role !== 'SUPER_ADMIN') {
-    return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
-  }
-
   try {
+    const session = await auth();
+    if (session?.user?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
+    }
+
     const admins = await prisma.usuario.findMany({
       where: { papel: { in: ['ADMIN', 'SUPER_ADMIN'] } },
       select: { id: true, nome: true, email: true, papel: true, ativo: true, criadoEm: true },
@@ -78,20 +78,20 @@ export async function GET() {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await auth();
-  if (session?.user?.role !== 'SUPER_ADMIN') {
-    return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
-  }
-
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
-  if (!id) return NextResponse.json({ erro: 'ID obrigatório' }, { status: 400 });
-
-  if (id === session.user.id) {
-    return NextResponse.json({ erro: 'Não é possível remover sua própria conta' }, { status: 400 });
-  }
-
   try {
+    const session = await auth();
+    if (session?.user?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ erro: 'Acesso negado' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ erro: 'ID obrigatório' }, { status: 400 });
+
+    if (id === session.user.id) {
+      return NextResponse.json({ erro: 'Não é possível remover sua própria conta' }, { status: 400 });
+    }
+
     const usuario = await prisma.usuario.findUnique({ where: { id } });
     if (!usuario || !['ADMIN', 'SUPER_ADMIN'].includes(usuario.papel)) {
       return NextResponse.json({ erro: 'Admin não encontrado' }, { status: 404 });

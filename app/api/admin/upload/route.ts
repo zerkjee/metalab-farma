@@ -14,12 +14,12 @@ const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
 
 export async function POST(request: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.role || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
-    return NextResponse.json({ erro: "Acesso negado" }, { status: 403 })
-  }
-
   try {
+    const session = await auth()
+    if (!session?.user?.role || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
+      return NextResponse.json({ erro: "Acesso negado" }, { status: 403 })
+    }
+
     const formData = await request.formData()
     const file = formData.get("file") as File | null
 
