@@ -86,7 +86,7 @@ function ProductCard({ product }: ProductCardProps) {
 
         <div className="flex gap-2 mt-auto">
           <Link
-            href={`/produtos/${product.id}`}
+            href={`/produtos/${product.slug}`}
             className="flex-1 py-2 text-xs font-bold rounded-xl border transition-all duration-200 hover:bg-gray-50 flex items-center justify-center"
             style={{ borderColor: cor, color: cor }}
           >

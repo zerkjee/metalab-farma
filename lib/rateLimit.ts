@@ -2,7 +2,7 @@ import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 
 // Fallback sem Redis: sempre permite a requisição
-const noopLimiter = { limit: async (_key: string) => ({ success: true }) }
+const noopLimiter = { limit: async () => ({ success: true }) }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeRatelimit(limiter: any, prefix: string): { limit: (key: string) => Promise<{ success: boolean }> } {

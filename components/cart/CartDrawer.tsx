@@ -109,7 +109,7 @@ export default function CartDrawer() {
                   <div key={item.productId} className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
                     <div className="flex gap-4">
                       <Link
-                        href={`/produtos/${item.productId}`}
+                        href={`/produtos/${item.slug || item.productId}`}
                         onClick={closeCart}
                         className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-white"
                       >
@@ -129,7 +129,7 @@ export default function CartDrawer() {
                           <div className="min-w-0">
                             <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{item.brand}</p>
                             <Link
-                              href={`/produtos/${item.productId}`}
+                              href={`/produtos/${item.slug || item.productId}`}
                               onClick={closeCart}
                               className="mt-1 line-clamp-2 text-sm font-black leading-snug text-gray-950 hover:text-[#6b21a8]"
                             >

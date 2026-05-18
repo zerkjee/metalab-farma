@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   const nav: Record<string, { label: string; href: string }[]> = {
     Produtos: [
@@ -46,9 +48,9 @@ export default function Footer() {
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <a href={link.href} className="text-sm text-gray-400 hover:text-[#c084fc] transition-colors duration-200">
+                    <Link href={link.href} className="text-sm text-gray-400 hover:text-[#c084fc] transition-colors duration-200">
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

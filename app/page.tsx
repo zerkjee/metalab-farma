@@ -2,17 +2,6 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import BannerCarousel from "@/components/BannerCarousel";
 import CampaignBanners from "@/components/CampaignBanners";
-
-export const metadata: Metadata = {
-  title: "Metalab Store | Suplementos Alimentares com Qualidade e Procedência",
-  description:
-    "Suplementos alimentares com tecnologia, cuidado e confiança em cada fórmula. Produtos para complementar sua rotina alimentar. Sem indicação terapêutica.",
-  openGraph: {
-    title: "Metalab Store | Suplementos Alimentares",
-    description: "Suplementos alimentares com qualidade e procedência garantida.",
-    type: "website",
-  },
-};
 import TrustSection from "@/components/TrustSection";
 import QualitySection from "@/components/QualitySection";
 import WhyMetalab from "@/components/WhyMetalab";
@@ -24,7 +13,17 @@ import PurchaseNotification from "@/components/social-proof/PurchaseNotification
 import VipBanner from "@/components/loyalty/VipBanner";
 import { Product } from "@/types/product";
 import { products as localProducts } from "@/data/products";
-import { categorizeProducts } from "@/utils/categorizeProducts";
+
+export const metadata: Metadata = {
+  title: "Metalab Store | Suplementos Alimentares com Qualidade e Procedência",
+  description:
+    "Suplementos alimentares com tecnologia, cuidado e confiança em cada fórmula. Produtos para complementar sua rotina alimentar. Sem indicação terapêutica.",
+  openGraph: {
+    title: "Metalab Store | Suplementos Alimentares",
+    description: "Suplementos alimentares com qualidade e procedência garantida.",
+    type: "website",
+  },
+};
 
 async function getProducts(): Promise<Product[]> {
   try {
@@ -61,7 +60,6 @@ async function getProducts(): Promise<Product[]> {
 
 export default async function Home() {
   const produtos = await getProducts();
-  const categorized = categorizeProducts(produtos);
 
   return (
     <>

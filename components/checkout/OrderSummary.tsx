@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { CartItem } from '@/types/cart';
 import type { CouponState } from '@/types/coupon';
 import type { FreteStatus } from '@/types/checkout';
+import { fmtCurrency } from '@/utils/formatters';
 
 interface OrderSummaryProps {
   formId: string;
@@ -17,13 +18,6 @@ interface OrderSummaryProps {
   total: number;
   coupons: CouponState;
   freteStatus: FreteStatus;
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
 }
 
 export default function OrderSummary({
@@ -61,9 +55,9 @@ export default function OrderSummary({
             </Link>
             <div className="min-w-0 flex-1">
               <p className="line-clamp-2 text-sm font-black leading-snug text-gray-950">{item.name}</p>
-              <p className="mt-1 text-xs text-gray-500">{item.quantity} x {formatCurrency(item.unitPrice)}</p>
+              <p className="mt-1 text-xs text-gray-500">{item.quantity} x {fmtCurrency(item.unitPrice)}</p>
             </div>
-            <p className="text-sm font-black text-gray-950">{formatCurrency(item.unitPrice * item.quantity)}</p>
+            <p className="text-sm font-black text-gray-950">{fmtCurrency(item.unitPrice * item.quantity)}</p>
           </div>
         ))}
       </div>
@@ -71,37 +65,37 @@ export default function OrderSummary({
       <div className="mt-5 space-y-3 border-t border-gray-100 pt-5">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Subtotal</span>
-          <span className="font-bold text-gray-950">{formatCurrency(subtotal)}</span>
+          <span className="font-bold text-gray-950">{fmtCurrency(subtotal)}</span>
         </div>
         {discountTotal > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-emerald-600">Desconto {coupons.discount ? `(${coupons.discount.code})` : ''}</span>
-            <span className="font-bold text-emerald-600">- {formatCurrency(discountTotal)}</span>
+            <span className="font-bold text-emerald-600">- {fmtCurrency(discountTotal)}</span>
           </div>
         )}
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Frete</span>
           {freteCalculado
-            ? <span className="font-bold text-gray-950">{formatCurrency(shippingTotal)}</span>
+            ? <span className="font-bold text-gray-950">{fmtCurrency(shippingTotal)}</span>
             : <span className="text-xs font-semibold text-gray-400 italic">Informe o CEP</span>
           }
         </div>
         {freteCalculado && shippingDiscountTotal > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-emerald-600">Cupom {coupons.freeShipping?.code}</span>
-            <span className="font-bold text-emerald-600">- {formatCurrency(shippingDiscountTotal)}</span>
+            <span className="font-bold text-emerald-600">- {fmtCurrency(shippingDiscountTotal)}</span>
           </div>
         )}
         {freteCalculado && shippingDiscountTotal > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">Frete a pagar</span>
-            <span className="font-bold text-gray-950">{formatCurrency(payableShippingTotal)}</span>
+            <span className="font-bold text-gray-950">{fmtCurrency(payableShippingTotal)}</span>
           </div>
         )}
         <div className="flex items-center justify-between border-t border-gray-100 pt-3">
           <span className="text-base font-black text-gray-950">Total</span>
           {freteCalculado
-            ? <span className="text-2xl font-black text-[#6b21a8]">{formatCurrency(total)}</span>
+            ? <span className="text-2xl font-black text-[#6b21a8]">{fmtCurrency(total)}</span>
             : <span className="text-sm font-semibold text-gray-400 italic">+ frete</span>
           }
         </div>
