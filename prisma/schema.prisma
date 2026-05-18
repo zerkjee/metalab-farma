@@ -126,6 +126,8 @@ model Produto {
   criadoEm    DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
+  @@index([ativo, destaque])
+  @@index([ativo, categoriaId])
   @@map("produtos")
 }
 
@@ -288,6 +290,8 @@ model Avaliacao {
 
   criadoEm DateTime @default(now())
 
+  @@unique([usuarioId, produtoId])
+  @@index([produtoId, aprovada])
   @@map("avaliacoes")
 }
 
