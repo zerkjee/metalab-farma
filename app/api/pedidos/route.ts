@@ -241,7 +241,7 @@ export async function POST(request: NextRequest) {
       {
         pedidoId: pedido.id,
         pedidoNumero: pedido.numero,
-        total: pedido.total,
+        total: Number(pedido.total),
         metodoPagamento: pedido.metodoPagamento,
       },
       { status: 201 }
