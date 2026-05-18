@@ -17,6 +17,7 @@ function CountUp({ target, suffix, prefix = '' }: { target: number; suffix: stri
   const started = useRef(false);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | null = null;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !started.current) {
@@ -25,17 +26,20 @@ function CountUp({ target, suffix, prefix = '' }: { target: number; suffix: stri
           const steps = 60;
           const increment = target / steps;
           let current = 0;
-          const timer = setInterval(() => {
+          timer = setInterval(() => {
             current = Math.min(current + increment, target);
             setCount(Math.floor(current));
-            if (current >= target) clearInterval(timer);
+            if (current >= target && timer) clearInterval(timer);
           }, duration / steps);
         }
       },
       { threshold: 0.3 }
     );
     if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (timer) clearInterval(timer);
+    };
   }, [target]);
 
   return (
