@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
@@ -49,11 +50,19 @@ export default async function CampaignBanners() {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-center">
-                    <div className="h-20 w-20 overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur">
-                      <div className="h-full w-full rounded-xl bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${b.imagemUrl})` }} />
+                  {b.imagemUrl && (
+                    <div className="flex items-center justify-center">
+                      <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur">
+                        <Image
+                          src={b.imagemUrl}
+                          alt={b.titulo ?? ''}
+                          fill
+                          sizes="80px"
+                          className="object-contain rounded-xl p-1"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )

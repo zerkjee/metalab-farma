@@ -51,16 +51,16 @@ const senhaReqs = [
 
 // ── field input ───────────────────────────────────────────────────────────────
 function Field({
-  label, error, touched, children,
+  label, error, touched, fieldId, children,
 }: {
-  label: string; error?: string; touched?: boolean; children: React.ReactNode;
+  label: string; error?: string; touched?: boolean; fieldId?: string; children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
       <label className="block text-xs font-semibold text-slate-400">{label}</label>
       {children}
       {touched && error && (
-        <p className="flex items-center gap-1 text-xs text-red-400">
+        <p id={fieldId ? `error-${fieldId}` : undefined} className="flex items-center gap-1 text-xs text-red-400">
           <span className="inline-block w-1 h-1 rounded-full bg-red-400 flex-shrink-0" />
           {error}
         </p>
@@ -290,7 +290,7 @@ export default function RegistroPage() {
 
                 <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5">
 
-                  <Field label="Nome completo" error={errors.nome} touched={touched.nome}>
+                  <Field label="Nome completo" error={errors.nome} touched={touched.nome} fieldId="nome">
                     <input
                       type="text"
                       value={form.nome}
@@ -298,23 +298,27 @@ export default function RegistroPage() {
                       onBlur={() => touch('nome')}
                       autoFocus
                       placeholder="Seu nome completo"
+                      aria-invalid={!!(touched.nome && errors.nome) || undefined}
+                      aria-describedby={touched.nome && errors.nome ? 'error-nome' : undefined}
                       className={inputCls(!!(touched.nome && errors.nome))}
                     />
                   </Field>
 
-                  <Field label="Email" error={errors.email} touched={touched.email}>
+                  <Field label="Email" error={errors.email} touched={touched.email} fieldId="email">
                     <input
                       type="email"
                       value={form.email}
                       onChange={(e) => set('email', e.target.value)}
                       onBlur={() => touch('email')}
                       placeholder="seu@email.com"
+                      aria-invalid={!!(touched.email && errors.email) || undefined}
+                      aria-describedby={touched.email && errors.email ? 'error-email' : undefined}
                       className={inputCls(!!(touched.email && errors.email))}
                     />
                   </Field>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <Field label="CPF" error={errors.cpf} touched={touched.cpf}>
+                    <Field label="CPF" error={errors.cpf} touched={touched.cpf} fieldId="cpf">
                       <input
                         type="text"
                         value={form.cpf}
@@ -322,6 +326,8 @@ export default function RegistroPage() {
                         onBlur={() => touch('cpf')}
                         placeholder="000.000.000-00"
                         inputMode="numeric"
+                        aria-invalid={!!(touched.cpf && errors.cpf) || undefined}
+                        aria-describedby={touched.cpf && errors.cpf ? 'error-cpf' : undefined}
                         className={inputCls(!!(touched.cpf && errors.cpf))}
                       />
                     </Field>
@@ -341,7 +347,7 @@ export default function RegistroPage() {
                   <div className="border-t border-white/10 pt-3.5 mt-0.5">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-300 mb-3">Endereço</p>
                     <div className="grid grid-cols-2 gap-3">
-                      <Field label="CEP" error={errors.cep} touched={touched.cep}>
+                      <Field label="CEP" error={errors.cep} touched={touched.cep} fieldId="cep">
                         <input
                           type="text"
                           value={form.cep}
@@ -353,28 +359,34 @@ export default function RegistroPage() {
                           onBlur={() => touch('cep')}
                           placeholder="00000-000"
                           inputMode="numeric"
+                          aria-invalid={!!(touched.cep && errors.cep) || undefined}
+                          aria-describedby={touched.cep && errors.cep ? 'error-cep' : undefined}
                           className={inputCls(!!(touched.cep && errors.cep))}
                         />
                       </Field>
-                      <Field label="Número" error={errors.numero} touched={touched.numero}>
+                      <Field label="Número" error={errors.numero} touched={touched.numero} fieldId="numero">
                         <input
                           type="text"
                           value={form.numero}
                           onChange={(e) => set('numero', e.target.value)}
                           onBlur={() => touch('numero')}
                           placeholder="120"
+                          aria-invalid={!!(touched.numero && errors.numero) || undefined}
+                          aria-describedby={touched.numero && errors.numero ? 'error-numero' : undefined}
                           className={inputCls(!!(touched.numero && errors.numero))}
                         />
                       </Field>
                     </div>
                     <div className="mt-3">
-                      <Field label="Endereço" error={errors.logradouro} touched={touched.logradouro}>
+                      <Field label="Endereço" error={errors.logradouro} touched={touched.logradouro} fieldId="logradouro">
                         <input
                           type="text"
                           value={form.logradouro}
                           onChange={(e) => set('logradouro', e.target.value)}
                           onBlur={() => touch('logradouro')}
                           placeholder="Rua das Flores"
+                          aria-invalid={!!(touched.logradouro && errors.logradouro) || undefined}
+                          aria-describedby={touched.logradouro && errors.logradouro ? 'error-logradouro' : undefined}
                           className={inputCls(!!(touched.logradouro && errors.logradouro))}
                         />
                       </Field>
@@ -391,17 +403,19 @@ export default function RegistroPage() {
                       </Field>
                     </div>
                     <div className="grid grid-cols-2 gap-3 mt-3">
-                      <Field label="Bairro" error={errors.bairro} touched={touched.bairro}>
+                      <Field label="Bairro" error={errors.bairro} touched={touched.bairro} fieldId="bairro">
                         <input
                           type="text"
                           value={form.bairro}
                           onChange={(e) => set('bairro', e.target.value)}
                           onBlur={() => touch('bairro')}
                           placeholder="Centro"
+                          aria-invalid={!!(touched.bairro && errors.bairro) || undefined}
+                          aria-describedby={touched.bairro && errors.bairro ? 'error-bairro' : undefined}
                           className={inputCls(!!(touched.bairro && errors.bairro))}
                         />
                       </Field>
-                      <Field label="Estado" error={errors.estado} touched={touched.estado}>
+                      <Field label="Estado" error={errors.estado} touched={touched.estado} fieldId="estado">
                         <input
                           type="text"
                           value={form.estado}
@@ -409,25 +423,29 @@ export default function RegistroPage() {
                           onBlur={() => touch('estado')}
                           placeholder="MG"
                           maxLength={2}
+                          aria-invalid={!!(touched.estado && errors.estado) || undefined}
+                          aria-describedby={touched.estado && errors.estado ? 'error-estado' : undefined}
                           className={inputCls(!!(touched.estado && errors.estado))}
                         />
                       </Field>
                     </div>
                     <div className="mt-3">
-                      <Field label="Cidade" error={errors.cidade} touched={touched.cidade}>
+                      <Field label="Cidade" error={errors.cidade} touched={touched.cidade} fieldId="cidade">
                         <input
                           type="text"
                           value={form.cidade}
                           onChange={(e) => set('cidade', e.target.value)}
                           onBlur={() => touch('cidade')}
                           placeholder="Belo Horizonte"
+                          aria-invalid={!!(touched.cidade && errors.cidade) || undefined}
+                          aria-describedby={touched.cidade && errors.cidade ? 'error-cidade' : undefined}
                           className={inputCls(!!(touched.cidade && errors.cidade))}
                         />
                       </Field>
                     </div>
                   </div>
 
-                  <Field label="Senha" error={errors.senha} touched={touched.senha}>
+                  <Field label="Senha" error={errors.senha} touched={touched.senha} fieldId="senha">
                     <div className="relative">
                       <input
                         type={showSenha ? 'text' : 'password'}
@@ -435,6 +453,8 @@ export default function RegistroPage() {
                         onChange={(e) => set('senha', e.target.value)}
                         onBlur={() => touch('senha')}
                         placeholder="Mínimo 8 caracteres"
+                        aria-invalid={!!(touched.senha && errors.senha) || undefined}
+                        aria-describedby={touched.senha && errors.senha ? 'error-senha' : undefined}
                         className={`${inputCls(!!(touched.senha && errors.senha))} pr-11`}
                       />
                       <button
@@ -464,7 +484,7 @@ export default function RegistroPage() {
                     )}
                   </Field>
 
-                  <Field label="Confirmar senha" error={errors.confirmarSenha} touched={touched.confirmarSenha}>
+                  <Field label="Confirmar senha" error={errors.confirmarSenha} touched={touched.confirmarSenha} fieldId="confirmarSenha">
                     <div className="relative">
                       <input
                         type={showConfirmar ? 'text' : 'password'}
@@ -472,6 +492,8 @@ export default function RegistroPage() {
                         onChange={(e) => set('confirmarSenha', e.target.value)}
                         onBlur={() => touch('confirmarSenha')}
                         placeholder="Repita a senha"
+                        aria-invalid={!!(touched.confirmarSenha && errors.confirmarSenha) || undefined}
+                        aria-describedby={touched.confirmarSenha && errors.confirmarSenha ? 'error-confirmarSenha' : undefined}
                         className={`${inputCls(!!(touched.confirmarSenha && errors.confirmarSenha))} pr-11`}
                       />
                       <button

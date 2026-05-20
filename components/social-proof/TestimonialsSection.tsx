@@ -54,6 +54,9 @@ export default function TestimonialsSection() {
           </div>
         </div>
 
+        {/* Hint de swipe — apenas mobile */}
+        <p className="md:hidden text-center text-xs text-gray-400 mb-2">← Deslize para ver mais →</p>
+
         {/* Scrollable row */}
         <div
           ref={scrollRef}

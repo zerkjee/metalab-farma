@@ -234,8 +234,8 @@ export default function BannerCarousel() {
 
   return (
     <section
-      className="relative overflow-hidden transition-[background] duration-700"
-      style={{ background: slide.bg, height: '88vh', minHeight: '600px' }}
+      className="relative overflow-hidden transition-[background] duration-700 h-[62vh] min-h-[380px] sm:h-[75vh] sm:min-h-[500px] lg:h-[88vh] lg:min-h-[600px]"
+      style={{ background: slide.bg }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -269,7 +269,7 @@ export default function BannerCarousel() {
 
               {/* Título */}
               <h1
-                className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight transition-all duration-500"
+                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight transition-all duration-500"
                 style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(12px)' : 'translateY(0)' }}
               >
                 {slide.title.split('\n').map((line, i) => (

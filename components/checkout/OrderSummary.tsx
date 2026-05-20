@@ -51,7 +51,7 @@ export default function OrderSummary({
               className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-white"
             >
               {item.imageUrl ? (
-                <Image src={item.imageUrl} alt={item.name} width={64} height={64} className="h-full w-full object-contain p-2" />
+                <Image src={item.imageUrl} alt={item.name} width={64} height={64} sizes="64px" className="h-full w-full object-contain p-2" />
               ) : (
                 <ShoppingBag className="h-6 w-6 text-gray-300" strokeWidth={1.6} />
               )}

@@ -42,7 +42,7 @@ export default function PurchaseNotification() {
   return (
     <div
       aria-live="polite"
-      className="fixed bottom-6 left-6 z-50 transition-all duration-500"
+      className="fixed bottom-6 left-4 z-[55] transition-all duration-300"
       style={{
         transform: visible ? 'translateX(0) translateY(0)' : 'translateX(-110%)',
         opacity: visible ? 1 : 0,
@@ -80,7 +80,7 @@ export default function PurchaseNotification() {
         <button
           onClick={() => setVisible(false)}
           aria-label="Fechar notificação"
-          className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-gray-300 hover:text-gray-500 transition-colors"
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-300 hover:text-gray-500 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />

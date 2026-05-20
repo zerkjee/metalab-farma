@@ -63,6 +63,8 @@ function LoginForm() {
           required
           autoFocus
           placeholder="seu@email.com"
+          aria-invalid={status === 'error' || undefined}
+          aria-describedby={status === 'error' ? 'login-error' : undefined}
           className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
         />
       </div>
@@ -76,6 +78,8 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="Mínimo 6 caracteres"
+            aria-invalid={status === 'error' || undefined}
+            aria-describedby={status === 'error' ? 'login-error' : undefined}
             className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 pr-11 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
           />
           <button
@@ -89,7 +93,7 @@ function LoginForm() {
       </div>
 
       {status === 'error' && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
+        <div id="login-error" className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
           {errorMsg}
         </div>
       )}

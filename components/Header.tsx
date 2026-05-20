@@ -123,7 +123,7 @@ export default function Header() {
 
             <button
               onClick={toggleCart}
-              className="relative p-2 text-gray-600 hover:text-[#6b21a8] transition-colors"
+              className="relative p-2.5 text-gray-600 hover:text-[#6b21a8] transition-colors"
               aria-label={`Abrir carrinho com ${cartCount} itens`}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +139,7 @@ export default function Header() {
 
             {/* Hamburger mobile */}
             <button
-              className="md:hidden p-2 text-gray-600"
+              className="md:hidden p-2.5 text-gray-600"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={menuOpen}

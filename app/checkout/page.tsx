@@ -12,6 +12,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { calculateCartTotals } from '@/services/cartTotals';
+import { fmtCurrency } from '@/utils/formatters';
 import type {
   CheckoutForm as CheckoutFormValues,
   FreteStatus,
@@ -82,6 +83,7 @@ export default function CheckoutPage() {
   const [cuponsDisponiveis, setCuponsDisponiveis] = useState<{ codigo: string; tipo: string; valor: number }[]>([]);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>(initialShippingMethods);
   const [freteStatus, setFreteStatus] = useState<FreteStatus>('idle');
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [enderecoMode, setEnderecoMode] = useState<'salvo' | 'novo'>('salvo');
   const [temEnderecoSalvo, setTemEnderecoSalvo] = useState(false);
   const savedFormRef = useRef<CheckoutFormValues | null>(null);
@@ -423,6 +425,45 @@ export default function CheckoutPage() {
             </div>
           </div>
         )}
+
+        {/* Resumo colapsável — visível apenas em mobile (< lg) */}
+        <div className="lg:hidden mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+          <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setSummaryOpen((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-3.5 text-sm"
+              aria-expanded={summaryOpen}
+            >
+              <span className="font-bold text-gray-950">
+                {summaryOpen ? 'Ocultar resumo' : `Ver resumo (${items.length} ${items.length === 1 ? 'item' : 'itens'})`}
+              </span>
+              <div className="flex items-center gap-3">
+                <span className="font-black text-[#6b21a8]">{fmtCurrency(totals.total)}</span>
+                <svg
+                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${summaryOpen ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+            {summaryOpen && (
+              <div className="border-t border-gray-100 px-4 pb-4 pt-3 space-y-2">
+                {items.map((item) => (
+                  <div key={item.productId} className="flex justify-between text-sm">
+                    <span className="text-gray-700 truncate flex-1 pr-2">{item.name} <span className="text-gray-400">×{item.quantity}</span></span>
+                    <span className="font-semibold text-gray-900 shrink-0">{fmtCurrency(item.unitPrice * item.quantity)}</span>
+                  </div>
+                ))}
+                <div className="pt-2 border-t border-gray-100 flex justify-between text-sm font-black text-gray-950">
+                  <span>Total</span>
+                  <span>{fmtCurrency(totals.total)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
           <div className="flex flex-col gap-6">

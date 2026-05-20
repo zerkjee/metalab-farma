@@ -114,11 +114,11 @@ export default function StatsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="relative p-8 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col items-center text-center gap-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group"
+              className="relative p-5 sm:p-8 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col items-center text-center gap-3 sm:gap-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group"
             >
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-sm group-hover:scale-110 transition-transform duration-300"
@@ -127,7 +127,7 @@ export default function StatsSection() {
                 {stat.icon}
               </div>
               <div>
-                <p className="text-4xl font-black text-gray-900 leading-none">
+                <p className="text-2xl sm:text-4xl font-black text-gray-900 leading-none">
                   {stat.suffix === '/5' ? (
                     <span>
                       {stat.prefix}<CountUp target={stat.value} suffix="" />

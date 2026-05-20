@@ -120,6 +120,7 @@ export default function CartDrawer() {
                             alt={item.name}
                             width={80}
                             height={80}
+                            sizes="80px"
                             className="h-full w-full object-contain p-2"
                           />
                         ) : (
@@ -141,7 +142,7 @@ export default function CartDrawer() {
                           </div>
                           <button
                             onClick={() => removeItem(item.productId)}
-                            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 hover:text-red-500"
+                            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-red-50 hover:text-red-500"
                             aria-label={`Remover ${item.name}`}
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={1.8} />

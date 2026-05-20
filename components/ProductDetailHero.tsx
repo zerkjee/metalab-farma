@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useRef, useEffect, useState } from 'react';
 import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
 import { fmtCurrency } from '@/utils/formatters';
@@ -20,7 +21,23 @@ export default function ProductDetailHero({
 
   const temEstoque = product.estoque > 0;
 
+  // Sticky CTA — aparece em mobile quando os botões originais saem da tela
+  const botoesRef = useRef<HTMLDivElement>(null);
+  const [stickyCta, setStickyCta] = useState(false);
+
+  useEffect(() => {
+    const el = botoesRef.current;
+    if (!el || typeof window === 'undefined') return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setStickyCta(!entry.isIntersecting),
+      { rootMargin: '0px 0px -60px 0px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   return (
+    <>
     <section className="py-12 bg-white border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
@@ -70,7 +87,7 @@ export default function ProductDetailHero({
 
             {/* Nome e Subtítulo */}
             <div>
-              <h1 className="text-4xl font-black text-gray-900 mb-2">
+              <h1 className="text-2xl sm:text-4xl font-black text-gray-900 mb-2">
                 {product.nome}
               </h1>
               <p className="text-gray-600 text-lg leading-relaxed">
@@ -80,7 +97,7 @@ export default function ProductDetailHero({
 
             {/* Preço */}
             <div
-              className="text-4xl font-black"
+              className="text-3xl sm:text-4xl font-black"
               style={{ color: corPrincipal }}
             >
               {precoFormatado}
@@ -132,10 +149,10 @@ export default function ProductDetailHero({
             </div>
 
             {/* Botões */}
-            <div className="flex gap-3 pt-4">
+            <div ref={botoesRef} className="flex flex-col sm:flex-row gap-3 pt-4">
               <button
                 disabled={!temEstoque}
-                className="flex-1 py-3 px-6 text-sm font-bold rounded-xl border-2 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="w-full sm:flex-1 py-3.5 px-6 text-sm font-bold rounded-xl border-2 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
                 style={{
                   borderColor: corPrincipal,
                   color: corPrincipal,
@@ -146,7 +163,7 @@ export default function ProductDetailHero({
               <button
                 onClick={() => addItem(product)}
                 disabled={!temEstoque}
-                className="flex-1 py-3 px-6 text-sm font-bold text-white rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
+                className="w-full sm:flex-1 py-3.5 px-6 text-sm font-bold text-white rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
                 style={{
                   backgroundColor: corPrincipal,
                 }}
@@ -163,5 +180,28 @@ export default function ProductDetailHero({
         </div>
       </div>
     </section>
+
+    {/* Sticky CTA mobile — visível apenas quando os botões originais saíram da tela */}
+    <div
+      aria-hidden={!stickyCta}
+      className={`fixed bottom-0 left-0 right-0 z-[60] bg-white/95 backdrop-blur-sm border-t border-gray-100 px-4 py-3 flex items-center gap-3 md:hidden transition-transform duration-300 ${stickyCta ? 'translate-y-0' : 'translate-y-full'}`}
+    >
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-gray-500 truncate">{product.marca}</p>
+        <p className="text-sm font-black text-gray-900 truncate">{product.nome}</p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-sm font-black" style={{ color: corPrincipal }}>{precoFormatado}</span>
+        <button
+          onClick={() => addItem(product)}
+          disabled={!temEstoque}
+          className="py-2.5 px-4 text-sm font-bold text-white rounded-xl disabled:opacity-40 active:scale-95 transition-all"
+          style={{ backgroundColor: corPrincipal }}
+        >
+          {temEstoque ? 'Comprar' : 'Indisponível'}
+        </button>
+      </div>
+    </div>
+    </>
   );
 }
