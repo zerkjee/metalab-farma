@@ -2,7 +2,8 @@
 
 import Script from 'next/script'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { getConsent } from '@/components/cookies/CookieBanner'
 
 const GA_ID = process.env.NEXT_PUBLIC_GA4_ID
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
@@ -17,7 +18,19 @@ function PageTracker() {
 }
 
 export default function Analytics() {
-  if (!GA_ID && !PIXEL_ID) return null
+  const [consented, setConsented] = useState(false)
+
+  useEffect(() => {
+    if (getConsent() === 'all') {
+      setConsented(true)
+      return
+    }
+    const handler = () => setConsented(true)
+    window.addEventListener('metalab_consent_granted', handler)
+    return () => window.removeEventListener('metalab_consent_granted', handler)
+  }, [])
+
+  if (!consented || (!GA_ID && !PIXEL_ID)) return null
 
   return (
     <>

@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Analytics from "@/components/analytics/Analytics";
+import CookieBanner from "@/components/cookies/CookieBanner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -91,6 +92,7 @@ export default function RootLayout({
           </CartProvider>
         </SessionProviderWrapper>
         <Analytics />
+        <CookieBanner />
       </body>
     </html>
   );

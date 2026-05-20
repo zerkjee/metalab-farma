@@ -15,9 +15,9 @@ export default function Footer() {
       { label: 'Contato', href: '/#contato' },
     ],
     Atendimento: [
-      { label: 'FAQ', href: '/' },
-      { label: 'Política de Privacidade', href: '/' },
-      { label: 'Trocas e Devoluções', href: '/' },
+      { label: 'Política de Privacidade', href: '/politica-de-privacidade' },
+      { label: 'Termos de Uso', href: '/termos-de-uso' },
+      { label: 'Trocas e Devoluções', href: '/trocas-e-devolucoes' },
       { label: 'Fale Conosco', href: '/#contato' },
     ],
   };
