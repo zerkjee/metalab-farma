@@ -87,6 +87,11 @@ model Categoria {
   @@map("categorias")
 }
 
+enum TipoProduto {
+  SIMPLES
+  KIT
+}
+
 model Produto {
   id            String  @id @default(cuid())
   nome          String
@@ -98,36 +103,58 @@ model Produto {
   descricaoHtml String  @db.Text
   descricaoCurta String?
 
+  // ─── Conteúdo (suplementos) ────────────────────────────────────────────────
+  composicao    String? @db.Text
+  modoDeUso     String? @db.Text
+
+  // ─── Preço ────────────────────────────────────────────────────────────────
   preco         Decimal  @db.Decimal(10, 2)
   precoOriginal Decimal? @db.Decimal(10, 2)
 
+  // ─── Estoque ──────────────────────────────────────────────────────────────
   estoque    Int @default(0)
   estoqueMin Int @default(5)
 
-  categoriaId String?
-  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+  // ─── Dimensões e peso (Melhor Envio) ──────────────────────────────────────
+  pesoGramas    Int?
+  alturaCm      Int?
+  larguraCm     Int?
+  comprimentoCm Int?
 
+  // ─── Classificação ────────────────────────────────────────────────────────
+  tipo        TipoProduto @default(SIMPLES)
+  tags        String[]
+  categoriaId String?
+  categoria   Categoria?  @relation(fields: [categoriaId], references: [id])
+
+  // ─── Visual ───────────────────────────────────────────────────────────────
   corPrincipal  String?
   corSecundaria String?
   imagemUrl     String?
 
+  // ─── SEO ──────────────────────────────────────────────────────────────────
   metaTitulo    String?
   metaDescricao String?
   palavrasChave String?
 
+  // ─── Flags ────────────────────────────────────────────────────────────────
   ativo    Boolean @default(true)
   destaque Boolean @default(false)
 
-  imagens   ImagemProduto[]
-  atributos AtributoProduto[]
-  avaliacoes Avaliacao[]
-  itens     ItemPedido[]
+  // ─── Relações ─────────────────────────────────────────────────────────────
+  imagens        ImagemProduto[]
+  atributos      AtributoProduto[]
+  avaliacoes     Avaliacao[]
+  itens          ItemPedido[]
+  kitItens       KitItem[]  @relation("KitPai")
+  componenteDe   KitItem[]  @relation("KitComponente")
 
   criadoEm    DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
   @@index([ativo, destaque])
   @@index([ativo, categoriaId])
+  @@index([tipo])
   @@map("produtos")
 }
 
@@ -150,6 +177,21 @@ model AtributoProduto {
   produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
   @@map("atributos_produto")
+}
+
+model KitItem {
+  id         String  @id @default(cuid())
+  quantidade Int     @default(1)
+  ordem      Int     @default(0)
+
+  kitId      String
+  kit        Produto @relation("KitPai",       fields: [kitId],      references: [id], onDelete: Cascade)
+  produtoId  String
+  produto    Produto @relation("KitComponente", fields: [produtoId],  references: [id])
+
+  @@unique([kitId, produtoId])
+  @@index([kitId])
+  @@map("kit_itens")
 }
 
 // ─── ENDEREÇOS ────────────────────────────────────────────────────────────────
