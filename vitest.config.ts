@@ -18,6 +18,7 @@ export default defineConfig({
         'lib/sentryUtils.ts',
         'lib/adminGuard.ts',
         'lib/validations.ts',
+        'lib/freteUtils.ts',
       ],
       reporter: ['text', 'html'],
     },

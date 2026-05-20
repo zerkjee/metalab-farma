@@ -148,7 +148,15 @@ export default function CheckoutPage() {
       }
       if (!cancelled) setFreteStatus('loading');
       try {
-        const res = await fetch(`/api/frete?cep=${digits}`, { signal: controller.signal });
+        const res = await fetch('/api/frete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cep: digits,
+            itens: items.map((i) => ({ produtoId: i.productId, quantidade: i.quantity })),
+          }),
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (cancelled) return;
         if (Array.isArray(data) && data.length > 0) {
@@ -164,7 +172,7 @@ export default function CheckoutPage() {
     })();
 
     return () => { cancelled = true; controller.abort(); };
-  }, [form.zipCode]);
+  }, [form.zipCode, items]);
 
   const selectedShipping = useMemo(
     () => shippingMethods.find((method) => method.id === selectedShippingId) ?? shippingMethods[0],
