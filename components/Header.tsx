@@ -173,7 +173,7 @@ export default function Header() {
               href={adminAccess.href}
               onClick={() => setMenuOpen(false)}
               aria-current={isAdminActive ? 'page' : undefined}
-              className={`flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
+              className={`flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
                 isAdminActive
                   ? 'bg-[#6b21a8]/10 text-[#6b21a8]'
                   : 'text-gray-700 hover:bg-gray-50 hover:text-[#6b21a8]'
@@ -185,13 +185,13 @@ export default function Header() {
             {isLoggedIn ? (
               <>
                 <Link href="/pedidos" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#6b21a8] transition-all">
+                  className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#6b21a8] transition-all">
                   <Package className="h-4 w-4" strokeWidth={1.8} />
                   Meus pedidos
                 </Link>
                 <button
                   onClick={() => { setMenuOpen(false); void signOut({ callbackUrl: '/' }); }}
-                  className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
+                  className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
                 >
                   <LogOut className="h-4 w-4" strokeWidth={1.8} />
                   Sair ({session?.user?.name?.split(' ')[0]})
@@ -199,7 +199,7 @@ export default function Header() {
               </>
             ) : (
               <Link href="/login" onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-[#6b21a8] hover:bg-purple-50 transition-all">
+                className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-semibold text-[#6b21a8] hover:bg-purple-50 transition-all">
                 <User className="h-4 w-4" strokeWidth={1.8} />
                 Entrar / Criar conta
               </Link>

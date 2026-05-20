@@ -226,6 +226,7 @@ export default function BannerCarousel() {
 
   useEffect(() => {
     if (paused) return;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     intervalRef.current = setInterval(() => setCurrent((c) => (c + 1) % slides.length), 5500);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [paused]);
