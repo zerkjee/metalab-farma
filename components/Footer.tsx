@@ -9,9 +9,9 @@ export default function Footer() {
       { label: 'Fitoterápicos', href: '/#produtos' },
     ],
     Institucional: [
-      { label: 'Sobre a Metalab', href: '/' },
-      { label: 'Qualidade', href: '/' },
-      { label: 'Certificações', href: '/' },
+      { label: 'Sobre a Metalab', href: '/sobre' },
+      { label: 'Qualidade', href: '/qualidade' },
+      { label: 'Certificações', href: '/certificacoes' },
       { label: 'Contato', href: '/#contato' },
     ],
     Atendimento: [
