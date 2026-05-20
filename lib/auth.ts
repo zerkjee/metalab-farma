@@ -7,12 +7,12 @@ import { prisma } from "./prisma"
 
 const loginSchema = z.object({
   email: z.string().email(),
-  senha: z.string().min(6),
+  senha: z.string().min(8),
 })
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
   pages: {
     signIn: "/login",
     error: "/login",

@@ -8,7 +8,12 @@ const noopLimiter = { limit: async () => ({ success: true }) }
 function makeRatelimit(limiter: any, prefix: string): { limit: (key: string) => Promise<{ success: boolean }> } {
   const url = process.env.UPSTASH_REDIS_REST_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN
-  if (!url || !token) return noopLimiter
+  if (!url || !token) {
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(`[rateLimit] UPSTASH_REDIS_REST_URL/TOKEN ausentes — rate limit desativado para "${prefix}"`)
+    }
+    return noopLimiter
+  }
 
   const redis = new Redis({ url, token })
   return new Ratelimit({ redis, limiter, prefix })

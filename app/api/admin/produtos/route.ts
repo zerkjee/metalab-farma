@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { logger } from "@/lib/logger"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes("ADMIN")) {
-      return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
-    }
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
     const busca = searchParams.get("busca") ?? ""

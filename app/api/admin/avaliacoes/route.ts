@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { requireAdmin } from '@/lib/adminGuard'
 import { logAudit, getClientIp } from '@/lib/audit'
 import { logger } from '@/lib/logger'
 
@@ -13,10 +13,8 @@ const updateSchema = z.object({
 // GET /api/admin/avaliacoes?status=pendentes|aprovadas|todas
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes('ADMIN')) {
-      return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
-    }
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') ?? 'pendentes'
@@ -43,8 +41,8 @@ export async function GET(request: NextRequest) {
 // PATCH /api/admin/avaliacoes — aprovar / reprovar
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes('ADMIN') || !session.user.id || !session.user.email) {
+    const session = await requireAdmin()
+    if (!session?.user?.id || !session.user.email) {
       return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
     }
 
@@ -77,8 +75,8 @@ export async function PATCH(request: NextRequest) {
 // DELETE /api/admin/avaliacoes?id=X
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes('ADMIN') || !session.user.id || !session.user.email) {
+    const session = await requireAdmin()
+    if (!session?.user?.id || !session.user.email) {
       return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
     }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
 import { v2 as cloudinary } from "cloudinary"
@@ -15,10 +15,8 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.role || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
-      return NextResponse.json({ erro: "Acesso negado" }, { status: 403 })
-    }
+    const session = await requireAdmin()
+    if (!session) return NextResponse.json({ erro: "Acesso negado" }, { status: 403 })
 
     const formData = await request.formData()
     const file = formData.get("file") as File | null
