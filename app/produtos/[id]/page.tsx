@@ -50,6 +50,8 @@ async function getProduto(idParam: string): Promise<Product | null> {
         descricaoCurta: p.descricaoCurta ? String(p.descricaoCurta) : null,
         descricaoHtml: p.descricaoHtml ? String(p.descricaoHtml) : null,
         imagemUrl: p.imagemUrl ? String(p.imagemUrl) : null,
+        tipo: (p.tipo === 'KIT' ? 'KIT' : 'SIMPLES') as 'SIMPLES' | 'KIT',
+        tags: Array.isArray(p.tags) ? p.tags : [],
         ativo: Boolean(p.ativo),
         destaque: Boolean(p.destaque),
         corPrincipal: p.corPrincipal ? String(p.corPrincipal) : null,

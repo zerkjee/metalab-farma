@@ -17,20 +17,39 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const categoria = searchParams.get("categoria")
-    const busca = searchParams.get("busca")
-    const pagina = Math.max(1, parseInt(searchParams.get("pagina") ?? "1"))
-    const porPagina = Math.min(Math.max(1, parseInt(searchParams.get("por_pagina") ?? "20") || 20), 100)
-    const destaque = searchParams.get("destaque") === "true"
+    const categoria  = searchParams.get("categoria")
+    const busca      = searchParams.get("busca")
+    const tag        = searchParams.get("tag")
+    const marca      = searchParams.get("marca")
+    const tipo       = searchParams.get("tipo")
+    const precoMin   = searchParams.get("preco_min")
+    const precoMax   = searchParams.get("preco_max")
+    const pagina     = Math.max(1, parseInt(searchParams.get("pagina") ?? "1"))
+    const porPagina  = Math.min(Math.max(1, parseInt(searchParams.get("por_pagina") ?? "20") || 20), 100)
+    const destaque   = searchParams.get("destaque") === "true"
 
     const where: Prisma.ProdutoWhereInput = { ativo: true }
+
     if (categoria) where.categoria = { slug: categoria }
-    if (destaque) where.destaque = true
+    if (destaque)  where.destaque  = true
+    if (tag)       where.tags = { has: tag }
+    if (marca)     where.marca = { equals: marca, mode: "insensitive" }
+    if (tipo && (tipo === "SIMPLES" || tipo === "KIT")) where.tipo = tipo
+
+    if (precoMin || precoMax) {
+      where.preco = {
+        ...(precoMin ? { gte: new Prisma.Decimal(precoMin) } : {}),
+        ...(precoMax ? { lte: new Prisma.Decimal(precoMax) } : {}),
+      }
+    }
+
     if (busca) {
       where.OR = [
-        { nome: { contains: busca, mode: "insensitive" } },
+        { nome:         { contains: busca, mode: "insensitive" } },
         { descricaoCurta: { contains: busca, mode: "insensitive" } },
-        { marca: { contains: busca, mode: "insensitive" } },
+        { marca:        { contains: busca, mode: "insensitive" } },
+        { sku:          { contains: busca, mode: "insensitive" } },
+        { tags:         { has: busca } },
       ]
     }
 
@@ -38,8 +57,8 @@ export async function GET(request: NextRequest) {
       prisma.produto.findMany({
         where,
         include: {
-          imagens: { orderBy: { ordem: "asc" }, take: 1 },
-          categoria: { select: { nome: true, slug: true } },
+          imagens:   { orderBy: { ordem: "asc" }, take: 1 },
+          categoria: { select: { id: true, nome: true, slug: true } },
         },
         orderBy: [{ destaque: "desc" }, { criadoEm: "desc" }],
         skip: (pagina - 1) * porPagina,
@@ -51,7 +70,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       produtos: produtos.map((p) => ({
         ...p,
-        preco: Number(p.preco),
+        preco:         Number(p.preco),
         precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
       })),
       total,
@@ -74,22 +93,48 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => null)
     const data = produtoSchema.parse(body)
+    const { kitItens, ...produtoData } = data
 
-    const produto = await prisma.produto.create({ data: data as Prisma.ProdutoUncheckedCreateInput })
-    auditFromSession(session, request, {
-      acao: "produto.criado",
-      recurso: "produto",
-      recursoId: produto.id,
-      detalhe: { nome: produto.nome, slug: produto.slug, preco: Number(produto.preco), estoque: produto.estoque },
+    // Valida que kit não referencia ele mesmo (só possível em update, mas mantemos aqui por segurança)
+    const produto = await prisma.$transaction(async (tx) => {
+      const p = await tx.produto.create({
+        data: produtoData as Prisma.ProdutoUncheckedCreateInput,
+      })
+
+      if (p.tipo === "KIT" && kitItens && kitItens.length > 0) {
+        const invalido = kitItens.find((k) => k.produtoId === p.id)
+        if (invalido) throw new Error("KIT_SELF_REFERENCE")
+
+        await tx.kitItem.createMany({
+          data: kitItens.map((k, i) => ({
+            kitId:      p.id,
+            produtoId:  k.produtoId,
+            quantidade: k.quantidade,
+            ordem:      k.ordem ?? i,
+          })),
+        })
+      }
+      return p
     })
+
+    auditFromSession(session, request, {
+      acao:      "produto.criado",
+      recurso:   "produto",
+      recursoId: produto.id,
+      detalhe:   { nome: produto.nome, tipo: produto.tipo, preco: Number(produto.preco) },
+    })
+
     return NextResponse.json({
       ...produto,
-      preco: Number(produto.preco),
+      preco:         Number(produto.preco),
       precoOriginal: produto.precoOriginal != null ? Number(produto.precoOriginal) : null,
     }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ erro: "Dados inválidos", detalhes: error.issues }, { status: 400 })
+    }
+    if (error instanceof Error && error.message === "KIT_SELF_REFERENCE") {
+      return NextResponse.json({ erro: "Kit não pode referenciar ele mesmo" }, { status: 400 })
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return NextResponse.json({ erro: "Slug ou SKU já existe" }, { status: 409 })

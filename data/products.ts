@@ -1,5 +1,8 @@
 import { Product } from "@/types/product";
-export const products: Product[] = [
+
+type MockProduct = Omit<Product, 'tipo' | 'tags'> & { tipo?: Product['tipo']; tags?: string[] }
+
+const mockData: MockProduct[] = [
   {
     id: 'local-1',
     slug: 'local-1',
@@ -3511,3 +3514,9 @@ export const products: Product[] = [
     corPrincipal: "#dc2626"
   },
 ];
+
+export const products: Product[] = mockData.map((p) => ({
+  ...p,
+  tipo: p.tipo ?? "SIMPLES",
+  tags: p.tags ?? [],
+}))

@@ -71,20 +71,51 @@ export const checkoutSchema = z.object({
   freteId: z.string(),
 })
 
+const kitItemInputSchema = z.object({
+  produtoId: z.string().min(1),
+  quantidade: z.number().int().positive(),
+  ordem: z.number().int().min(0).optional(),
+})
+
 export const produtoSchema = z.object({
   nome: z.string().min(2),
   slug: z.string().min(2),
   sku: z.string().min(1),
+  ean: z.string().nullable().optional(),
   marca: z.string().optional(),
+  subtitulo: z.string().nullable().optional(),
+  categoriaId: z.string().nullable().optional(),
+  tipo: z.enum(["SIMPLES", "KIT"]).default("SIMPLES"),
+  // Preço e estoque
   preco: z.coerce.number().positive(),
-  precoOriginal: z.coerce.number().positive().optional(),
+  precoOriginal: z.coerce.number().positive().nullable().optional(),
   estoque: z.coerce.number().int().min(0),
-  descricaoCurta: z.string().optional(),
+  estoqueMin: z.coerce.number().int().min(0).optional(),
+  // Conteúdo
+  descricaoCurta: z.string().nullable().optional(),
   descricaoHtml: z.string().optional().default(""),
-  corPrincipal: z.string().optional(),
-  imagemUrl: z.string().optional(),
+  composicao: z.string().nullable().optional(),
+  modoDeUso: z.string().nullable().optional(),
+  // Logística (Melhor Envio)
+  pesoGramas: z.coerce.number().int().positive().nullable().optional(),
+  alturaCm: z.coerce.number().int().positive().nullable().optional(),
+  larguraCm: z.coerce.number().int().positive().nullable().optional(),
+  comprimentoCm: z.coerce.number().int().positive().nullable().optional(),
+  // Descoberta
+  tags: z.array(z.string()).optional().default([]),
+  // Visual
+  corPrincipal: z.string().nullable().optional(),
+  corSecundaria: z.string().nullable().optional(),
+  imagemUrl: z.string().nullable().optional(),
+  // SEO
+  metaTitulo: z.string().nullable().optional(),
+  metaDescricao: z.string().nullable().optional(),
+  palavrasChave: z.string().nullable().optional(),
+  // Flags
   ativo: z.boolean().default(true),
   destaque: z.boolean().default(false),
+  // Kit
+  kitItens: z.array(kitItemInputSchema).optional(),
 })
 
 export const cupomSchema = z.object({

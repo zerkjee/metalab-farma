@@ -1,33 +1,57 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
-import { Prisma } from "@prisma/client"
+
+const kitItemInputSchema = z.object({
+  produtoId:  z.string().min(1),
+  quantidade: z.number().int().positive(),
+  ordem:      z.number().int().min(0).optional(),
+})
 
 const produtoUpdateSchema = z.object({
-  nome: z.string().min(1).optional(),
-  slug: z.string().min(1).optional(),
-  sku: z.string().min(1).optional(),
-  ean: z.string().nullable().optional(),
-  marca: z.string().optional(),
-  subtitulo: z.string().nullable().optional(),
-  descricaoHtml: z.string().optional(),
+  nome:          z.string().min(1).optional(),
+  slug:          z.string().min(1).optional(),
+  sku:           z.string().min(1).optional(),
+  ean:           z.string().nullable().optional(),
+  marca:         z.string().optional(),
+  subtitulo:     z.string().nullable().optional(),
+  categoriaId:   z.string().nullable().optional(),
+  tipo:          z.enum(["SIMPLES", "KIT"]).optional(),
+  // Conteúdo
   descricaoCurta: z.string().nullable().optional(),
-  preco: z.number().positive().optional(),
+  descricaoHtml:  z.string().optional(),
+  composicao:     z.string().nullable().optional(),
+  modoDeUso:      z.string().nullable().optional(),
+  // Preço
+  preco:         z.number().positive().optional(),
   precoOriginal: z.number().positive().nullable().optional(),
-  estoque: z.number().int().min(0).optional(),
-  estoqueMin: z.number().int().min(0).optional(),
-  categoriaId: z.string().nullable().optional(),
-  corPrincipal: z.string().nullable().optional(),
+  // Estoque
+  estoque:       z.number().int().min(0).optional(),
+  estoqueMin:    z.number().int().min(0).optional(),
+  // Logística
+  pesoGramas:    z.number().int().positive().nullable().optional(),
+  alturaCm:      z.number().int().positive().nullable().optional(),
+  larguraCm:     z.number().int().positive().nullable().optional(),
+  comprimentoCm: z.number().int().positive().nullable().optional(),
+  // Descoberta
+  tags:          z.array(z.string()).optional(),
+  // Visual
+  corPrincipal:  z.string().nullable().optional(),
   corSecundaria: z.string().nullable().optional(),
-  imagemUrl: z.string().nullable().optional(),
-  metaTitulo: z.string().nullable().optional(),
+  imagemUrl:     z.string().nullable().optional(),
+  // SEO
+  metaTitulo:    z.string().nullable().optional(),
   metaDescricao: z.string().nullable().optional(),
   palavrasChave: z.string().nullable().optional(),
-  ativo: z.boolean().optional(),
-  destaque: z.boolean().optional(),
+  // Flags
+  ativo:         z.boolean().optional(),
+  destaque:      z.boolean().optional(),
+  // Kit
+  kitItens:      z.array(kitItemInputSchema).optional(),
 }).strict()
 
 type Params = { params: Promise<{ id: string }> }
@@ -40,14 +64,22 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const produto = await prisma.produto.findFirst({
       where: { OR: [{ id }, { slug: id }], ativo: true },
       include: {
-        imagens: { orderBy: { ordem: "asc" } },
+        imagens:   { orderBy: { ordem: "asc" } },
         atributos: true,
         categoria: true,
         avaliacoes: {
-          where: { aprovada: true },
+          where:   { aprovada: true },
           include: { usuario: { select: { nome: true } } },
           orderBy: { criadoEm: "desc" },
           take: 20,
+        },
+        kitItens: {
+          include: {
+            produto: {
+              select: { id: true, nome: true, slug: true, preco: true, imagemUrl: true, imagens: { take: 1 } },
+            },
+          },
+          orderBy: { ordem: "asc" },
         },
       },
     })
@@ -58,8 +90,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     return NextResponse.json({
       ...produto,
-      preco: Number(produto.preco),
+      preco:         Number(produto.preco),
       precoOriginal: produto.precoOriginal != null ? Number(produto.precoOriginal) : null,
+      kitItens: produto.kitItens.map((k) => ({
+        ...k,
+        produto: { ...k.produto, preco: Number(k.produto.preco) },
+      })),
     })
   } catch (error) {
     logger.error("Erro buscando produto por id", error)
@@ -86,21 +122,49 @@ export async function PUT(request: NextRequest, { params }: Params) {
       )
     }
 
-    const produto = await prisma.produto.update({
-      where: { id },
-      data: parsed.data,
+    const { kitItens, ...produtoData } = parsed.data
+
+    // Valida que kit não referencia ele mesmo
+    if (kitItens) {
+      const invalido = kitItens.find((k) => k.produtoId === id)
+      if (invalido) {
+        return NextResponse.json({ erro: "Kit não pode referenciar ele mesmo" }, { status: 400 })
+      }
+    }
+
+    const produto = await prisma.$transaction(async (tx) => {
+      const p = await tx.produto.update({
+        where: { id },
+        data: produtoData,
+      })
+
+      // Quando kitItens é fornecido, substitui completamente os componentes
+      if (kitItens !== undefined) {
+        await tx.kitItem.deleteMany({ where: { kitId: id } })
+        if (kitItens.length > 0 && p.tipo === "KIT") {
+          await tx.kitItem.createMany({
+            data: kitItens.map((k, i) => ({
+              kitId:      id,
+              produtoId:  k.produtoId,
+              quantidade: k.quantidade,
+              ordem:      k.ordem ?? i,
+            })),
+          })
+        }
+      }
+      return p
     })
 
     auditFromSession(session, request, {
-      acao: "produto.atualizado",
-      recurso: "produto",
+      acao:      "produto.atualizado",
+      recurso:   "produto",
       recursoId: produto.id,
-      detalhe: { campos: Object.keys(parsed.data) },
+      detalhe:   { campos: Object.keys(produtoData) },
     })
 
     return NextResponse.json({
       ...produto,
-      preco: Number(produto.preco),
+      preco:         Number(produto.preco),
       precoOriginal: produto.precoOriginal != null ? Number(produto.precoOriginal) : null,
     })
   } catch (error) {
@@ -128,8 +192,8 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     })
 
     auditFromSession(session, request, {
-      acao: "produto.desativado",
-      recurso: "produto",
+      acao:      "produto.desativado",
+      recurso:   "produto",
       recursoId: id,
     })
 
