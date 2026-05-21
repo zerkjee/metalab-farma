@@ -79,7 +79,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
+    // Em CI usa next start (build já feito antes), local usa dev server
+    command: process.env.CI ? 'npx next start' : 'npm run dev',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
