@@ -47,6 +47,15 @@ export interface Product {
     produtoId: string
     produto: { id: string; nome: string; slug: string; preco: number; imagemUrl?: string | null }
   }[]
+  kitsDisponiveis?: {
+    id: string
+    nome: string
+    slug: string
+    preco: number
+    precoOriginal?: number | null
+    estoque: number
+    quantidade: number
+  }[]
   // Meta
   criadoEm?: string
   atualizadoEm?: string

@@ -9,7 +9,18 @@ import PurchaseNotification from '@/components/social-proof/PurchaseNotification
 import TrackViewItem from '@/components/analytics/TrackViewItem';
 import { products as localProducts } from '@/data/products';
 import { getProductDetail } from '@/utils/productDetails';
+import type { Ingrediente } from '@/utils/productDetails';
 import { Product } from '@/types/product';
+
+// Converte o texto de composição do banco em Ingrediente[] para o ComposicaoSection
+function composicaoFromText(text: string): Ingrediente[] {
+  const delimiter = text.includes(';') ? ';' : ','
+  return text
+    .split(delimiter)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 1)
+    .map((nome) => ({ nome, descricao: '', icone: 'Sparkles' }))
+}
 
 export const revalidate = 60
 
@@ -55,6 +66,9 @@ async function getProduto(idParam: string): Promise<Product | null> {
         ativo: Boolean(p.ativo),
         destaque: Boolean(p.destaque),
         corPrincipal: p.corPrincipal ? String(p.corPrincipal) : null,
+        composicao: p.composicao ? String(p.composicao) : null,
+        modoDeUso: p.modoDeUso ? String(p.modoDeUso) : null,
+        kitsDisponiveis: Array.isArray(p.kitsDisponiveis) ? p.kitsDisponiveis : undefined,
         criadoEm: p.criadoEm ? String(p.criadoEm) : undefined,
       }
     }
@@ -106,6 +120,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const numericId = parseInt(produto.id.replace('local-', '')) || 0
   const detail = getProductDetail(numericId)
   const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#6b21a8'
+
+  // Composição: preferir dado do banco, fallback para dado estático legado
+  const composicaoIngredientes: Ingrediente[] | null =
+    produto.composicao
+      ? composicaoFromText(produto.composicao)
+      : detail?.composicao ?? null
+
+  // Modo de uso: preferir dado do banco, fallback para dado estático legado
+  const modoDeUsoText =
+    produto.modoDeUso ??
+    detail?.modo_uso ??
+    'Conforme orientação do fabricante ou de um profissional habilitado. Não auto-medicar.'
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -169,7 +195,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </section>
 
-      {detail && <ComposicaoSection composicao={detail.composicao} corPrincipal={corPrincipal} />}
+      {composicaoIngredientes && composicaoIngredientes.length > 0 && (
+        <ComposicaoSection composicao={composicaoIngredientes} corPrincipal={corPrincipal} />
+      )}
 
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -178,7 +206,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
           <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
             <p className="text-gray-700 text-lg leading-relaxed mb-6">
-              {detail?.modo_uso ?? 'Conforme orientação do fabricante ou de um profissional habilitado. Não auto-medicar.'}
+              {modoDeUsoText}
             </p>
             <div className="space-y-4 text-sm text-gray-600">
               <p>✓ Consulte o rótulo do produto para orientações específicas</p>

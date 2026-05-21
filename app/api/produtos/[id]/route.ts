@@ -88,6 +88,34 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ erro: "Produto não encontrado" }, { status: 404 })
     }
 
+    // Kits que contêm este produto como componente (relação reversa)
+    const kitsRelacionados = produto.tipo === "SIMPLES"
+      ? await prisma.kitItem.findMany({
+          where: { produtoId: produto.id },
+          include: {
+            kit: {
+              select: {
+                id: true, nome: true, slug: true, preco: true, precoOriginal: true,
+                estoque: true, ativo: true,
+              },
+            },
+          },
+          orderBy: { quantidade: "asc" },
+        })
+      : []
+
+    const kitsDisponiveis = kitsRelacionados
+      .filter((k) => k.kit.ativo && k.kit.estoque > 0)
+      .map((k) => ({
+        id:            k.kit.id,
+        nome:          k.kit.nome,
+        slug:          k.kit.slug,
+        preco:         Number(k.kit.preco),
+        precoOriginal: k.kit.precoOriginal != null ? Number(k.kit.precoOriginal) : null,
+        estoque:       k.kit.estoque,
+        quantidade:    k.quantidade,
+      }))
+
     return NextResponse.json({
       ...produto,
       preco:         Number(produto.preco),
@@ -96,6 +124,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         ...k,
         produto: { ...k.produto, preco: Number(k.produto.preco) },
       })),
+      kitsDisponiveis,
     })
   } catch (error) {
     logger.error("Erro buscando produto por id", error)

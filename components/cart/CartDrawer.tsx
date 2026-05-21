@@ -70,6 +70,7 @@ export default function CartDrawer() {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-label="Carrinho de compras"
+        aria-hidden={!isOpen}
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <div>
