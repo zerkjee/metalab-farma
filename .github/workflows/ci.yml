@@ -145,6 +145,7 @@ jobs:
     env:
       CI: 'true'
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
+      AUTH_TRUST_HOST: '1'
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       NEXT_PUBLIC_URL: http://localhost:3000
@@ -221,6 +222,7 @@ jobs:
     env:
       CI: 'true'
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
+      AUTH_TRUST_HOST: '1'
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       NEXT_PUBLIC_URL: http://localhost:3000
