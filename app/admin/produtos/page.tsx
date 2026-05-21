@@ -246,7 +246,7 @@ export default function AdminProdutos() {
       .finally(() => setLoading(false));
   }, [search]);
 
-  // eslint-disable-next-line react-compiler/react-compiler
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
   // Carrega lista de produtos para seleção de componentes de kit

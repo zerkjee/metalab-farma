@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Playwright E2E — não é código React
     "e2e/**",
+    // Coverage output
+    "coverage/**",
   ]),
 ]);
 
