@@ -16,6 +16,7 @@ export default function CookieBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-compiler/react-compiler
     if (!getConsent()) setVisible(true)
   }, [])
 

@@ -22,6 +22,7 @@ export default function Analytics() {
 
   useEffect(() => {
     if (getConsent() === 'all') {
+      // eslint-disable-next-line react-compiler/react-compiler
       setConsented(true)
       return
     }
