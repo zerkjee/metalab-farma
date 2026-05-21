@@ -35,6 +35,7 @@ yarn-error.log*
 .env.local
 .env.production
 .env.development
+.env.e2e
 # .env.example é seguro commitar (sem valores reais)
 
 # vercel
@@ -48,3 +49,10 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Playwright E2E
+/e2e/.auth/
+/e2e/report/
+/e2e/results/
+/playwright-report/
+/test-results/

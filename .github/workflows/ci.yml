@@ -1,0 +1,283 @@
+name: CI
+
+# ─── Triggers ─────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+# Cancela runs anteriores no mesmo branch/PR para economizar minutos
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ─── Variáveis globais ────────────────────────────────────────────────────────
+env:
+  NODE_VERSION: '22'
+  NEXT_TELEMETRY_DISABLED: '1'
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOBS
+# ══════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 1. QUALITY — lint · typecheck · audit
+  #    Roda em todos os pushes. Sem DB, sem secrets. Gate mais rápido.
+  # ────────────────────────────────────────────────────────────────────────────
+  quality:
+    name: Quality (lint · typecheck · audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit (prod deps)
+        run: npm audit --audit-level=high --omit=dev
+        continue-on-error: true
+
+      - name: TypeScript — noEmit
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 2. UNIT TESTS — Vitest
+  #    Paralelo com build. Sem banco.
+  # ────────────────────────────────────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ github.run_number }}
+          path: coverage/
+          retention-days: 14
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 3. BUILD — Next.js (sem prisma migrate deploy)
+  #    Usa DATABASE_URL dummy: generateStaticParams tem try/catch e retorna []
+  #    se a API não responder. Sentry pula upload sem SENTRY_AUTH_TOKEN.
+  #    NÃO executa "npm run build" para não rodar prisma migrate deploy em CI.
+  # ────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build (Next.js)
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'ci-placeholder-secret-min-length-32ch' }}
+      NEXT_PUBLIC_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_NAME: Metalab Store
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Build Next.js
+        # Não usa "npm run build" para evitar "prisma migrate deploy" em cada push
+        run: npx next build
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 4. E2E · CHROMIUM — PRs + pushes para develop/main
+  #    Gate obrigatório antes do merge. Precisa de DATABASE_URL real (Supabase).
+  # ────────────────────────────────────────────────────────────────────────────
+  e2e-chromium:
+    name: E2E · Chromium
+    runs-on: ubuntu-latest
+    needs: [build, unit-tests]
+    timeout-minutes: 30
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'))
+    env:
+      CI: 'true'
+      NODE_TLS_REJECT_UNAUTHORIZED: '0'
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      NEXT_PUBLIC_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_NAME: Metalab Store
+      PLAYWRIGHT_BASE_URL: http://localhost:3000
+      E2E_PRODUCT_SLUG: ${{ secrets.E2E_PRODUCT_SLUG || 'articulice-curcuma-30-comprimidos' }}
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL || '' }}
+      E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD || '' }}
+      E2E_COUPON_CODE: ${{ secrets.E2E_COUPON_CODE || 'BEMVINDO10' }}
+      E2E_TEST_CEP: '01310-100'
+      E2E_MOCK_APIS: '1'
+      MERCADOPAGO_ACCESS_TOKEN: ${{ secrets.MERCADOPAGO_ACCESS_TOKEN || '' }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || '' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright — Chromium
+        uses: actions/cache@v4
+        id: pw-cache-chromium
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright + system deps (cache miss)
+        if: steps.pw-cache-chromium.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Install Playwright system deps only (cache hit)
+        if: steps.pw-cache-chromium.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run E2E — Chromium
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-chromium-${{ github.run_number }}
+          path: |
+            e2e/report/
+            e2e/results/
+          retention-days: 30
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 5. E2E · FULL SUITE — apenas push para main
+  #    Todos os projetos: chromium, firefox, mobile-android, tablet, mobile-iphone.
+  #    WebKit (iPhone) requer --with-deps para instalar libavif16 e libwoff1.
+  # ────────────────────────────────────────────────────────────────────────────
+  e2e-full:
+    name: E2E · Full Suite (main)
+    runs-on: ubuntu-latest
+    needs: [build, unit-tests]
+    timeout-minutes: 60
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      CI: 'true'
+      NODE_TLS_REJECT_UNAUTHORIZED: '0'
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      NEXT_PUBLIC_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_NAME: Metalab Store
+      PLAYWRIGHT_BASE_URL: http://localhost:3000
+      E2E_PRODUCT_SLUG: ${{ secrets.E2E_PRODUCT_SLUG || 'articulice-curcuma-30-comprimidos' }}
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL || '' }}
+      E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD || '' }}
+      E2E_COUPON_CODE: ${{ secrets.E2E_COUPON_CODE || 'BEMVINDO10' }}
+      E2E_TEST_CEP: '01310-100'
+      E2E_MOCK_APIS: '1'
+      MERCADOPAGO_ACCESS_TOKEN: ${{ secrets.MERCADOPAGO_ACCESS_TOKEN || '' }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || '' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright — todos os browsers
+        uses: actions/cache@v4
+        id: pw-cache-all
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-all-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install all Playwright browsers + deps (cache miss)
+        if: steps.pw-cache-all.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      - name: Install Playwright system deps only (cache hit)
+        if: steps.pw-cache-all.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run E2E — Full Suite
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-full-${{ github.run_number }}
+          path: |
+            e2e/report/
+            e2e/results/
+          retention-days: 30
+
+      - name: Upload JUnit
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: junit-full-${{ github.run_number }}
+          path: e2e/results/junit.xml
+          retention-days: 30
