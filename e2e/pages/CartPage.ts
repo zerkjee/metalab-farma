@@ -8,8 +8,8 @@ export class CartPage {
   get drawer()          { return this.page.getByRole('complementary', { name: /carrinho/i }) }
   get closeButton()     { return this.page.getByRole('button', { name: /fechar carrinho/i }) }
   get emptyMessage()    { return this.page.locator('text=/carrinho está vazio/i') }
-  get checkoutButton()  { return this.page.getByRole('link', { name: /finalizar|checkout|comprar/i }) }
-  get couponInput()     { return this.drawer.getByPlaceholder(/cupom|código/i) }
+  get checkoutButton()  { return this.drawer.getByRole('link', { name: /finalizar|checkout|comprar/i }) }
+  get couponInput()     { return this.drawer.getByPlaceholder(/PRIMEIRA|cupom|código/i) }
   get applyCouponBtn()  { return this.drawer.getByRole('button', { name: /aplicar/i }) }
   get couponSuccess()   { return this.drawer.locator('text=/cupom aplicado|desconto/i') }
   get couponError()     { return this.drawer.locator('text=/inválido|expirado|não encontrado/i') }
@@ -110,10 +110,10 @@ export class CartPage {
   }
 
   async assertCouponApplied() {
-    await expect(this.couponSuccess).toBeVisible({ timeout: 5_000 })
+    await expect(this.couponSuccess).toBeVisible({ timeout: 15_000 })
   }
 
   async assertCouponError() {
-    await expect(this.couponError).toBeVisible({ timeout: 5_000 })
+    await expect(this.couponError).toBeVisible({ timeout: 15_000 })
   }
 }

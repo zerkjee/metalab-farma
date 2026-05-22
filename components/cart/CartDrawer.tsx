@@ -58,6 +58,7 @@ export default function CartDrawer() {
   return (
     <>
       <div
+        data-testid="cart-backdrop"
         className={`fixed inset-0 z-[70] bg-slate-950/45 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
