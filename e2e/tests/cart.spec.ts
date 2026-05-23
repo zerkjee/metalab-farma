@@ -49,8 +49,7 @@ test.describe('Carrinho — Estado vazio', () => {
     const home = new HomePage(page)
     await home.goto()
     await cart.open()
-    // Clica no backdrop (overlay)
-    await page.locator('[aria-hidden="true"]').first().click()
+    await page.getByTestId('cart-backdrop').click()
     await expect(cart.drawer).not.toBeVisible({ timeout: 3_000 })
   })
 })
@@ -127,16 +126,7 @@ test.describe('Carrinho — Manipulação de itens', () => {
     await cart.open()
     await cart.assertHasItems()
 
-    // Botão de remover item (Trash2 icon)
-    const trashBtn = page.getByRole('complementary', { name: /carrinho/i })
-      .locator('button')
-      .filter({ has: page.locator('svg path[d*="M3 6h18"]') }) // Trash icon path
-      .first()
-      .or(
-        page.getByRole('complementary', { name: /carrinho/i })
-          .locator('button').last()
-      )
-
+    const trashBtn = page.getByRole('button', { name: /remover/i }).first()
     await trashBtn.click()
     await page.waitForTimeout(500)
     // Carrinho deve estar vazio ou com menos itens
@@ -191,7 +181,7 @@ test.describe('Carrinho — Cupons', () => {
     await cart.open()
 
     const input = page.getByRole('complementary', { name: /carrinho/i })
-      .getByPlaceholder(/cupom|código/i)
+      .getByPlaceholder(/PRIMEIRA|cupom|código/i)
     const visible = await input.isVisible().catch(() => false)
     if (visible) {
       await input.fill('TESTE123')
@@ -223,17 +213,6 @@ test.describe('Carrinho — Navegação para Checkout', () => {
     const cart = new CartPage(page)
     await home.goto()
     await cart.open()
-
-    const checkoutLink = page.getByRole('complementary', { name: /carrinho/i })
-      .getByRole('link', { name: /finalizar|checkout/i })
-      .or(
-        page.getByRole('complementary', { name: /carrinho/i })
-          .getByRole('button', { name: /finalizar|checkout/i })
-      )
-    const visible = await checkoutLink.first().isVisible().catch(() => false)
-    if (visible) {
-      await checkoutLink.first().click()
-      await expect(page).toHaveURL(/checkout/, { timeout: 10_000 })
-    }
+    await cart.goToCheckout()
   })
 })
