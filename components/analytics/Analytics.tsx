@@ -22,6 +22,7 @@ export default function Analytics() {
 
   useEffect(() => {
     if (getConsent() === 'all') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConsented(true)
       return
     }

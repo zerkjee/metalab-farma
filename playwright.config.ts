@@ -13,9 +13,8 @@ export default defineConfig({
   expect: { timeout: 12_000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 2,
-  // 1 worker local: dev server (Next.js Turbopack) reinicia por memória com
-  // requests concorrentes — execução sequencial previne OOM e flakiness
+  retries: process.env.CI ? 1 : 0,
+  // 1 worker local: dev server reinicia por memória com requests concorrentes
   workers: process.env.CI ? 2 : 1,
 
   reporter: [
@@ -79,7 +78,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
+    // Em CI usa next start (build já feito antes), local usa dev server
+    command: process.env.CI ? 'npx next start' : 'npm run dev',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

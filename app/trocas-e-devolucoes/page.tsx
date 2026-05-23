@@ -67,7 +67,7 @@ export default function TrocasEDevolucoes() {
                   <a href="mailto:mlmetalab@gmail.com" className="text-[#c084fc] hover:underline">
                     mlmetalab@gmail.com
                   </a>{' '}
-                  com o assunto <strong>"Solicitação de Devolução — Pedido #XXXXX"</strong>.
+                  com o assunto <strong>&quot;Solicitação de Devolução — Pedido #XXXXX&quot;</strong>.
                 </li>
                 <li>Informe o número do pedido, o motivo e, se possível, fotos do produto.</li>
                 <li>Nossa equipe responderá em até <strong>2 dias úteis</strong> com as instruções de envio.</li>
