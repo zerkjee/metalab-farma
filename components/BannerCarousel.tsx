@@ -6,9 +6,9 @@ import Link from 'next/link';
 const slides = [
   {
     id: 1,
-    badge: 'Suplementos com Procedência',
-    title: 'Qualidade e Tecnologia\npara sua Rotina',
-    subtitle: 'Formulações exclusivas, insumos selecionados e embalagem lacrada. Complemente sua alimentação com confiança.',
+    badge: 'Referência em Suplementação Alimentar',
+    title: 'Excelência em Controle\nde Qualidade',
+    subtitle: 'Formulações desenvolvidas com rigor técnico, insumos de procedência controlada e embalagem lacrada de fábrica. Confiança em cada etapa.',
     cta: { label: 'Ver Produtos', href: '#produtos' },
     ctaSecondary: { label: 'Conheça a Metalab', href: '#qualidade' },
     bg: 'linear-gradient(135deg, #1a0533 0%, #2d1654 50%, #1e3a5f 100%)',
@@ -19,9 +19,9 @@ const slides = [
   },
   {
     id: 2,
-    badge: 'Maior Economia',
+    badge: 'Maior Economia por Kit',
     title: 'Kits com até 30%\nde Desconto',
-    subtitle: 'Compre o Kit 2 ou Kit 3 e economize mais. Todos os produtos lacrados, com nota fiscal e procedência garantida.',
+    subtitle: 'Adquira o Kit 2 ou Kit 3 e maximize o custo-benefício. Todos os produtos lacrados, com nota fiscal e procedência garantida.',
     cta: { label: 'Ver Kits', href: '#produtos' },
     ctaSecondary: { label: 'Comparar Preços', href: '#produtos' },
     bg: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a5f 100%)',
@@ -32,22 +32,22 @@ const slides = [
   },
   {
     id: 3,
-    badge: '⭐ 4.9 / 5 de Satisfação',
+    badge: '4.9 / 5 — Satisfação dos Clientes',
     title: 'Mais de 12.400\nClientes Satisfeitos',
-    subtitle: '97% de avaliações positivas. Clientes de todo o Brasil confiam na Metalab para complementar a rotina alimentar.',
+    subtitle: '97% de avaliações positivas. Clientes em todo o Brasil confiam na Metalab para complementar sua rotina alimentar com qualidade.',
     cta: { label: 'Ver Avaliações', href: '/avaliacoes' },
     ctaSecondary: { label: 'Explorar Produtos', href: '#produtos' },
     bg: 'linear-gradient(135deg, #0c1a35 0%, #1e3a5f 50%, #1a2744 100%)',
     accent: '#7dd3fc',
     dot: '#0ea5e9',
-    badges: ['⭐ 4.9 / 5 média', '✓ 51.000+ pedidos', '✓ 97% positivas'],
+    badges: ['✓ 4.9 / 5 média', '✓ 51.000+ pedidos', '✓ 97% positivas'],
     decoration: { circle1: '#0ea5e9', circle2: '#a855f7' },
   },
   {
     id: 4,
-    badge: 'Confiança & Segurança',
+    badge: 'Confiança, Precisão, Procedência',
     title: 'Produto Lacrado,\nProcedência Garantida',
-    subtitle: 'Cada produto sai lacrado de fábrica, com rótulo completo e nota fiscal. Compre com total segurança.',
+    subtitle: 'Cada produto sai lacrado de fábrica com rótulo completo, nota fiscal e cadeia produtiva rastreável. Qualidade verificável.',
     cta: { label: 'Ver Catálogo', href: '#produtos' },
     ctaSecondary: { label: 'Saiba Mais', href: '#qualidade' },
     bg: 'linear-gradient(135deg, #1a0533 0%, #4a1272 50%, #2d1654 100%)',
@@ -85,10 +85,12 @@ function RightPanel({ id, accent, transitioning }: { id: number; accent: string;
     <div style={style} className="flex flex-col gap-4">
       <Card className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-          <span className="text-2xl">⭐</span>
+          <svg className="w-6 h-6 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
         </div>
         <div>
-          <p className="text-3xl font-black text-white">4.9<span className="text-lg text-white/50">/5</span></p>
+          <p className="text-3xl font-bold text-white tracking-tight">4.9<span className="text-lg text-white/50">/5</span></p>
           <p className="text-white/60 text-xs mt-0.5">Satisfação dos clientes</p>
           <div className="flex gap-0.5 mt-1">{[1,2,3,4,5].map(i => <Star key={i} filled={i <= 5} />)}</div>
         </div>
@@ -185,17 +187,36 @@ function RightPanel({ id, accent, transitioning }: { id: number; accent: string;
   );
 
   // id === 4
+  const trustItems = [
+    {
+      svg: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>,
+      title: 'Lacre Original',
+      desc: 'Embalagem lacrada de fábrica',
+    },
+    {
+      svg: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+      title: 'BPF Certificado',
+      desc: 'Boas Práticas de Fabricação',
+    },
+    {
+      svg: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+      title: 'Nota Fiscal',
+      desc: 'Compra 100% documentada',
+    },
+    {
+      svg: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
+      title: 'Procedência',
+      desc: 'Insumos com rastreabilidade',
+    },
+  ];
   return (
     <div style={style} className="grid grid-cols-2 gap-4">
-      {[
-        { icon: '🔒', title: 'Lacre Original', desc: 'Embalagem lacrada de fábrica' },
-        { icon: '📋', title: 'BPF Certificado', desc: 'Boas Práticas de Fabricação' },
-        { icon: '🧾', title: 'Nota Fiscal', desc: 'Compra 100% documentada' },
-        { icon: '✅', title: 'Procedência', desc: 'Insumos com rastreabilidade' },
-      ].map(({ icon, title, desc }) => (
-        <Card key={title} className="flex flex-col gap-2">
-          <span className="text-2xl">{icon}</span>
-          <p className="text-white font-bold text-sm">{title}</p>
+      {trustItems.map(({ svg, title, desc }) => (
+        <Card key={title} className="flex flex-col gap-2.5">
+          <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-white/80">
+            {svg}
+          </div>
+          <p className="text-white font-bold text-sm tracking-tight">{title}</p>
           <p className="text-white/50 text-xs leading-snug">{desc}</p>
         </Card>
       ))}

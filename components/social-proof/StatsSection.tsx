@@ -7,8 +7,7 @@ interface Stat {
   suffix: string;
   prefix?: string;
   label: string;
-  icon: React.ReactNode;
-  color: string;
+  sublabel?: string;
 }
 
 function CountUp({ target, suffix, prefix = '' }: { target: number; suffix: string; prefix?: string }) {
@@ -54,95 +53,64 @@ const stats: Stat[] = [
     value: 12400,
     suffix: '+',
     label: 'Clientes satisfeitos',
-    color: '#6b21a8',
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
+    sublabel: 'em todo o Brasil',
   },
   {
     value: 51000,
     suffix: '+',
     label: 'Pedidos enviados',
-    color: '#1d4ed8',
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-      </svg>
-    ),
+    sublabel: 'com rastreio garantido',
   },
   {
     value: 97,
     suffix: '%',
     label: 'Avaliações positivas',
-    color: '#059669',
-    icon: (
-      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
+    sublabel: 'média geral dos produtos',
   },
   {
     value: 9,
     suffix: '/5',
     prefix: '4.',
     label: 'Satisfação média',
-    color: '#f59e0b',
-    icon: (
-      <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-    ),
+    sublabel: 'nota dos clientes',
   },
 ];
 
 export default function StatsSection() {
   return (
-    <section className="py-20 bg-white border-b border-gray-100">
+    <section className="py-20 bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         <div className="text-center mb-14">
-          <p className="text-sm font-semibold text-[#6b21a8] uppercase tracking-widest mb-2">Nossos Números</p>
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+          <p className="text-xs font-bold text-[#c084fc] uppercase tracking-[0.2em] mb-4">Nossos Números</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
             Confiança comprovada em dados
           </h2>
-          <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-            Mais de uma década fornecendo suplementos alimentares com qualidade e procedência para clientes em todo o Brasil.
+          <p className="mt-4 text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
+            Resultados concretos de quem escolhe qualidade e procedência na suplementação alimentar.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-gray-800 rounded-xl overflow-hidden border border-gray-800">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="relative p-5 sm:p-8 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col items-center text-center gap-3 sm:gap-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group"
+              className="flex flex-col items-center justify-center text-center px-6 py-10 bg-gray-950 hover:bg-gray-900 transition-colors duration-300"
             >
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-sm group-hover:scale-110 transition-transform duration-300"
-                style={{ backgroundColor: stat.color }}
-              >
-                {stat.icon}
-              </div>
-              <div>
-                <p className="text-2xl sm:text-4xl font-black text-gray-900 leading-none">
-                  {stat.suffix === '/5' ? (
-                    <span>
-                      {stat.prefix}<CountUp target={stat.value} suffix="" />
-                      <span className="text-2xl text-gray-400 font-semibold">/5</span>
-                    </span>
-                  ) : (
-                    <CountUp target={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
-                  )}
-                </p>
-                <p className="text-sm text-gray-500 font-medium mt-1">{stat.label}</p>
-              </div>
-              <div
-                className="absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ backgroundColor: stat.color }}
-              />
+              <p className="text-4xl sm:text-5xl font-bold text-white leading-none mb-2 tracking-tight">
+                {stat.suffix === '/5' ? (
+                  <span>
+                    {stat.prefix}<CountUp target={stat.value} suffix="" />
+                    <span className="text-2xl text-gray-500 font-semibold">/5</span>
+                  </span>
+                ) : (
+                  <CountUp target={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
+                )}
+              </p>
+              <p className="text-sm font-semibold text-[#c084fc] mt-1">{stat.label}</p>
+              {stat.sublabel && (
+                <p className="text-xs text-gray-600 mt-0.5">{stat.sublabel}</p>
+              )}
             </div>
           ))}
         </div>
