@@ -196,10 +196,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </section>
 
       {composicaoIngredientes && composicaoIngredientes.length > 0 && (
-        <ComposicaoSection composicao={composicaoIngredientes} corPrincipal={corPrincipal} />
+        <div id="descricao">
+          <ComposicaoSection composicao={composicaoIngredientes} corPrincipal={corPrincipal} />
+        </div>
       )}
 
-      <section className="py-16 bg-white border-b border-gray-100">
+      <section id={composicaoIngredientes && composicaoIngredientes.length > 0 ? undefined : 'descricao'} className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Como incluir na rotina</h2>

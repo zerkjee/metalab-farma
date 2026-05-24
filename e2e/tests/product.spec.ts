@@ -233,7 +233,7 @@ test.describe('PDP — CTA Desktop', () => {
 
     // Ambos os botões do hero devem estar visíveis antes de qualquer scroll
     await expect(pdp.addToCartButton).toBeVisible()
-    const moreInfoBtn = page.getByRole('button', { name: /mais informações/i })
+    const moreInfoBtn = page.getByRole('button', { name: /ver composição/i })
     await expect(moreInfoBtn).toBeVisible()
   })
 })
