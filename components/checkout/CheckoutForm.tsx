@@ -294,18 +294,29 @@ export default function CheckoutForm({
         <div className="grid gap-3 md:grid-cols-3">
           {paymentMethods.map((method) => {
             const active = method.id === selectedPaymentId;
+            const disabled = method.disabled ?? false;
             return (
               <button
                 key={method.id}
                 type="button"
-                onClick={() => onPaymentChange(method.id)}
+                disabled={disabled}
+                onClick={() => !disabled && onPaymentChange(method.id)}
                 className={`rounded-2xl border p-4 text-left transition-all ${
-                  active
+                  disabled
+                    ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-50'
+                    : active
                     ? 'border-[#0f2756] bg-[#0f2756]/5 shadow-sm'
                     : 'border-gray-200 bg-gray-50 hover:border-[#0f2756]/40 hover:bg-white'
                 }`}
               >
-                <p className="font-black text-gray-950">{method.label}</p>
+                <div className="flex items-start justify-between gap-1">
+                  <p className="font-black text-gray-950">{method.label}</p>
+                  {disabled && (
+                    <span className="shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold text-gray-500">
+                      Em breve
+                    </span>
+                  )}
+                </div>
                 <p className="mt-1 text-sm leading-5 text-gray-500">{method.description}</p>
               </button>
             );

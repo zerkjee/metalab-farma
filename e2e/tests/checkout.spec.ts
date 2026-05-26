@@ -183,21 +183,66 @@ test.describe('Checkout — Pagamento PIX (mockado)', () => {
     // Aguarda resposta do pedido mockado
     await page.waitForTimeout(2_000)
 
-    // Deve mostrar tela de sucesso, QR Code PIX ou número do pedido
-    const successIndicators = [
-      page.locator('text=/pedido confirmado|pague com pix|qr code|MTL-/i'),
-      page.locator('text=/e2etest|teste/i'),
-      page.locator('text=/pixqr|copie o código/i'),
+    // FLUXO CORRETO: deve mostrar "Aguardando pagamento PIX" — NUNCA "Compra finalizada" ainda
+    const pixPendingIndicators = [
+      page.locator('text=/aguardando pagamento pix/i'),
+      page.locator('text=/pague com pix/i'),
+      page.locator('text=/pix copia e cola/i'),
+      page.locator('text=/expira em/i'),
     ]
-    let found = false
-    for (const indicator of successIndicators) {
-      if (await indicator.isVisible().catch(() => false)) { found = true; break }
+    let foundPending = false
+    for (const indicator of pixPendingIndicators) {
+      if (await indicator.isVisible().catch(() => false)) { foundPending = true; break }
     }
-    // Se nenhum indicador de sucesso visível, aceita o teste desde que não haja erro 500
-    if (!found) {
+
+    // Garante que "Compra finalizada" NÃO aparece prematuramente
+    const falsePositive = await page.locator('text=/compra finalizada/i').isVisible().catch(() => false)
+    expect(falsePositive).toBeFalsy()
+
+    // Se nenhum indicador de PIX pendente visível, aceita desde que não haja erro 500
+    if (!foundPending) {
       const errorVisible = await page.locator('text=/erro interno|500|falha/i').isVisible().catch(() => false)
       expect(errorVisible).toBeFalsy()
     }
+  })
+
+  test('tela PIX pendente não deve exibir "Compra finalizada com sucesso"', async ({ page }) => {
+    const checkout = new CheckoutPage(page)
+    await checkout.mockCepApi()
+    await checkout.mockFreteApi()
+    await checkout.mockPedidoApi()
+    await checkout.mockPagamentoApi()
+    await checkout.goto()
+
+    const hasForm = await checkout.nameInput.isVisible().catch(() => false)
+    if (!hasForm) test.skip(true, 'Teste requer usuário não logado com form visível')
+
+    await checkout.fillPersonalData({
+      name:  TEST_DATA.name,
+      email: TEST_DATA.email,
+      phone: TEST_DATA.phone,
+      cpf:   TEST_DATA.cpf,
+    })
+    await checkout.fillAddress({
+      zip:      TEST_DATA.zip,
+      address:  TEST_DATA.address,
+      number:   TEST_DATA.number,
+      district: TEST_DATA.district,
+      city:     TEST_DATA.city,
+      state:    TEST_DATA.state,
+    })
+    await page.waitForTimeout(500)
+
+    const submitBtn = page.getByRole('button', { name: /finalizar pedido|pagar|confirmar/i })
+    const btnVisible = await submitBtn.isVisible().catch(() => false)
+    if (!btnVisible) test.skip(true, 'Botão de submit não encontrado')
+
+    await submitBtn.click()
+    await page.waitForTimeout(2_000)
+
+    // Deve NUNCA mostrar "Compra finalizada" sem confirmação de pagamento
+    const compraFinalizada = await page.locator('text=/compra finalizada/i').isVisible().catch(() => false)
+    expect(compraFinalizada).toBeFalsy()
   })
 
   test('método de pagamento PIX deve estar selecionável', async ({ page }) => {
@@ -208,11 +253,16 @@ test.describe('Checkout — Pagamento PIX (mockado)', () => {
     await expect(pixLabel).toBeVisible()
   })
 
-  test('métodos de pagamento alternativos devem estar visíveis', async ({ page }) => {
+  test('cartão e boleto devem aparecer desabilitados com badge "Em breve"', async ({ page }) => {
     const checkout = new CheckoutPage(page)
     await checkout.goto()
 
-    await expect(page.locator('text=/cartão|boleto/i').first()).toBeVisible()
+    // Os métodos devem estar visíveis mas desabilitados
+    await expect(page.locator('text=/cartão de crédito/i').first()).toBeVisible()
+    await expect(page.locator('text=/boleto/i').first()).toBeVisible()
+    // Badge "Em breve" deve estar presente
+    const emBreve = await page.locator('text=/em breve/i').first().isVisible().catch(() => false)
+    expect(emBreve).toBeTruthy()
   })
 })
 

@@ -133,15 +133,19 @@ describe('POST /api/pedidos — happy path', () => {
     expect(data?.total).toBe(110)
   })
 
-  it('chama enqueueOrderEmail após criação', async () => {
+  it('NÃO envia e-mail para PIX na criação — webhook dispara após confirmação', async () => {
+    // Para PIX: o e-mail é enviado pelo webhook /api/pagamento/webhook quando
+    // payment.status === "approved". Enviar aqui seria prematuro (pagamento pendente).
     await POST(makeRequest(VALID_BODY))
     await Promise.resolve()
-    expect(mockEnqueue).toHaveBeenCalledOnce()
+    expect(mockEnqueue).not.toHaveBeenCalled()
   })
 
-  it('payload do e-mail não contém CPF nem endereço', async () => {
-    await POST(makeRequest(VALID_BODY))
+  it('envia e-mail imediatamente para métodos síncronos (não-PIX)', async () => {
+    const bodyNaoPix = { ...VALID_BODY, metodoPagamento: 'CARTAO_CREDITO' }
+    await POST(makeRequest(bodyNaoPix))
     await Promise.resolve()
+    expect(mockEnqueue).toHaveBeenCalledOnce()
     const payload = mockEnqueue.mock.calls[0]?.[0]
     expect(payload).not.toHaveProperty('cpf')
     expect(payload).not.toHaveProperty('endereco')

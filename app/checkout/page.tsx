@@ -7,6 +7,7 @@ import { trackBeginCheckout, trackPurchase } from '@/lib/analytics';
 import { useSession } from 'next-auth/react';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
+import PixPending from '@/components/checkout/PixPending';
 import OrderSummary from '@/components/checkout/OrderSummary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -15,6 +16,7 @@ import { calculateCartTotals } from '@/services/cartTotals';
 import { fmtCurrency } from '@/utils/formatters';
 import type {
   CheckoutForm as CheckoutFormValues,
+  CheckoutStage,
   FreteStatus,
   PaymentMethod,
   PaymentMethodId,
@@ -44,21 +46,25 @@ const initialShippingMethods: ShippingMethod[] = [
   { id: 'express',  label: 'Entrega expressa', description: 'Prioridade na separação e no envio.',       price: 0, estimate: '' },
 ];
 
+// Cartão e Boleto ainda não têm backend — ficam visíveis mas desabilitados
 const paymentMethods: PaymentMethod[] = [
   {
     id: 'PIX',
-    label: 'Pix',
+    label: 'PIX',
     description: 'Confirmação instantânea. QR Code gerado após o pedido.',
+    disabled: false,
   },
   {
     id: 'CARTAO_CREDITO',
     label: 'Cartão de Crédito',
-    description: 'Parcelamento disponível. Processado pelo Mercado Pago.',
+    description: 'Parcelamento em breve.',
+    disabled: true,
   },
   {
     id: 'BOLETO',
     label: 'Boleto',
-    description: 'Vencimento em 3 dias úteis. Compensação em até 2 dias.',
+    description: 'Em breve.',
+    disabled: true,
   },
 ];
 
@@ -76,8 +82,10 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedShippingId, setSelectedShippingId] = useState<ShippingMethodId>('standard');
-  const [selectedPaymentId, setSelectedPaymentId] = useState<PaymentMethodId>('PIX');
-  const [order, setOrder] = useState<RealOrder | null>(null);
+  // PIX é o único método habilitado
+  const [selectedPaymentId] = useState<PaymentMethodId>('PIX');
+  // Máquina de estados do checkout
+  const [checkoutStage, setCheckoutStage] = useState<CheckoutStage>({ stage: 'form' });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [cuponsDisponiveis, setCuponsDisponiveis] = useState<{ codigo: string; tipo: string; valor: number }[]>([]);
@@ -89,6 +97,8 @@ export default function CheckoutPage() {
   const savedFormRef = useRef<CheckoutFormValues | null>(null);
   const beginCheckoutFired = useRef(false);
   const cartSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Snapshot do pedido para o trackPurchase, preenchido só quando confirmado
+  const pendingTrackRef = useRef<{ orderId: string; total: number } | null>(null);
 
   useEffect(() => {
     if (!session?.user) return;
@@ -139,7 +149,6 @@ export default function CheckoutPage() {
     const controller = new AbortController();
     const digits = form.zipCode.replace(/\D/g, '');
 
-    // Tudo dentro de async fn — evita setState síncrono no body do effect (React 19 strict)
     void (async () => {
       if (digits.length !== 8) {
         if (!cancelled) {
@@ -209,10 +218,10 @@ export default function CheckoutPage() {
           total: totals.total,
           cupomCodigo: coupons.discount?.code ?? undefined,
         }),
-      })
-    }, 3000)
+      });
+    }, 3000);
 
-    return () => { if (cartSaveTimer.current) clearTimeout(cartSaveTimer.current) }
+    return () => { if (cartSaveTimer.current) clearTimeout(cartSaveTimer.current); };
   }, [form.email, form.fullName, items, totals.total, coupons.discount, hydrated]);
 
   const appliedCoupons = useMemo(
@@ -249,6 +258,24 @@ export default function CheckoutPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  // Chamado pelo PixPending quando polling confirma pago: true
+  function handlePixConfirmed() {
+    if (checkoutStage.stage !== 'pending_pix') return;
+    const order = checkoutStage.order;
+
+    // Só aqui limpa o carrinho e dispara analytics — pagamento realmente confirmado
+    clearCart();
+    if (pendingTrackRef.current) {
+      trackPurchase({
+        orderId: pendingTrackRef.current.orderId,
+        value: pendingTrackRef.current.total,
+        items: [], // itens já foram limpos do cart
+      });
+    }
+
+    setCheckoutStage({ stage: 'confirmed', order });
+  }
+
   async function finishOrder() {
     setSubmitting(true);
     setSubmitError('');
@@ -281,6 +308,7 @@ export default function CheckoutPage() {
         metodoPagamento: selectedPaymentId,
       };
 
+      // 1. Cria o pedido
       const res = await fetch('/api/pedidos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -294,6 +322,7 @@ export default function CheckoutPage() {
         return;
       }
 
+      // 2. Cria pagamento PIX no Mercado Pago
       let pixQrCode: string | undefined;
       let pixQrCodeBase64: string | undefined;
 
@@ -303,14 +332,22 @@ export default function CheckoutPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ pedidoId: data.pedidoId }),
         });
-        if (pixRes.ok) {
-          const pixData = await pixRes.json();
-          pixQrCode = pixData.qrCode;
-          pixQrCodeBase64 = pixData.qrCodeBase64;
+
+        if (!pixRes.ok) {
+          // Pedido foi criado mas o PIX falhou — redireciona para Meus pedidos
+          setSubmitError(
+            'Pedido criado, mas não foi possível gerar o QR Code PIX. ' +
+            'Acesse "Meus pedidos" para tentar novamente.',
+          );
+          return;
         }
+
+        const pixData = await pixRes.json();
+        pixQrCode = pixData.qrCode;
+        pixQrCodeBase64 = pixData.qrCodeBase64;
       }
 
-      setOrder({
+      const order: RealOrder = {
         id: data.pedidoId,
         numero: data.pedidoNumero,
         total: data.total,
@@ -320,18 +357,13 @@ export default function CheckoutPage() {
         customer: form,
         shipping: selectedShipping,
         coupons: appliedCoupons,
-      });
-      trackPurchase({
-        orderId: data.pedidoId,
-        value: data.total,
-        items: items.map((item) => ({
-          id: item.productId,
-          name: item.name,
-          price: item.unitPrice,
-          quantity: item.quantity,
-        })),
-      });
-      clearCart();
+      };
+
+      // Guarda referência para o trackPurchase que será disparado só na confirmação
+      pendingTrackRef.current = { orderId: data.pedidoId, total: data.total };
+
+      // 3. Avança para estado de PIX pendente — NÃO limpa carrinho nem dispara analytics aqui
+      setCheckoutStage({ stage: 'pending_pix', order });
     } catch {
       setSubmitError('Erro de conexão. Verifique sua internet e tente novamente.');
     } finally {
@@ -346,12 +378,26 @@ export default function CheckoutPage() {
     if (result.ok) setCouponCode('');
   }
 
-  if (order) {
+  // ── Roteamento por estágio ────────────────────────────────────────────────
+
+  if (checkoutStage.stage === 'pending_pix') {
     return (
       <>
         <Header />
         <main className="bg-[#fafafa] px-4 py-14 sm:px-6 lg:px-8">
-          <CheckoutSuccess order={order} />
+          <PixPending order={checkoutStage.order} onConfirmed={handlePixConfirmed} />
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (checkoutStage.stage === 'confirmed') {
+    return (
+      <>
+        <Header />
+        <main className="bg-[#fafafa] px-4 py-14 sm:px-6 lg:px-8">
+          <CheckoutSuccess order={checkoutStage.order} />
         </main>
         <Footer />
       </>
@@ -398,6 +444,7 @@ export default function CheckoutPage() {
     );
   }
 
+  // ── Formulário de checkout ──────────────────────────────────────────────────
   return (
     <>
       <Header />
@@ -426,7 +473,7 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Resumo colapsável — visível apenas em mobile (< lg) */}
+        {/* Resumo colapsável — visível apenas em mobile */}
         <div className="lg:hidden mx-auto max-w-7xl px-4 pt-4 sm:px-6">
           <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
             <button
@@ -558,7 +605,7 @@ export default function CheckoutPage() {
               onEnderecoModeChange={handleEnderecoModeChange}
               onChange={updateForm}
               onShippingChange={setSelectedShippingId}
-              onPaymentChange={setSelectedPaymentId}
+              onPaymentChange={() => { /* somente PIX habilitado */ }}
               onSubmit={finishOrder}
             />
           </div>

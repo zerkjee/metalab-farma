@@ -97,10 +97,10 @@ export class CheckoutPage {
         status: 201,
         contentType: 'application/json',
         body: JSON.stringify({
-          id: orderId,
-          numero: 'MTL-2026-E2ETEST',
-          status: 'AGUARDANDO_PAGAMENTO',
+          pedidoId: orderId,
+          pedidoNumero: 'MTL-2026-E2ETEST',
           total: 99.9,
+          metodoPagamento: 'PIX',
         }),
       })
     })
@@ -113,10 +113,34 @@ export class CheckoutPage {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
+          tipo: 'PIX',
           pagamentoId: 'mp-e2e-test-123',
-          pixQrCode: '00020126580014br.gov.bcb.pix0136e2e-test-pix-code',
-          pixQrCodeBase64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+          qrCode: '00020126580014br.gov.bcb.pix0136e2e-test-pix-code',
+          qrCodeBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+          expiracao: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
         }),
+      })
+    })
+    // Mock polling de status — retorna não-pago por padrão (estado correto para PIX pendente)
+    await this.page.route('**/api/pagamento/status/**', async (route) => {
+      if (route.request().method() !== 'GET') { await route.continue(); return }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ pago: false, status: 'AGUARDANDO_PAGAMENTO' }),
+      })
+    })
+  }
+
+  async mockPagamentoApiConfirmado(orderId = 'e2e-test-order-001') {
+    await this.mockPagamentoApi()
+    // Sobrescreve o status para simular webhook confirmado
+    await this.page.route(`**/api/pagamento/status/${orderId}`, async (route) => {
+      if (route.request().method() !== 'GET') { await route.continue(); return }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ pago: true, status: 'PAGAMENTO_APROVADO' }),
       })
     })
   }

@@ -31,7 +31,13 @@ export interface PaymentMethod {
   id: PaymentMethodId;
   label: string;
   description: string;
+  disabled?: boolean;
 }
+
+export type CheckoutStage =
+  | { stage: 'form' }
+  | { stage: 'pending_pix'; order: RealOrder }
+  | { stage: 'confirmed'; order: RealOrder }
 
 export interface RealOrder {
   id: string;

@@ -208,18 +208,22 @@ export async function POST(request: NextRequest) {
       data: { convertido: true },
     })
 
-    void enqueueOrderEmail({
-      numero: pedido.numero,
-      compradorNome: pedido.compradorNome,
-      compradorEmail: pedido.compradorEmail,
-      total: Number(pedido.total),
-      metodoPagamento: pedido.metodoPagamento ?? "PIX",
-      itens: pedido.itens.map((item) => ({
-        nome: item.produtoNome,
-        quantidade: item.quantidade,
-        precoUnit: Number(item.precoUnit),
-      })),
-    })
+    // Para PIX: o e-mail de confirmação é enviado pelo webhook após pagamento aprovado.
+    // Para métodos síncronos (quando implementados): enviar aqui.
+    if (metodoPagamento !== "PIX") {
+      void enqueueOrderEmail({
+        numero: pedido.numero,
+        compradorNome: pedido.compradorNome,
+        compradorEmail: pedido.compradorEmail,
+        total: Number(pedido.total),
+        metodoPagamento: pedido.metodoPagamento ?? "PIX",
+        itens: pedido.itens.map((item) => ({
+          nome: item.produtoNome,
+          quantidade: item.quantidade,
+          precoUnit: Number(item.precoUnit),
+        })),
+      })
+    }
 
     logger.info("Pedido criado", { route: "POST /api/pedidos", pedidoNumero: pedido.numero, total: Number(pedido.total) })
 
