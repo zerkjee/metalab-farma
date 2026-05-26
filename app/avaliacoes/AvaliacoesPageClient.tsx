@@ -132,9 +132,9 @@ export default function AvaliacoesPageClient() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#1a0533] via-[#2d1654] to-[#1e3a5f] py-20 text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm font-semibold text-purple-300 uppercase tracking-widest mb-3">Prova Social</p>
+          <p className="text-sm font-semibold text-[#60a5fa] uppercase tracking-widest mb-3">Prova Social</p>
           <h1 className="text-4xl sm:text-5xl font-black mb-4">Avaliações dos Clientes</h1>
-          <p className="text-purple-200 text-lg max-w-xl mx-auto mb-10">
+          <p className="text-blue-200 text-lg max-w-xl mx-auto mb-10">
             Transparência total — veja o que nossos clientes reais dizem sobre os suplementos Metalab.
           </p>
 
@@ -143,13 +143,13 @@ export default function AvaliacoesPageClient() {
             {loading ? (
               <div className="h-24 w-48 bg-white/10 rounded-2xl animate-pulse" />
             ) : totalCount === 0 ? (
-              <p className="text-purple-300 text-lg">Seja o primeiro a avaliar!</p>
+              <p className="text-[#60a5fa] text-lg">Seja o primeiro a avaliar!</p>
             ) : (
               <>
                 <div className="flex flex-col items-center">
                   <span className="text-6xl font-black">{overallAvg}</span>
                   <StarRating rating={overallAvg} size="lg" />
-                  <span className="text-purple-300 text-sm mt-2">{totalCount} avaliações</span>
+                  <span className="text-[#60a5fa] text-sm mt-2">{totalCount} avaliações</span>
                 </div>
 
                 <div className="hidden sm:block w-px h-24 bg-white/20" />
@@ -157,14 +157,14 @@ export default function AvaliacoesPageClient() {
                 <div className="flex flex-col gap-2 w-56">
                   {dist.map(({ star, count, pct }) => (
                     <div key={star} className="flex items-center gap-2.5">
-                      <span className="text-xs text-purple-300 w-3">{star}</span>
+                      <span className="text-xs text-[#60a5fa] w-3">{star}</span>
                       <svg className="w-3 h-3 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                       </svg>
                       <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-xs text-purple-300 w-5 text-right">{count}</span>
+                      <span className="text-xs text-[#60a5fa] w-5 text-right">{count}</span>
                     </div>
                   ))}
                 </div>
@@ -188,7 +188,7 @@ export default function AvaliacoesPageClient() {
               placeholder="Buscar por produto, cliente ou comentário..."
               value={search}
               onChange={(e) => changeSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6b21a8]/30 focus:border-[#6b21a8] transition-all shadow-sm"
+              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2756]/30 focus:border-[#0f2756] transition-all shadow-sm"
             />
           </div>
 
@@ -201,8 +201,8 @@ export default function AvaliacoesPageClient() {
                   onClick={() => changeFilter(val)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 ${
                     filter === val
-                      ? 'bg-[#6b21a8] text-white border-[#6b21a8]'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#6b21a8] hover:text-[#6b21a8]'
+                      ? 'bg-[#0f2756] text-white border-[#0f2756]'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#0f2756] hover:text-[#0f2756]'
                   }`}
                 >
                   {val === 'all' ? 'Todas' : `${val} ★`}
@@ -228,7 +228,7 @@ export default function AvaliacoesPageClient() {
             <select
               value={sort}
               onChange={(e) => { setSort(e.target.value as SortKey); setPage(1); }}
-              className="text-xs font-medium text-gray-600 border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#6b21a8]/30 focus:border-[#6b21a8] shadow-sm"
+              className="text-xs font-medium text-gray-600 border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#0f2756]/30 focus:border-[#0f2756] shadow-sm"
             >
               <option value="recent">Mais recentes</option>
               <option value="highest">Maior nota</option>
@@ -291,7 +291,7 @@ export default function AvaliacoesPageClient() {
                   <p className="text-sm mt-1">Tente outros filtros ou limpe a busca</p>
                   <button
                     onClick={() => { setSearch(''); setFilter('all'); setOnlyVerified(false); setPage(1); }}
-                    className="mt-6 px-5 py-2.5 rounded-xl bg-[#6b21a8] text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                    className="mt-6 px-5 py-2.5 rounded-xl bg-[#0f2756] text-white text-sm font-bold hover:opacity-90 transition-opacity"
                   >
                     Limpar filtros
                   </button>
@@ -306,7 +306,7 @@ export default function AvaliacoesPageClient() {
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-[#6b21a8] hover:text-[#6b21a8] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+                className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-[#0f2756] hover:text-[#0f2756] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -319,8 +319,8 @@ export default function AvaliacoesPageClient() {
                   onClick={() => setPage(p)}
                   className={`w-10 h-10 rounded-xl text-sm font-bold border transition-all duration-200 shadow-sm ${
                     p === page
-                      ? 'bg-[#6b21a8] text-white border-[#6b21a8]'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#6b21a8] hover:text-[#6b21a8]'
+                      ? 'bg-[#0f2756] text-white border-[#0f2756]'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#0f2756] hover:text-[#0f2756]'
                   }`}
                 >
                   {p}
@@ -330,7 +330,7 @@ export default function AvaliacoesPageClient() {
               <button
                 disabled={page === totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-[#6b21a8] hover:text-[#6b21a8] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+                className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-[#0f2756] hover:text-[#0f2756] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

@@ -97,7 +97,7 @@ export default function PoliticaDePrivacidade() {
               </ul>
               <p className="mt-2">
                 Para exercer qualquer direito, envie um e-mail para{' '}
-                <a href="mailto:mlmetalab@gmail.com" className="text-[#c084fc] hover:underline">
+                <a href="mailto:mlmetalab@gmail.com" className="text-[#60a5fa] hover:underline">
                   mlmetalab@gmail.com
                 </a>
                 . Responderemos em até 15 dias úteis.
@@ -129,7 +129,7 @@ export default function PoliticaDePrivacidade() {
               <h2 className="text-xl font-bold text-gray-900 mb-3">10. Contato</h2>
               <p>
                 Dúvidas sobre esta política:{' '}
-                <a href="mailto:mlmetalab@gmail.com" className="text-[#c084fc] hover:underline">
+                <a href="mailto:mlmetalab@gmail.com" className="text-[#60a5fa] hover:underline">
                   mlmetalab@gmail.com
                 </a>
               </p>

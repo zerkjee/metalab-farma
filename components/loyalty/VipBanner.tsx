@@ -43,7 +43,7 @@ export default function VipBanner() {
             <a
               href="/vip"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all duration-200 hover:scale-105 hover:shadow-2xl text-base"
-              style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+              style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
             >
               Acessar Área VIP
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

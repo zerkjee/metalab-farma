@@ -47,7 +47,7 @@ export default function TrustSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center mb-14">
-          <p className="text-xs font-bold text-[#6b21a8] uppercase tracking-[0.2em] mb-4">Nossos Valores</p>
+          <p className="text-xs font-bold text-[#0f2756] uppercase tracking-[0.2em] mb-4">Nossos Valores</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
             Análises Confiáveis e Precisas
           </h2>
@@ -61,9 +61,9 @@ export default function TrustSection() {
           {cards.map(({ title, desc, icon }) => (
             <div
               key={title}
-              className="group flex flex-col gap-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-[#6b21a8]/30 hover:shadow-md transition-all duration-300"
+              className="group flex flex-col gap-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-[#0f2756]/30 hover:shadow-md transition-all duration-300"
             >
-              <div className="w-11 h-11 rounded-lg flex items-center justify-center text-[#6b21a8] bg-gray-50 border border-gray-100 group-hover:bg-[#6b21a8]/5 transition-colors">
+              <div className="w-11 h-11 rounded-lg flex items-center justify-center text-[#0f2756] bg-gray-50 border border-gray-100 group-hover:bg-[#0f2756]/5 transition-colors">
                 {icon}
               </div>
               <div>

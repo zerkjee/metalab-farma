@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger'
 export const revalidate = 300 // 5 min: reviews só mudam quando admin aprova
 
 const AVATAR_COLORS = [
-  '#7c3aed', '#059669', '#dc2626', '#d97706', '#0284c7',
+  '#1e50a8', '#059669', '#dc2626', '#d97706', '#0284c7',
   '#db2777', '#16a34a', '#9333ea', '#ea580c', '#0891b2',
 ]
 
@@ -44,7 +44,7 @@ export async function GET() {
         productSlug: a.produto.slug,
         productName: a.produto.nome,
         productImage: a.produto.imagemUrl ?? null,
-        productColor: a.produto.corPrincipal ?? '#7c3aed',
+        productColor: a.produto.corPrincipal ?? '#1e50a8',
         customerName: a.usuario.nome,
         customerCity: ender?.cidade ?? '',
         customerState: ender?.estado ?? '',

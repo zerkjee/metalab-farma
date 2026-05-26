@@ -30,7 +30,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       disabled={disabled || loading}
       className={`inline-flex items-center justify-center gap-2 font-bold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      style={variant === 'primary' ? { background: 'linear-gradient(135deg, #6b21a8, #7c3aed)', ...style } : style}
+      style={variant === 'primary' ? { background: 'linear-gradient(135deg, #0f2756, #1e50a8)', ...style } : style}
       {...props}
     >
       {loading && (

@@ -12,8 +12,8 @@ export default function NotFound() {
       <Header />
       <main className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-24 text-center">
         <div
-          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl text-white shadow-xl shadow-purple-200"
-          style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl text-white shadow-xl shadow-blue-200"
+          style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
         >
           <span className="text-3xl font-black">404</span>
         </div>
@@ -24,13 +24,13 @@ export default function NotFound() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
             href="/"
-            className="rounded-xl bg-[#6b21a8] px-6 py-3 text-sm font-black text-white transition-all hover:opacity-90"
+            className="rounded-xl bg-[#0f2756] px-6 py-3 text-sm font-black text-white transition-all hover:opacity-90"
           >
             Ir para a loja
           </Link>
           <Link
             href="/#produtos"
-            className="rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-gray-600 transition-all hover:border-[#6b21a8]/30 hover:text-[#6b21a8]"
+            className="rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-gray-600 transition-all hover:border-[#0f2756]/30 hover:text-[#0f2756]"
           >
             Ver produtos
           </Link>

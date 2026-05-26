@@ -52,8 +52,8 @@ export default function Footer() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-9 h-9 rounded-xl bg-[#0f2756]/10 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-[#60a5fa]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
@@ -85,9 +85,9 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-baseline gap-1 mb-1">
               <span className="text-2xl font-black text-white tracking-tight">METALAB</span>
-              <span className="text-lg font-bold text-[#c084fc]">Store</span>
+              <span className="text-lg font-bold text-[#60a5fa]">Store</span>
             </div>
-            <p className="text-sm text-[#c084fc]/70 font-medium mb-4">Compromisso com a vida</p>
+            <p className="text-sm text-[#60a5fa]/70 font-medium mb-4">Compromisso com a vida</p>
             <p className="text-xs text-gray-500 leading-relaxed mb-5">
               Suplementos alimentares com tecnologia, cuidado e confiança em cada fórmula.
               Produtos para complementar sua rotina alimentar com qualidade e procedência garantida.
@@ -95,7 +95,7 @@ export default function Footer() {
 
             <div className="space-y-2 mb-6">
               <a href="mailto:contato@metalab.com.br"
-                className="flex items-center gap-2 text-xs text-gray-500 hover:text-[#c084fc] transition-colors">
+                className="flex items-center gap-2 text-xs text-gray-500 hover:text-[#60a5fa] transition-colors">
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
@@ -141,7 +141,7 @@ export default function Footer() {
               <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="text-sm text-gray-500 hover:text-[#c084fc] transition-colors duration-200">
+                    <Link href={link.href} className="text-sm text-gray-500 hover:text-[#60a5fa] transition-colors duration-200">
                       {link.label}
                     </Link>
                   </li>

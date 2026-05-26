@@ -99,7 +99,7 @@ export default function VipPageClient() {
         <Header />
         <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0f0522, #0f172a)' }}>
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl animate-pulse" style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }} />
+            <div className="w-12 h-12 rounded-2xl animate-pulse" style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }} />
             <p className="text-white/40 text-sm animate-pulse">Carregando área VIP...</p>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function VipPageClient() {
         <div className="pointer-events-none absolute -right-32 -top-32 h-[600px] w-[600px] rounded-full opacity-20 blur-3xl"
           style={{ background: levelCfg.color }} />
         <div className="pointer-events-none absolute -bottom-16 -left-16 h-80 w-80 rounded-full opacity-10 blur-3xl"
-          style={{ background: '#7c3aed' }} />
+          style={{ background: '#1e50a8' }} />
         <div className="absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '36px 36px' }} />
         {/* Noise grain */}
@@ -263,7 +263,7 @@ export default function VipPageClient() {
             <div className="mb-10">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-white font-black text-xl">Pedidos Recentes</h2>
-                <Link href="/pedidos" className="text-xs font-bold text-purple-400 hover:text-purple-300 transition-colors">
+                <Link href="/pedidos" className="text-xs font-bold text-[#60a5fa] hover:text-[#60a5fa] transition-colors">
                   Ver todos →
                 </Link>
               </div>
@@ -435,7 +435,7 @@ export default function VipPageClient() {
                 <Link
                   href="/#produtos"
                   className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white text-sm transition-all hover:scale-105 hover:shadow-2xl"
-                  style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                  style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
                 >
                   Comprar e ganhar pontos
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

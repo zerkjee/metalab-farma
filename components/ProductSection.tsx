@@ -14,7 +14,7 @@ export default function ProductSection({
   title,
   subtitle,
   products,
-  color = '#6b21a8',
+  color = '#0f2756',
 }: ProductSectionProps) {
   if (products.length === 0) {
     return null;

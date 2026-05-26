@@ -92,7 +92,7 @@ export default function Sobre() {
         <section className="bg-gray-950 text-white py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold text-[#c084fc] uppercase tracking-widest mb-4">
+              <p className="text-sm font-semibold text-[#60a5fa] uppercase tracking-widest mb-4">
                 Sobre a Metalab
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-6">
@@ -106,13 +106,13 @@ export default function Sobre() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/#produtos"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#c084fc] text-gray-950 font-bold rounded-xl hover:bg-purple-300 transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#60a5fa] text-gray-950 font-bold rounded-xl hover:bg-blue-300 transition-colors"
                 >
                   Ver produtos
                 </Link>
                 <Link
                   href="/qualidade"
-                  className="inline-flex items-center gap-2 px-6 py-3 border border-gray-700 text-white font-semibold rounded-xl hover:border-[#c084fc] hover:text-[#c084fc] transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-gray-700 text-white font-semibold rounded-xl hover:border-[#60a5fa] hover:text-[#60a5fa] transition-colors"
                 >
                   Nossa qualidade
                 </Link>
@@ -126,8 +126,8 @@ export default function Sobre() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map(({ value, label }) => (
-                <div key={label} className="flex flex-col items-center text-center p-6 rounded-2xl bg-[#f5f3ff] border border-[#ede9fe]">
-                  <span className="text-3xl font-black text-[#6b21a8] mb-1">{value}</span>
+                <div key={label} className="flex flex-col items-center text-center p-6 rounded-2xl bg-[#eff6ff] border border-[#dbeafe]">
+                  <span className="text-3xl font-black text-[#0f2756] mb-1">{value}</span>
                   <span className="text-sm text-gray-500 font-medium">{label}</span>
                 </div>
               ))}
@@ -140,7 +140,7 @@ export default function Sobre() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <p className="text-sm font-semibold text-[#6b21a8] uppercase tracking-widest mb-4">Nossa Missão</p>
+                <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-4">Nossa Missão</p>
                 <h2 className="text-3xl sm:text-4xl font-black text-gray-900 leading-tight mb-6">
                   Suplementação honesta, sem promessas vazias
                 </h2>
@@ -153,8 +153,8 @@ export default function Sobre() {
                   Não vendemos medicamentos, não fazemos promessas terapêuticas e não comprometemos sua
                   saúde por resultados rápidos. Acreditamos que suplementar bem começa pela escolha certa.
                 </p>
-                <div className="p-5 rounded-2xl bg-[#f5f3ff] border border-[#ede9fe]">
-                  <p className="text-sm text-[#6b21a8] font-semibold mb-1">⚠️ Aviso importante</p>
+                <div className="p-5 rounded-2xl bg-[#eff6ff] border border-[#dbeafe]">
+                  <p className="text-sm text-[#0f2756] font-semibold mb-1">⚠️ Aviso importante</p>
                   <p className="text-sm text-gray-600">
                     Nossos produtos são suplementos alimentares. Não são medicamentos e não têm indicação
                     terapêutica. Consulte sempre um profissional de saúde antes de suplementar.
@@ -167,15 +167,15 @@ export default function Sobre() {
                 {milestones.map(({ year, title, desc }, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex flex-col items-center">
-                      <div className="w-10 h-10 rounded-full bg-[#6b21a8] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[#0f2756] text-white flex items-center justify-center text-xs font-bold shrink-0">
                         {i + 1}
                       </div>
                       {i < milestones.length - 1 && (
-                        <div className="w-px flex-1 bg-[#ede9fe] mt-2" />
+                        <div className="w-px flex-1 bg-[#dbeafe] mt-2" />
                       )}
                     </div>
                     <div className="pb-6">
-                      <span className="text-xs font-bold text-[#6b21a8] uppercase tracking-wider">{year}</span>
+                      <span className="text-xs font-bold text-[#0f2756] uppercase tracking-wider">{year}</span>
                       <h3 className="text-base font-bold text-gray-900 mt-1 mb-2">{title}</h3>
                       <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
                     </div>
@@ -187,10 +187,10 @@ export default function Sobre() {
         </section>
 
         {/* Valores */}
-        <section className="py-24 bg-[#f5f3ff]">
+        <section className="py-24 bg-[#eff6ff]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-[#6b21a8] uppercase tracking-widest mb-3">Nossos Valores</p>
+              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Nossos Valores</p>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
                 O que nos guia todos os dias
               </h2>
@@ -199,9 +199,9 @@ export default function Sobre() {
               {values.map(({ title, desc, icon }) => (
                 <div
                   key={title}
-                  className="group flex flex-col items-start gap-4 p-6 rounded-2xl bg-white hover:bg-[#ede9fe] border border-[#ede9fe] hover:border-[#c4b5fd] hover:shadow-lg transition-all duration-300"
+                  className="group flex flex-col items-start gap-4 p-6 rounded-2xl bg-white hover:bg-[#dbeafe] border border-[#dbeafe] hover:border-[#c4b5fd] hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="p-3 rounded-xl bg-[#f5f3ff] text-[#6b21a8] group-hover:bg-white shadow-sm transition-colors">
+                  <div className="p-3 rounded-xl bg-[#eff6ff] text-[#0f2756] group-hover:bg-white shadow-sm transition-colors">
                     {icon}
                   </div>
                   <div>
@@ -223,7 +223,7 @@ export default function Sobre() {
             </p>
             <Link
               href="/#produtos"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#c084fc] text-gray-950 font-bold rounded-xl hover:bg-purple-300 transition-colors text-base"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#60a5fa] text-gray-950 font-bold rounded-xl hover:bg-blue-300 transition-colors text-base"
             >
               Ver todos os produtos
             </Link>

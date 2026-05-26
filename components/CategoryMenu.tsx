@@ -86,7 +86,7 @@ export default function CategoryMenu() {
         >
           <a
             href={category.href}
-            className="flex items-center gap-1 text-gray-700 font-medium hover:text-purple-600 transition-colors py-2"
+            className="flex items-center gap-1 text-gray-700 font-medium hover:text-[#0f2756] transition-colors py-2"
           >
             {category.name}
             <ChevronDown size={16} className="group-hover:rotate-180 transition-transform" />
@@ -99,7 +99,7 @@ export default function CategoryMenu() {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="block px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors text-sm"
+                  className="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:text-[#0f2756] transition-colors text-sm"
                 >
                   {item.name}
                 </a>

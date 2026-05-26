@@ -363,7 +363,7 @@ export default function CheckoutPage() {
       <>
         <Header />
         <main className="flex min-h-[60vh] items-center justify-center bg-[#fafafa] px-4">
-          <div className="h-12 w-12 animate-pulse rounded-2xl bg-[#6b21a8]/20" />
+          <div className="h-12 w-12 animate-pulse rounded-2xl bg-[#0f2756]/20" />
         </main>
         <Footer />
       </>
@@ -376,10 +376,10 @@ export default function CheckoutPage() {
         <Header />
         <main className="bg-[#fafafa] px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-sm">
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#6b21a8]/10 text-[#6b21a8]">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0f2756]/10 text-[#0f2756]">
               <ShoppingBag className="h-8 w-8" strokeWidth={1.7} />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Checkout</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#0f2756]">Checkout</p>
             <h1 className="mt-3 text-3xl font-black text-gray-950">Seu carrinho está vazio</h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500">
               Adicione produtos ao carrinho antes de finalizar o pedido.
@@ -387,7 +387,7 @@ export default function CheckoutPage() {
             <Link
               href="/#produtos"
               className="mt-7 inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+              style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
             >
               Voltar para loja
             </Link>
@@ -404,12 +404,12 @@ export default function CheckoutPage() {
       <main className="bg-[#fafafa]">
         <section className="border-b border-gray-100 bg-white px-4 py-10 sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-4">
-            <Link href="/#produtos" className="inline-flex items-center gap-2 self-start text-sm font-bold text-gray-500 transition-colors hover:text-[#6b21a8]">
+            <Link href="/#produtos" className="inline-flex items-center gap-2 self-start text-sm font-bold text-gray-500 transition-colors hover:text-[#0f2756]">
               <ArrowLeft className="h-4 w-4" strokeWidth={1.8} />
               Continuar comprando
             </Link>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Checkout</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#0f2756]">Checkout</p>
               <h1 className="mt-2 text-3xl font-black text-gray-950 sm:text-4xl">Finalize seu pedido</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
                 Pagamento processado com segurança via Mercado Pago.
@@ -439,7 +439,7 @@ export default function CheckoutPage() {
                 {summaryOpen ? 'Ocultar resumo' : `Ver resumo (${items.length} ${items.length === 1 ? 'item' : 'itens'})`}
               </span>
               <div className="flex items-center gap-3">
-                <span className="font-black text-[#6b21a8]">{fmtCurrency(totals.total)}</span>
+                <span className="font-black text-[#0f2756]">{fmtCurrency(totals.total)}</span>
                 <svg
                   className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${summaryOpen ? 'rotate-180' : ''}`}
                   fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -469,7 +469,7 @@ export default function CheckoutPage() {
           <div className="flex flex-col gap-6">
             <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Cupons</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Cupons</p>
                 <h2 className="mt-1 text-xl font-black text-gray-950">Aplique seus benefícios</h2>
                 <p className="mt-1 text-sm text-gray-500">Permitido 1 cupom de desconto + 1 cupom de frete grátis.</p>
               </div>
@@ -490,7 +490,7 @@ export default function CheckoutPage() {
                           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${
                             jaAplicado
                               ? 'border-emerald-200 bg-emerald-50 text-emerald-600 cursor-default'
-                              : 'border-purple-200 bg-purple-50 text-[#6b21a8] hover:bg-purple-100 cursor-pointer'
+                              : 'border-blue-200 bg-blue-50 text-[#0f2756] hover:bg-blue-100 cursor-pointer'
                           }`}
                         >
                           <span>{c.codigo}</span>
@@ -509,12 +509,12 @@ export default function CheckoutPage() {
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
                   placeholder="Ou digite um código"
-                  className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8] focus:bg-white"
+                  className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#0f2756] focus:bg-white"
                 />
                 <button
                   type="button"
                   onClick={handleApplyCoupon}
-                  className="rounded-xl bg-[#6b21a8] px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90"
+                  className="rounded-xl bg-[#0f2756] px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90"
                 >
                   Aplicar cupom
                 </button>

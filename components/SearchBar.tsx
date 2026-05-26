@@ -28,11 +28,11 @@ export default function SearchBar({ compact = false }: SearchBarProps) {
           placeholder="Buscar produtos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 bg-gray-100 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-4 py-2 bg-gray-100 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0f2756]"
         />
         <button
           type="submit"
-          className="ml-2 p-2 text-gray-600 hover:text-purple-600 transition-colors"
+          className="ml-2 p-2 text-gray-600 hover:text-[#0f2756] transition-colors"
         >
           <Search size={20} />
         </button>
@@ -48,11 +48,11 @@ export default function SearchBar({ compact = false }: SearchBarProps) {
           placeholder="Buscar suplementos, vitaminas, minerais..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-5 py-3 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+          className="w-full px-5 py-3 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#0f2756] transition-colors"
         />
         <button
           type="submit"
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-purple-600 transition-colors"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-[#0f2756] transition-colors"
         >
           <Search size={20} />
         </button>

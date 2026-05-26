@@ -119,7 +119,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const numericId = parseInt(produto.id.replace('local-', '')) || 0
   const detail = getProductDetail(numericId)
-  const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#6b21a8'
+  const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#0f2756'
 
   // Composição: preferir dado do banco, fallback para dado estático legado
   const composicaoIngredientes: Ingrediente[] | null =

@@ -254,7 +254,7 @@ export default function ProductDetailHero({
                 <span className="text-[10px] font-bold text-gray-600 leading-tight">Compra<br/>segura</span>
               </div>
               <div className="flex flex-col items-center gap-1 p-2.5 rounded-xl bg-gray-50 border border-gray-100 text-center">
-                <Truck className="w-4 h-4 text-purple-500" strokeWidth={2} />
+                <Truck className="w-4 h-4 text-[#0f2756]" strokeWidth={2} />
                 <span className="text-[10px] font-bold text-gray-600 leading-tight">Entrega<br/>garantida</span>
               </div>
             </div>

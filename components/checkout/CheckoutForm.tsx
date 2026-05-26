@@ -49,7 +49,7 @@ function cepMask(v: string) {
 }
 
 
-const inputCls = 'w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-950 outline-none transition-colors placeholder:text-gray-400 focus:border-[#6b21a8] focus:bg-white';
+const inputCls = 'w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-950 outline-none transition-colors placeholder:text-gray-400 focus:border-[#0f2756] focus:bg-white';
 
 export default function CheckoutForm({
   formId,
@@ -93,7 +93,7 @@ export default function CheckoutForm({
       {/* ── Dados do cliente ── */}
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Dados do cliente</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Dados do cliente</p>
           <h2 className="mt-1 text-xl font-black text-gray-950">Identificação</h2>
         </div>
 
@@ -143,7 +143,7 @@ export default function CheckoutForm({
       {/* ── Endereço de entrega ── */}
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Entrega</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Entrega</p>
           <h2 className="mt-1 text-xl font-black text-gray-950">Endereço de entrega</h2>
         </div>
 
@@ -156,8 +156,8 @@ export default function CheckoutForm({
                 onClick={() => onEnderecoModeChange(mode)}
                 className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-all ${
                   enderecoMode === mode
-                    ? 'border-[#6b21a8] bg-[#6b21a8]/5 text-[#6b21a8]'
-                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-[#6b21a8]/30'
+                    ? 'border-[#0f2756] bg-[#0f2756]/5 text-[#0f2756]'
+                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-[#0f2756]/30'
                 }`}
               >
                 {mode === 'salvo' ? 'Meu endereço' : 'Outro endereço'}
@@ -231,7 +231,7 @@ export default function CheckoutForm({
       {/* ── Entrega ── */}
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Entrega</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Entrega</p>
           <h2 className="mt-1 text-xl font-black text-gray-950">Escolha a forma de entrega</h2>
         </div>
 
@@ -243,7 +243,7 @@ export default function CheckoutForm({
 
         {freteStatus === 'loading' && (
           <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#6b21a8] border-t-transparent" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0f2756] border-t-transparent" />
             <p className="text-sm text-gray-500">Calculando frete...</p>
           </div>
         )}
@@ -265,8 +265,8 @@ export default function CheckoutForm({
                   onClick={() => onShippingChange(method.id)}
                   className={`rounded-2xl border p-4 text-left transition-all ${
                     active
-                      ? 'border-[#6b21a8] bg-[#6b21a8]/5 shadow-sm'
-                      : 'border-gray-200 bg-gray-50 hover:border-[#6b21a8]/40 hover:bg-white'
+                      ? 'border-[#0f2756] bg-[#0f2756]/5 shadow-sm'
+                      : 'border-gray-200 bg-gray-50 hover:border-[#0f2756]/40 hover:bg-white'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -275,7 +275,7 @@ export default function CheckoutForm({
                       <p className="mt-1 text-sm leading-5 text-gray-500">{method.description}</p>
                       <p className="mt-2 text-xs font-semibold text-gray-400">{method.estimate}</p>
                     </div>
-                    <span className="shrink-0 text-sm font-black text-[#6b21a8]">{fmtCurrency(method.price)}</span>
+                    <span className="shrink-0 text-sm font-black text-[#0f2756]">{fmtCurrency(method.price)}</span>
                   </div>
                 </button>
               );
@@ -287,7 +287,7 @@ export default function CheckoutForm({
       {/* ── Pagamento ── */}
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Pagamento</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Pagamento</p>
           <h2 className="mt-1 text-xl font-black text-gray-950">Como você quer pagar?</h2>
         </div>
 
@@ -301,8 +301,8 @@ export default function CheckoutForm({
                 onClick={() => onPaymentChange(method.id)}
                 className={`rounded-2xl border p-4 text-left transition-all ${
                   active
-                    ? 'border-[#6b21a8] bg-[#6b21a8]/5 shadow-sm'
-                    : 'border-gray-200 bg-gray-50 hover:border-[#6b21a8]/40 hover:bg-white'
+                    ? 'border-[#0f2756] bg-[#0f2756]/5 shadow-sm'
+                    : 'border-gray-200 bg-gray-50 hover:border-[#0f2756]/40 hover:bg-white'
                 }`}
               >
                 <p className="font-black text-gray-950">{method.label}</p>

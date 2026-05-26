@@ -25,13 +25,13 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button
               onClick={reset}
-              className="rounded-xl bg-[#6b21a8] px-6 py-3 text-sm font-black text-white transition-all hover:opacity-90"
+              className="rounded-xl bg-[#0f2756] px-6 py-3 text-sm font-black text-white transition-all hover:opacity-90"
             >
               Tentar novamente
             </button>
             <Link
               href="/"
-              className="rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-gray-600 transition-all hover:border-[#6b21a8]/30 hover:text-[#6b21a8]"
+              className="rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-gray-600 transition-all hover:border-[#0f2756]/30 hover:text-[#0f2756]"
             >
               Voltar para a loja
             </Link>

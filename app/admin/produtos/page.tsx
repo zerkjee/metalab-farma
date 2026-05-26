@@ -116,7 +116,7 @@ function apiToManaged(p: ApiProduto): ManagedProduct {
     stock: p.estoque,
     status,
     image: img,
-    color: p.corPrincipal ?? '#6b21a8',
+    color: p.corPrincipal ?? '#0f2756',
     description: p.descricaoCurta ?? '',
     composicao: p.composicao ?? '',
     modoDeUso: p.modoDeUso ?? '',
@@ -142,7 +142,7 @@ function productToForm(p: ManagedProduct): ProductForm {
 const emptyForm: ProductForm = {
   name: '', slug: '', sku: '', ean: '', brand: 'Metalab', categoriaId: '',
   tipo: 'SIMPLES', price: 0, salePrice: 0, stock: 0, status: 'ativo',
-  image: '', color: '#6b21a8', description: '',
+  image: '', color: '#0f2756', description: '',
   composicao: '', modoDeUso: '',
   pesoGramas: null, alturaCm: null, larguraCm: null, comprimentoCm: null,
   tags: [], tagsText: '', kitItens: [],
@@ -633,7 +633,7 @@ export default function AdminProdutos() {
                       onChange={e => updateField('stock', Number(e.target.value))} className={inputCls} />
                   </Field>
                   <Field label="Cor do produto (hex)">
-                    <input value={form.color} onChange={e => updateField('color', e.target.value)} className={inputCls} placeholder="#6b21a8" />
+                    <input value={form.color} onChange={e => updateField('color', e.target.value)} className={inputCls} placeholder="#0f2756" />
                   </Field>
                 </div>
               </section>

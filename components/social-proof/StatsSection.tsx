@@ -82,7 +82,7 @@ export default function StatsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center mb-14">
-          <p className="text-xs font-bold text-[#c084fc] uppercase tracking-[0.2em] mb-4">Nossos Números</p>
+          <p className="text-xs font-bold text-[#60a5fa] uppercase tracking-[0.2em] mb-4">Nossos Números</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
             Confiança comprovada em dados
           </h2>
@@ -107,7 +107,7 @@ export default function StatsSection() {
                   <CountUp target={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
                 )}
               </p>
-              <p className="text-sm font-semibold text-[#c084fc] mt-1">{stat.label}</p>
+              <p className="text-sm font-semibold text-[#60a5fa] mt-1">{stat.label}</p>
               {stat.sublabel && (
                 <p className="text-xs text-gray-600 mt-0.5">{stat.sublabel}</p>
               )}

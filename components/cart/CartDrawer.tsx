@@ -75,12 +75,12 @@ export default function CartDrawer() {
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Sua compra</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Sua compra</p>
             <h2 className="mt-1 text-xl font-black text-gray-950">Carrinho</h2>
           </div>
           <button
             onClick={closeCart}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-all hover:border-[#6b21a8]/30 hover:bg-[#6b21a8]/5 hover:text-[#6b21a8]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-all hover:border-[#0f2756]/30 hover:bg-[#0f2756]/5 hover:text-[#0f2756]"
             aria-label="Fechar carrinho"
           >
             <X className="h-5 w-5" strokeWidth={1.8} />
@@ -89,7 +89,7 @@ export default function CartDrawer() {
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#6b21a8]/10 text-[#6b21a8]">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0f2756]/10 text-[#0f2756]">
               <ShoppingBag className="h-8 w-8" strokeWidth={1.7} />
             </div>
             <p className="text-lg font-black text-gray-950">Seu carrinho está vazio</p>
@@ -99,7 +99,7 @@ export default function CartDrawer() {
             <button
               onClick={closeCart}
               className="mt-6 rounded-xl px-5 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+              style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
             >
               Ver produtos
             </button>
@@ -137,7 +137,7 @@ export default function CartDrawer() {
                             <Link
                               href={`/produtos/${item.slug || item.productId}`}
                               onClick={closeCart}
-                              className="mt-1 line-clamp-2 text-sm font-black leading-snug text-gray-950 hover:text-[#6b21a8]"
+                              className="mt-1 line-clamp-2 text-sm font-black leading-snug text-gray-950 hover:text-[#0f2756]"
                             >
                               {item.name}
                             </Link>
@@ -155,7 +155,7 @@ export default function CartDrawer() {
                           <div className="inline-flex items-center rounded-xl border border-gray-200 bg-white">
                             <button
                               onClick={() => decreaseItem(item.productId)}
-                              className="flex h-9 w-9 items-center justify-center text-gray-500 transition-colors hover:text-[#6b21a8]"
+                              className="flex h-9 w-9 items-center justify-center text-gray-500 transition-colors hover:text-[#0f2756]"
                               aria-label={`Diminuir quantidade de ${item.name}`}
                             >
                               <Minus className="h-4 w-4" strokeWidth={2} />
@@ -164,7 +164,7 @@ export default function CartDrawer() {
                             <button
                               onClick={() => increaseItem(item.productId)}
                               disabled={item.quantity >= item.stock}
-                              className="flex h-9 w-9 items-center justify-center text-gray-500 transition-colors hover:text-[#6b21a8] disabled:cursor-not-allowed disabled:opacity-35"
+                              className="flex h-9 w-9 items-center justify-center text-gray-500 transition-colors hover:text-[#0f2756] disabled:cursor-not-allowed disabled:opacity-35"
                               aria-label={`Aumentar quantidade de ${item.name}`}
                             >
                               <Plus className="h-4 w-4" strokeWidth={2} />
@@ -183,8 +183,8 @@ export default function CartDrawer() {
             </div>
 
             <div className="border-t border-gray-100 bg-white px-5 py-5">
-              <div className="mb-4 rounded-2xl border border-dashed border-[#6b21a8]/30 bg-[#6b21a8]/5 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#6b21a8]">Cupons</p>
+              <div className="mb-4 rounded-2xl border border-dashed border-[#0f2756]/30 bg-[#0f2756]/5 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0f2756]">Cupons</p>
                 <p className="mt-1 text-sm text-gray-600">
                   Use 1 cupom de desconto + 1 cupom de frete grátis.
                 </p>
@@ -195,12 +195,12 @@ export default function CartDrawer() {
                     onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
                     placeholder="PRIMEIRA30"
                     disabled={isApplyingCoupon}
-                    className="min-w-0 flex-1 rounded-xl border border-purple-200 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#6b21a8] disabled:opacity-60"
+                    className="min-w-0 flex-1 rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-950 outline-none placeholder:text-gray-400 focus:border-[#0f2756] disabled:opacity-60"
                   />
                   <button
                     onClick={handleApplyCoupon}
                     disabled={isApplyingCoupon || !couponCode.trim()}
-                    className="rounded-xl bg-[#6b21a8] px-3 py-2 text-xs font-black text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 min-w-[60px] flex items-center justify-center"
+                    className="rounded-xl bg-[#0f2756] px-3 py-2 text-xs font-black text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 min-w-[60px] flex items-center justify-center"
                   >
                     {isApplyingCoupon ? (
                       <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -262,7 +262,7 @@ export default function CartDrawer() {
                 )}
                 <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                   <span className="text-base font-bold text-gray-950">Total parcial</span>
-                  <span className="text-2xl font-black text-[#6b21a8]">{formatCurrency(totals.total)}</span>
+                  <span className="text-2xl font-black text-[#0f2756]">{formatCurrency(totals.total)}</span>
                 </div>
               </div>
 
@@ -270,7 +270,7 @@ export default function CartDrawer() {
                 href="/checkout"
                 onClick={closeCart}
                 className="mt-5 block w-full rounded-xl px-5 py-3 text-center text-sm font-black text-white transition-all hover:opacity-90 active:scale-[0.99]"
-                style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
               >
                 Continuar para checkout
               </Link>

@@ -48,7 +48,7 @@ export default function WhyMetalab() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center mb-16">
-          <p className="text-xs font-bold text-[#6b21a8] uppercase tracking-[0.2em] mb-4">Nosso Diferencial</p>
+          <p className="text-xs font-bold text-[#0f2756] uppercase tracking-[0.2em] mb-4">Nosso Diferencial</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
             Confiança, Precisão,<br className="hidden sm:block" /> Experiência, Excelência
           </h2>
@@ -62,9 +62,9 @@ export default function WhyMetalab() {
           {pillars.map(({ icon, title, desc }) => (
             <div
               key={title}
-              className="group flex flex-col gap-5 p-7 bg-white rounded-xl border border-gray-200 hover:border-[#6b21a8]/30 hover:shadow-lg transition-all duration-300"
+              className="group flex flex-col gap-5 p-7 bg-white rounded-xl border border-gray-200 hover:border-[#0f2756]/30 hover:shadow-lg transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center text-[#6b21a8] bg-gray-50 group-hover:bg-[#6b21a8]/5 transition-colors border border-gray-100">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center text-[#0f2756] bg-gray-50 group-hover:bg-[#0f2756]/5 transition-colors border border-gray-100">
                 {icon}
               </div>
               <div>

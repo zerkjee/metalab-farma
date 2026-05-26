@@ -39,7 +39,7 @@ export default function OrderSummary({
   return (
     <aside className="sticky top-24 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="mb-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#6b21a8]">Resumo</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Resumo</p>
         <h2 className="mt-1 text-xl font-black text-gray-950">Seu pedido</h2>
       </div>
 
@@ -98,7 +98,7 @@ export default function OrderSummary({
         <div className="flex items-center justify-between border-t border-gray-100 pt-3">
           <span className="text-base font-black text-gray-950">Total</span>
           {freteCalculado
-            ? <span className="text-2xl font-black text-[#6b21a8]">{fmtCurrency(total)}</span>
+            ? <span className="text-2xl font-black text-[#0f2756]">{fmtCurrency(total)}</span>
             : <span className="text-sm font-semibold text-gray-400 italic">+ frete</span>
           }
         </div>
@@ -109,7 +109,7 @@ export default function OrderSummary({
         form={formId}
         disabled={submitting}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-        style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+        style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
       >
         <LockKeyhole className="h-4 w-4" strokeWidth={1.8} />
         {submitting ? 'Processando...' : 'Finalizar pedido'}

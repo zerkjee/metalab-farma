@@ -43,12 +43,12 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
     <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-sm">
       <div
         className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl text-white shadow-xl shadow-purple-200"
-        style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+        style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
       >
         <CheckCircle2 className="h-10 w-10" strokeWidth={1.8} />
       </div>
 
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#6b21a8]">Pedido criado</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#0f2756]">Pedido criado</p>
       <h1 className="mt-3 text-3xl font-black text-gray-950">Compra finalizada com sucesso</h1>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-gray-500">
         Seu pedido foi recebido. Acompanhe o status pelo seu e-mail ou na área do cliente.
@@ -62,7 +62,7 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
           </div>
           <div className="rounded-2xl bg-white px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Total</p>
-            <p className="mt-1 text-xl font-black text-[#6b21a8]">{fmtCurrency(order.total)}</p>
+            <p className="mt-1 text-xl font-black text-[#0f2756]">{fmtCurrency(order.total)}</p>
           </div>
         </div>
 
@@ -92,7 +92,7 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
       </div>
 
       {order.metodoPagamento === 'PIX' && order.pixQrCode && (
-        <div className={`mt-6 rounded-2xl border p-5 text-left transition-colors ${pago ? 'border-emerald-200 bg-emerald-50' : 'border-purple-100 bg-purple-50'}`}>
+        <div className={`mt-6 rounded-2xl border p-5 text-left transition-colors ${pago ? 'border-emerald-200 bg-emerald-50' : 'border-purple-100 bg-blue-50'}`}>
           {pago ? (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               <CheckCircle2 className="h-12 w-12 text-emerald-500" strokeWidth={1.6} />
@@ -121,7 +121,7 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
                 <p className="flex-1 truncate text-xs font-mono text-gray-700">{order.pixQrCode}</p>
                 <button
                   onClick={copyPix}
-                  className="flex-shrink-0 rounded-lg bg-[#6b21a8] p-1.5 text-white transition-all hover:opacity-90"
+                  className="flex-shrink-0 rounded-lg bg-[#0f2756] p-1.5 text-white transition-all hover:opacity-90"
                   title="Copiar código Pix"
                 >
                   <Copy className="h-4 w-4" strokeWidth={1.8} />
@@ -141,14 +141,14 @@ export default function CheckoutSuccess({ order }: { order: RealOrder }) {
         <Link
           href="/"
           className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+          style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
         >
           <PackageCheck className="h-4 w-4" strokeWidth={1.8} />
           Voltar para loja
         </Link>
         <Link
           href="/pedidos"
-          className="inline-flex items-center justify-center rounded-xl border border-gray-200 px-5 py-3 text-sm font-bold text-gray-600 transition-all hover:border-[#6b21a8]/30 hover:bg-[#6b21a8]/5 hover:text-[#6b21a8]"
+          className="inline-flex items-center justify-center rounded-xl border border-gray-200 px-5 py-3 text-sm font-bold text-gray-600 transition-all hover:border-[#0f2756]/30 hover:bg-[#0f2756]/5 hover:text-[#0f2756]"
         >
           Meus pedidos
         </Link>

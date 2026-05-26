@@ -8,7 +8,7 @@ interface RatingDistributionProps {
   color?: string;
 }
 
-export default function RatingDistribution({ summary, color = '#6b21a8' }: RatingDistributionProps) {
+export default function RatingDistribution({ summary, color = '#0f2756' }: RatingDistributionProps) {
   const total = summary.totalReviews;
 
   const bars = ([5, 4, 3, 2, 1] as const).map((star) => ({

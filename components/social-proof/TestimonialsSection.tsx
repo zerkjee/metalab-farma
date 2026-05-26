@@ -19,12 +19,12 @@ export default function TestimonialsSection() {
   }
 
   return (
-    <section className="py-20 bg-[#f5f3ff] border-b border-purple-100 overflow-hidden">
+    <section className="py-20 bg-[#eff6ff] border-b border-purple-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
           <div>
-            <p className="text-sm font-semibold text-[#6b21a8] uppercase tracking-widest mb-2">Prova Social</p>
+            <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-2">Prova Social</p>
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
               Clientes que amam a Metalab
             </h2>
@@ -37,7 +37,7 @@ export default function TestimonialsSection() {
           <div className="flex gap-2 flex-shrink-0">
             <button
               onClick={() => scroll('left')}
-              className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-[#6b21a8] hover:border-[#6b21a8] transition-all duration-200 shadow-sm"
+              className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-[#0f2756] hover:border-[#0f2756] transition-all duration-200 shadow-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -45,7 +45,7 @@ export default function TestimonialsSection() {
             </button>
             <button
               onClick={() => scroll('right')}
-              className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-[#6b21a8] hover:border-[#6b21a8] transition-all duration-200 shadow-sm"
+              className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-[#0f2756] hover:border-[#0f2756] transition-all duration-200 shadow-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -116,7 +116,7 @@ export default function TestimonialsSection() {
         <div className="mt-10 text-center">
           <Link
             href="/avaliacoes"
-            className="inline-flex items-center gap-2 text-sm font-bold text-[#6b21a8] hover:underline underline-offset-4 transition-all"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[#0f2756] hover:underline underline-offset-4 transition-all"
           >
             Ver todas as avaliações
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

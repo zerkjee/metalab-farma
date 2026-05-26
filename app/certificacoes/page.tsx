@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const certifications = [
   {
     badge: 'ANVISA',
-    color: '#6b21a8',
+    color: '#0f2756',
     title: 'Conformidade ANVISA',
     subtitle: 'Agência Nacional de Vigilância Sanitária',
     desc: 'Todos os nossos suplementos alimentares são desenvolvidos em conformidade com as normas da ANVISA, incluindo as RDC nº 243/2018 e RDC nº 786/2023, que regulamentam os suplementos alimentares no Brasil.',
@@ -97,7 +97,7 @@ export default function Certificacoes() {
         <section className="bg-gray-950 text-white py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold text-[#c084fc] uppercase tracking-widest mb-4">
+              <p className="text-sm font-semibold text-[#60a5fa] uppercase tracking-widest mb-4">
                 Certificações e Conformidade
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-6">
@@ -137,7 +137,7 @@ export default function Certificacoes() {
         <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <p className="text-sm font-semibold text-[#6b21a8] uppercase tracking-widest mb-3">Detalhamento</p>
+              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Detalhamento</p>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
                 Nossas conformidades regulatórias
               </h2>
@@ -184,17 +184,17 @@ export default function Certificacoes() {
         </section>
 
         {/* FAQ */}
-        <section className="py-24 bg-[#f5f3ff]">
+        <section className="py-24 bg-[#eff6ff]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-[#6b21a8] uppercase tracking-widest mb-3">Perguntas Frequentes</p>
+              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Perguntas Frequentes</p>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
                 Dúvidas sobre regulamentação
               </h2>
             </div>
             <div className="space-y-4">
               {faqs.map(({ q, a }) => (
-                <div key={q} className="p-6 rounded-2xl bg-white border border-[#ede9fe]">
+                <div key={q} className="p-6 rounded-2xl bg-white border border-[#dbeafe]">
                   <p className="font-bold text-gray-900 mb-2">{q}</p>
                   <p className="text-sm text-gray-600 leading-relaxed">{a}</p>
                 </div>
@@ -214,13 +214,13 @@ export default function Certificacoes() {
             <div className="flex flex-wrap justify-center gap-3">
               <Link
                 href="/qualidade"
-                className="inline-flex items-center gap-2 px-6 py-3 border border-gray-700 text-gray-300 font-semibold rounded-xl hover:border-[#c084fc] hover:text-[#c084fc] transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 border border-gray-700 text-gray-300 font-semibold rounded-xl hover:border-[#60a5fa] hover:text-[#60a5fa] transition-colors text-sm"
               >
                 Ver nossa qualidade
               </Link>
               <Link
                 href="/#produtos"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#c084fc] text-gray-950 font-bold rounded-xl hover:bg-purple-300 transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#60a5fa] text-gray-950 font-bold rounded-xl hover:bg-blue-300 transition-colors text-sm"
               >
                 Ver produtos
               </Link>

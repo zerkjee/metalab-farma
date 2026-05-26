@@ -14,7 +14,7 @@ export default function Hero() {
 
       {/* Círculos decorativos */}
       <div className="absolute top-20 right-20 w-96 h-96 rounded-full opacity-10"
-        style={{ background: 'radial-gradient(circle, #a855f7, transparent)' }} />
+        style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
       <div className="absolute bottom-10 left-10 w-72 h-72 rounded-full opacity-10"
         style={{ background: 'radial-gradient(circle, #3b82f6, transparent)' }} />
 
@@ -23,14 +23,14 @@ export default function Hero() {
 
           {/* Pill badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-8">
-            <span className="w-2 h-2 rounded-full bg-[#a855f7] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#3b82f6] animate-pulse" />
             <span className="text-sm text-white/90 font-medium">Suplementos Alimentares com Procedência Garantida</span>
           </div>
 
           {/* Título */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-tight mb-6">
             Qualidade e{' '}
-            <span style={{ color: '#c084fc' }}>Tecnologia</span>
+            <span style={{ color: '#60a5fa' }}>Tecnologia</span>
             <br />
             para sua Rotina
           </h1>
@@ -47,7 +47,7 @@ export default function Hero() {
             <a
               href="#produtos"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-white text-base transition-all duration-200 hover:scale-105 hover:shadow-2xl"
-              style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+              style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
             >
               Ver Todos os Produtos
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@ export default function Hero() {
               { icon: '✓', label: 'Produto Não é Medicamento' },
             ].map(({ icon, label }) => (
               <div key={label} className="flex items-center gap-2 text-white/80 text-sm">
-                <span className="text-[#c084fc] font-bold">{icon}</span>
+                <span className="text-[#60a5fa] font-bold">{icon}</span>
                 <span>{label}</span>
               </div>
             ))}

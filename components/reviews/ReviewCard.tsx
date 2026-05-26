@@ -83,8 +83,8 @@ function ReviewCard({ review, compact = false }: ReviewCardProps) {
           disabled={voted}
           className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all duration-200 ${
             voted
-              ? 'bg-[#6b21a8] border-[#6b21a8] text-white'
-              : 'border-gray-200 text-gray-600 hover:border-[#6b21a8] hover:text-[#6b21a8]'
+              ? 'bg-[#0f2756] border-[#0f2756] text-white'
+              : 'border-gray-200 text-gray-600 hover:border-[#0f2756] hover:text-[#0f2756]'
           }`}
         >
           <svg className="w-3.5 h-3.5" fill={voted ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">

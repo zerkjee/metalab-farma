@@ -18,8 +18,8 @@ export default function TrocasEDevolucoes() {
           <p className="text-sm text-gray-500 mb-10">Última atualização: 20 de maio de 2026</p>
 
           {/* Destaque CDC */}
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-10">
-            <p className="text-sm text-purple-800 font-medium">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-10">
+            <p className="text-sm text-blue-800 font-medium">
               Conforme o <strong>Código de Defesa do Consumidor (art. 49)</strong>, você tem direito ao
               arrependimento em até <strong>7 dias corridos</strong> após o recebimento do produto, sem
               necessidade de justificativa, para compras feitas fora do estabelecimento comercial (internet).
@@ -64,7 +64,7 @@ export default function TrocasEDevolucoes() {
               <ol className="list-decimal pl-5 space-y-2">
                 <li>
                   Envie um e-mail para{' '}
-                  <a href="mailto:mlmetalab@gmail.com" className="text-[#c084fc] hover:underline">
+                  <a href="mailto:mlmetalab@gmail.com" className="text-[#60a5fa] hover:underline">
                     mlmetalab@gmail.com
                   </a>{' '}
                   com o assunto <strong>&quot;Solicitação de Devolução — Pedido #XXXXX&quot;</strong>.
@@ -97,7 +97,7 @@ export default function TrocasEDevolucoes() {
               <h2 className="text-xl font-bold text-gray-900 mb-3">6. Contato</h2>
               <p>
                 Dúvidas? Fale conosco:{' '}
-                <a href="mailto:mlmetalab@gmail.com" className="text-[#c084fc] hover:underline">
+                <a href="mailto:mlmetalab@gmail.com" className="text-[#60a5fa] hover:underline">
                   mlmetalab@gmail.com
                 </a>
               </p>

@@ -36,8 +36,8 @@ export default async function CampaignBanners() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {banners.map((b) => {
-            const accent = b.accent ?? '#c084fc'
-            const bg = b.bg ?? 'linear-gradient(135deg, #1a0533, #2d1654, #1e3a5f)'
+            const accent = b.accent ?? '#60a5fa'
+            const bg = b.bg ?? 'linear-gradient(135deg, #040d1e, #0f2756, #1a3a72)'
             const ctaTextColor = isLight(accent) ? '#1a0533' : '#ffffff'
             const isClickable = !!b.linkUrl
 

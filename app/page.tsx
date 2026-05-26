@@ -78,7 +78,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
             <div>
-              <p className="text-sm font-semibold text-[#6b21a8] uppercase tracking-widest mb-2">Catálogo Completo</p>
+              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-2">Catálogo Completo</p>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
                 Nossos Produtos
               </h2>
@@ -98,7 +98,7 @@ export default async function Home() {
             title="Todos os Produtos"
             subtitle="Nosso catálogo completo de suplementos de qualidade"
             products={produtos}
-            color="#6b21a8"
+            color="#0f2756"
           />
         ) : (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">

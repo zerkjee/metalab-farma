@@ -11,11 +11,11 @@ const slides = [
     subtitle: 'Formulações desenvolvidas com rigor técnico, insumos de procedência controlada e embalagem lacrada de fábrica. Confiança em cada etapa.',
     cta: { label: 'Ver Produtos', href: '#produtos' },
     ctaSecondary: { label: 'Conheça a Metalab', href: '#qualidade' },
-    bg: 'linear-gradient(135deg, #1a0533 0%, #2d1654 50%, #1e3a5f 100%)',
-    accent: '#c084fc',
-    dot: '#a855f7',
+    bg: 'linear-gradient(135deg, #040d1e 0%, #0f2756 50%, #1a3a72 100%)',
+    accent: '#60a5fa',
+    dot: '#3b82f6',
     badges: ['✓ Embalagem Lacrada', '✓ Formulação Exclusiva', '✓ Sem Indicação Terapêutica'],
-    decoration: { circle1: '#a855f7', circle2: '#3b82f6' },
+    decoration: { circle1: '#3b82f6', circle2: '#0ea5e9' },
   },
   {
     id: 2,
@@ -24,11 +24,11 @@ const slides = [
     subtitle: 'Adquira o Kit 2 ou Kit 3 e maximize o custo-benefício. Todos os produtos lacrados, com nota fiscal e procedência garantida.',
     cta: { label: 'Ver Kits', href: '#produtos' },
     ctaSecondary: { label: 'Comparar Preços', href: '#produtos' },
-    bg: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a5f 100%)',
-    accent: '#a5b4fc',
-    dot: '#6366f1',
+    bg: 'linear-gradient(135deg, #050c1b 0%, #0d1f45 50%, #0f2756 100%)',
+    accent: '#93c5fd',
+    dot: '#60a5fa',
     badges: ['✓ Kit 2 = 10% OFF', '✓ Kit 3 = 30% OFF', '✓ Frete Econômico'],
-    decoration: { circle1: '#6366f1', circle2: '#0ea5e9' },
+    decoration: { circle1: '#60a5fa', circle2: '#0ea5e9' },
   },
   {
     id: 3,
@@ -39,9 +39,9 @@ const slides = [
     ctaSecondary: { label: 'Explorar Produtos', href: '#produtos' },
     bg: 'linear-gradient(135deg, #0c1a35 0%, #1e3a5f 50%, #1a2744 100%)',
     accent: '#7dd3fc',
-    dot: '#0ea5e9',
+    dot: '#38bdf8',
     badges: ['✓ 4.9 / 5 média', '✓ 51.000+ pedidos', '✓ 97% positivas'],
-    decoration: { circle1: '#0ea5e9', circle2: '#a855f7' },
+    decoration: { circle1: '#38bdf8', circle2: '#60a5fa' },
   },
   {
     id: 4,
@@ -50,11 +50,11 @@ const slides = [
     subtitle: 'Cada produto sai lacrado de fábrica com rótulo completo, nota fiscal e cadeia produtiva rastreável. Qualidade verificável.',
     cta: { label: 'Ver Catálogo', href: '#produtos' },
     ctaSecondary: { label: 'Saiba Mais', href: '#qualidade' },
-    bg: 'linear-gradient(135deg, #1a0533 0%, #4a1272 50%, #2d1654 100%)',
-    accent: '#e879f9',
-    dot: '#c026d3',
+    bg: 'linear-gradient(135deg, #030a17 0%, #0f2756 50%, #1a3a72 100%)',
+    accent: '#bfdbfe',
+    dot: '#60a5fa',
     badges: ['✓ Lacre Original', '✓ BPF Certificado', '✓ Nota Fiscal'],
-    decoration: { circle1: '#c026d3', circle2: '#7c3aed' },
+    decoration: { circle1: '#60a5fa', circle2: '#0ea5e9' },
   },
 ];
 
@@ -157,7 +157,7 @@ function RightPanel({ id, accent, transitioning }: { id: number; accent: string;
     <div style={style} className="flex flex-col gap-4">
       <Card>
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">MC</div>
+          <div className="w-8 h-8 rounded-full bg-[#0f2756] flex items-center justify-center text-white text-xs font-bold">MC</div>
           <div>
             <p className="text-white text-sm font-bold">Mariana Costa</p>
             <p className="text-white/40 text-xs">São Paulo, SP</p>
@@ -317,7 +317,7 @@ export default function BannerCarousel() {
               >
                 <Link href={slide.cta.href}
                   className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200 hover:scale-105 hover:shadow-2xl whitespace-nowrap"
-                  style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                  style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
                 >
                   {slide.cta.label}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

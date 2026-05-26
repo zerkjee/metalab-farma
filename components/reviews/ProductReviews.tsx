@@ -30,7 +30,7 @@ interface ApiResponse {
 type FilterRating = 'all' | 5 | 4 | 3 | 2 | 1;
 type SortKey = 'recent' | 'highest' | 'lowest';
 
-const AVATAR_COLORS = ['#7c3aed', '#6b21a8', '#9333ea', '#a855f7', '#581c87'];
+const AVATAR_COLORS = ['#1e50a8', '#0f2756', '#9333ea', '#3b82f6', '#081a42'];
 
 function toReview(a: ApiAvaliacao, productId: string): Review {
   const colorIdx = (a.cliente.primeiroNome.charCodeAt(0) || 0) % AVATAR_COLORS.length;
@@ -38,7 +38,7 @@ function toReview(a: ApiAvaliacao, productId: string): Review {
     id: a.id,
     productId,
     productName: '',
-    productColor: '#7c3aed',
+    productColor: '#1e50a8',
     customerName: a.cliente.primeiroNome,
     customerCity: a.cliente.cidade,
     customerState: a.cliente.estado,
@@ -54,7 +54,7 @@ function toReview(a: ApiAvaliacao, productId: string): Review {
   };
 }
 
-export default function ProductReviews({ productId, color = '#6b21a8' }: ProductReviewsProps) {
+export default function ProductReviews({ productId, color = '#0f2756' }: ProductReviewsProps) {
   const { data: session } = useSession();
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,7 +174,7 @@ export default function ProductReviews({ productId, color = '#6b21a8' }: Product
                   key={value}
                   onClick={() => { setFilter(value); setVisible(4); }}
                   className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 ${
-                    filter === value ? 'text-white border-transparent' : 'text-gray-600 border-gray-200 bg-white hover:border-[#6b21a8] hover:text-[#6b21a8]'
+                    filter === value ? 'text-white border-transparent' : 'text-gray-600 border-gray-200 bg-white hover:border-[#0f2756] hover:text-[#0f2756]'
                   }`}
                   style={filter === value ? { backgroundColor: color, borderColor: color } : {}}
                 >

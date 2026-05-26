@@ -88,7 +88,7 @@ export default function PointsRedemption({
               <p className="text-2xl font-black text-emerald-400">R$ {opt.valor}</p>
               <p className="text-white/50 text-xs mt-1.5">por {opt.pontos.toLocaleString('pt-BR')} pts</p>
               {busy === opt.pontos && (
-                <p className="text-purple-400 text-xs mt-1 animate-pulse">Resgatando...</p>
+                <p className="text-[#60a5fa] text-xs mt-1 animate-pulse">Resgatando...</p>
               )}
             </button>
           );

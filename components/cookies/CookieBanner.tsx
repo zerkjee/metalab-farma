@@ -34,7 +34,7 @@ export default function CookieBanner() {
         <p className="text-sm text-gray-300 flex-1 leading-relaxed">
           Usamos cookies para melhorar sua experiência, analisar o tráfego e personalizar anúncios.
           Ao clicar em <strong className="text-white">Aceitar todos</strong>, você concorda com nossa{' '}
-          <Link href="/politica-de-privacidade" className="underline text-[#c084fc] hover:text-purple-300">
+          <Link href="/politica-de-privacidade" className="underline text-[#60a5fa] hover:text-[#60a5fa]">
             Política de Privacidade
           </Link>
           .
@@ -48,7 +48,7 @@ export default function CookieBanner() {
           </button>
           <button
             onClick={() => accept('all')}
-            className="px-4 py-2 text-sm font-semibold bg-[#c084fc] text-gray-950 rounded-lg hover:bg-purple-300 transition-colors"
+            className="px-4 py-2 text-sm font-semibold bg-[#60a5fa] text-gray-950 rounded-lg hover:bg-blue-300 transition-colors"
           >
             Aceitar todos
           </button>

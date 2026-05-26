@@ -73,7 +73,7 @@ const inputCls = (hasError: boolean) =>
   `w-full rounded-xl border bg-slate-800/60 px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none transition-all ${
     hasError
       ? 'border-red-500/60 focus:border-red-400 focus:ring-1 focus:ring-red-400/30'
-      : 'border-slate-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40'
+      : 'border-slate-700 focus:border-[#0f2756] focus:ring-1 focus:ring-[#0f2756]/40'
   }`;
 
 // ── main page ─────────────────────────────────────────────────────────────────
@@ -224,19 +224,19 @@ export default function RegistroPage() {
             <div>
               <Link href="/" className="flex items-center gap-3">
                 <div
-                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-purple-950/40"
-                  style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
+                  style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
                 >
                   M
                 </div>
                 <div>
                   <p className="text-lg font-black tracking-tight">METALAB</p>
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-purple-300">Suplementos</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Suplementos</p>
                 </div>
               </Link>
 
               <div className="mt-20 max-w-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-purple-300">Novo cliente</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Novo cliente</p>
                 <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight">
                   Crie sua conta e comece a transformar seu desempenho.
                 </h1>
@@ -253,7 +253,7 @@ export default function RegistroPage() {
                 { icon: <Tag size={16} strokeWidth={1.8} />, label: 'Ofertas exclusivas' },
               ].map((item) => (
                 <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="mb-3 block text-purple-300">{item.icon}</span>
+                  <span className="mb-3 block text-[#60a5fa]">{item.icon}</span>
                   <p className="text-xs font-semibold text-slate-300">{item.label}</p>
                 </div>
               ))}
@@ -268,14 +268,14 @@ export default function RegistroPage() {
               <div className="mb-7 lg:hidden text-center">
                 <Link href="/">
                   <div
-                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-purple-950/40"
-                    style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
+                    style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
                   >
                     M
                   </div>
                 </Link>
                 <p className="text-xl font-black tracking-tight">METALAB</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-300">Suplementos</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#60a5fa]">Suplementos</p>
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl">
@@ -345,7 +345,7 @@ export default function RegistroPage() {
 
                   {/* ── Endereço ── */}
                   <div className="border-t border-white/10 pt-3.5 mt-0.5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-300 mb-3">Endereço</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#60a5fa] mb-3">Endereço</p>
                     <div className="grid grid-cols-2 gap-3">
                       <Field label="CEP" error={errors.cep} touched={touched.cep} fieldId="cep">
                         <input
@@ -515,7 +515,7 @@ export default function RegistroPage() {
                     type="submit"
                     disabled={loading}
                     className="w-full rounded-xl py-3 text-sm font-bold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1 flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                    style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
                   >
                     {loading ? (
                       <>
@@ -530,7 +530,7 @@ export default function RegistroPage() {
 
                   <p className="text-center text-xs text-slate-500">
                     Já tem conta?{' '}
-                    <Link href="/login" className="text-purple-400 hover:text-purple-300 font-semibold">
+                    <Link href="/login" className="text-[#60a5fa] hover:text-[#60a5fa] font-semibold">
                       Entrar
                     </Link>
                   </p>

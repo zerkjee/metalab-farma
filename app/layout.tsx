@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import CartDrawer from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
@@ -8,14 +8,11 @@ import Analytics from "@/components/analytics/Analytics";
 import CookieBanner from "@/components/cookies/CookieBanner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 const BASE = process.env.NEXT_PUBLIC_URL ?? "https://metalab-farma.vercel.app";
@@ -78,7 +75,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
     >
       <head>
         <script

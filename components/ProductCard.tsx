@@ -18,7 +18,7 @@ function ProductCard({ product }: ProductCardProps) {
   const precoOriginal = product.precoOriginal ? Number(product.precoOriginal) : null;
   const desconto = precoOriginal ? Math.round((1 - preco / precoOriginal) * 100) : 0;
   const temEstoque = product.estoque > 0;
-  const cor = product.corPrincipal ?? '#6b21a8';
+  const cor = product.corPrincipal ?? '#0f2756';
 
   const handleAdd = useCallback(() => addItem(product), [addItem, product]);
 

@@ -65,7 +65,7 @@ function LoginForm() {
           placeholder="seu@email.com"
           aria-invalid={status === 'error' || undefined}
           aria-describedby={status === 'error' ? 'login-error' : undefined}
-          className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
+          className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-[#0f2756] focus:ring-1 focus:ring-[#0f2756]/40 transition-all"
         />
       </div>
 
@@ -80,7 +80,7 @@ function LoginForm() {
             placeholder="Mínimo 6 caracteres"
             aria-invalid={status === 'error' || undefined}
             aria-describedby={status === 'error' ? 'login-error' : undefined}
-            className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 pr-11 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
+            className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 pr-11 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-[#0f2756] focus:ring-1 focus:ring-[#0f2756]/40 transition-all"
           />
           <button
             type="button"
@@ -102,14 +102,14 @@ function LoginForm() {
         type="submit"
         disabled={loading}
         className="w-full rounded-xl py-3 text-sm font-bold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-        style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+        style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
       >
         {loading ? 'Entrando...' : 'Entrar'}
       </button>
 
       <p className="text-center text-xs text-slate-500">
         Não tem conta?{' '}
-        <Link href="/registro" className="text-purple-400 hover:text-purple-300 font-semibold">
+        <Link href="/registro" className="text-[#60a5fa] hover:text-[#60a5fa] font-semibold">
           Criar conta grátis
         </Link>
       </p>
@@ -131,19 +131,19 @@ export default function LoginPage() {
             <div>
               <Link href="/" className="flex items-center gap-3">
                 <div
-                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-purple-950/40"
-                  style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
+                  style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
                 >
                   M
                 </div>
                 <div>
                   <p className="text-lg font-black tracking-tight">METALAB</p>
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-purple-300">Suplementos</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Suplementos</p>
                 </div>
               </Link>
 
               <div className="mt-20 max-w-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-purple-300">Sua conta</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Sua conta</p>
                 <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight">
                   Acesse e aproveite benefícios exclusivos.
                 </h1>
@@ -160,7 +160,7 @@ export default function LoginPage() {
                 { icon: <ShieldCheck size={16} strokeWidth={1.8} />, label: 'PIX com desconto' },
               ].map((item) => (
                 <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="mb-3 block text-purple-300">{item.icon}</span>
+                  <span className="mb-3 block text-[#60a5fa]">{item.icon}</span>
                   <p className="text-xs font-semibold text-slate-300">{item.label}</p>
                 </div>
               ))}
@@ -173,14 +173,14 @@ export default function LoginPage() {
               <div className="mb-7 lg:hidden text-center">
                 <Link href="/">
                   <div
-                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-purple-950/40"
-                    style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
+                    style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
                   >
                     M
                   </div>
                 </Link>
                 <p className="text-xl font-black tracking-tight">METALAB</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-300">Suplementos</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#60a5fa]">Suplementos</p>
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl">

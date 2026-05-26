@@ -22,7 +22,7 @@ export default function QualitySection() {
 
           {/* Texto */}
           <div>
-            <p className="text-xs font-bold text-[#6b21a8] uppercase tracking-[0.2em] mb-4">
+            <p className="text-xs font-bold text-[#0f2756] uppercase tracking-[0.2em] mb-4">
               Qualidade e Tecnologia
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight leading-tight mb-6">
@@ -37,7 +37,7 @@ export default function QualitySection() {
             <ul className="space-y-3.5">
               {bullets.map((b) => (
                 <li key={b} className="flex items-start gap-3 text-sm text-gray-600">
-                  <svg className="w-4 h-4 text-[#6b21a8] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-[#0f2756] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                   {b}
@@ -52,9 +52,9 @@ export default function QualitySection() {
               {metrics.map(({ value, label }) => (
                 <div
                   key={label}
-                  className="flex flex-col items-center justify-center p-7 rounded-xl bg-gray-50 border border-gray-200 text-center hover:border-[#6b21a8]/30 hover:shadow-sm transition-all duration-300"
+                  className="flex flex-col items-center justify-center p-7 rounded-xl bg-gray-50 border border-gray-200 text-center hover:border-[#0f2756]/30 hover:shadow-sm transition-all duration-300"
                 >
-                  <span className="text-3xl font-bold text-[#6b21a8] mb-2 tracking-tight">{value}</span>
+                  <span className="text-3xl font-bold text-[#0f2756] mb-2 tracking-tight">{value}</span>
                   <span className="text-xs text-gray-500 font-medium leading-tight">{label}</span>
                 </div>
               ))}

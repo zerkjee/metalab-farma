@@ -125,7 +125,7 @@ export default function TermosDeUso() {
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-3">12. Contato</h2>
               <p>
-                <a href="mailto:mlmetalab@gmail.com" className="text-[#c084fc] hover:underline">
+                <a href="mailto:mlmetalab@gmail.com" className="text-[#60a5fa] hover:underline">
                   mlmetalab@gmail.com
                 </a>
               </p>
