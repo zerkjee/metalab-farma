@@ -11,6 +11,7 @@ import { products as localProducts } from '@/data/products';
 import { getProductDetail } from '@/utils/productDetails';
 import type { Ingrediente } from '@/utils/productDetails';
 import { Product } from '@/types/product';
+import { prisma } from '@/lib/prisma';
 
 // Converte o texto de composição do banco em Ingrediente[] para o ComposicaoSection
 function composicaoFromText(text: string): Ingrediente[] {
@@ -31,11 +32,11 @@ interface ProductPageProps {
 // Pré-gera páginas para todos os produtos ativos em build time (ISR: revalida a cada 60s)
 export async function generateStaticParams() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/produtos?por_pagina=100`, { cache: 'no-store' })
-    if (!res.ok) return []
-    const data = await res.json()
-    return ((data.produtos ?? []) as { slug: string }[]).map((p) => ({ id: p.slug }))
+    const products = await prisma.produto.findMany({
+      where: { ativo: true },
+      select: { slug: true },
+    })
+    return products.map((p) => ({ id: p.slug }))
   } catch {
     return []
   }
@@ -43,33 +44,30 @@ export async function generateStaticParams() {
 
 async function getProduto(idParam: string): Promise<Product | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/produtos/${idParam}`, {
-      next: { revalidate: 60 },
+    const p = await prisma.produto.findFirst({
+      where: { OR: [{ slug: idParam }, { id: idParam }] },
     })
-    if (res.ok) {
-      const p = await res.json()
+    if (p) {
       return {
-        id: String(p.id),
-        slug: String(p.slug),
-        sku: p.sku ? String(p.sku) : undefined,
-        nome: String(p.nome),
-        marca: String(p.marca ?? 'Metalab'),
+        id: p.id,
+        slug: p.slug,
+        sku: p.sku ?? undefined,
+        nome: p.nome,
+        marca: p.marca,
+        tipo: p.tipo as 'SIMPLES' | 'KIT',
         preco: Number(p.preco),
-        precoOriginal: p.precoOriginal ? Number(p.precoOriginal) : null,
-        estoque: Number(p.estoque ?? 0),
-        descricaoCurta: p.descricaoCurta ? String(p.descricaoCurta) : null,
-        descricaoHtml: p.descricaoHtml ? String(p.descricaoHtml) : null,
-        imagemUrl: p.imagemUrl ? String(p.imagemUrl) : null,
-        tipo: (p.tipo === 'KIT' ? 'KIT' : 'SIMPLES') as 'SIMPLES' | 'KIT',
-        tags: Array.isArray(p.tags) ? p.tags : [],
-        ativo: Boolean(p.ativo),
-        destaque: Boolean(p.destaque),
-        corPrincipal: p.corPrincipal ? String(p.corPrincipal) : null,
-        composicao: p.composicao ? String(p.composicao) : null,
-        modoDeUso: p.modoDeUso ? String(p.modoDeUso) : null,
-        kitsDisponiveis: Array.isArray(p.kitsDisponiveis) ? p.kitsDisponiveis : undefined,
-        criadoEm: p.criadoEm ? String(p.criadoEm) : undefined,
+        precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
+        estoque: p.estoque,
+        descricaoCurta: p.descricaoCurta ?? null,
+        descricaoHtml: p.descricaoHtml ?? null,
+        imagemUrl: p.imagemUrl ?? null,
+        tags: p.tags,
+        ativo: p.ativo,
+        destaque: p.destaque,
+        corPrincipal: p.corPrincipal ?? null,
+        composicao: p.composicao ?? null,
+        modoDeUso: p.modoDeUso ?? null,
+        criadoEm: p.criadoEm.toISOString(),
       }
     }
   } catch {

@@ -13,6 +13,9 @@ import PurchaseNotification from "@/components/social-proof/PurchaseNotification
 import VipBanner from "@/components/loyalty/VipBanner";
 import { Product } from "@/types/product";
 import { products as localProducts } from "@/data/products";
+import { prisma } from "@/lib/prisma";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Metalab Store | Suplementos Alimentares com Qualidade e Procedência",
@@ -27,30 +30,31 @@ export const metadata: Metadata = {
 
 async function getProducts(): Promise<Product[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000"
-    const res = await fetch(`${baseUrl}/api/produtos?por_pagina=200`, {
-      next: { revalidate: 60 },
+    const rows = await prisma.produto.findMany({
+      where: { ativo: true },
+      orderBy: [{ destaque: "desc" }, { criadoEm: "desc" }],
+      take: 200,
     })
-    if (res.ok) {
-      const data = await res.json()
-      const apiProducts: Product[] = (data.produtos ?? []).map((p: Record<string, unknown>) => ({
-        id: String(p.id),
-        slug: String(p.slug),
-        sku: p.sku ? String(p.sku) : undefined,
-        nome: String(p.nome),
-        marca: String(p.marca ?? "Metalab"),
+    if (rows.length > 0) {
+      return rows.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        sku: p.sku ?? undefined,
+        nome: p.nome,
+        marca: p.marca,
+        tipo: p.tipo as "SIMPLES" | "KIT",
         preco: Number(p.preco),
-        precoOriginal: p.precoOriginal ? Number(p.precoOriginal) : null,
-        estoque: Number(p.estoque ?? 0),
-        descricaoCurta: p.descricaoCurta ? String(p.descricaoCurta) : null,
-        descricaoHtml: p.descricaoHtml ? String(p.descricaoHtml) : null,
-        imagemUrl: p.imagemUrl ? String(p.imagemUrl) : null,
-        ativo: Boolean(p.ativo),
-        destaque: Boolean(p.destaque),
-        corPrincipal: p.corPrincipal ? String(p.corPrincipal) : null,
-        criadoEm: p.criadoEm ? String(p.criadoEm) : undefined,
+        precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
+        estoque: p.estoque,
+        descricaoCurta: p.descricaoCurta ?? null,
+        descricaoHtml: p.descricaoHtml ?? null,
+        imagemUrl: p.imagemUrl ?? null,
+        tags: p.tags,
+        ativo: p.ativo,
+        destaque: p.destaque,
+        corPrincipal: p.corPrincipal ?? null,
+        criadoEm: p.criadoEm.toISOString(),
       }))
-      if (apiProducts.length > 0) return apiProducts
     }
   } catch {
     // fallback to local data
