@@ -1,22 +1,22 @@
 'use client';
 
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 
 const titles: Record<string, string> = {
-  '/admin':              'Dashboard',
-  '/admin/produtos':     'Gestão de Produtos',
-  '/admin/pedidos':      'Gestão de Pedidos',
-  '/admin/clientes':     'Gestão de Clientes',
-  '/admin/cupons':       'Gestão de Cupons',
-  '/admin/avaliacoes':   'Moderação de Avaliações',
-  '/admin/banners':      'Gestão de Banners',
-  '/admin/analytics':    'Analytics',
-  '/admin/audit':        'Auditoria',
-  '/admin/criar-admin':  'Admins',
+  '/admin':             'Dashboard',
+  '/admin/produtos':    'Produtos',
+  '/admin/pedidos':     'Pedidos',
+  '/admin/clientes':    'Clientes',
+  '/admin/cupons':      'Cupons',
+  '/admin/avaliacoes':  'Avaliações',
+  '/admin/banners':     'Banners',
+  '/admin/analytics':   'Analytics',
+  '/admin/audit':       'Auditoria',
+  '/admin/criar-admin': 'Admins',
 };
 
 const tipoIcon: Record<string, string> = {
@@ -43,13 +43,22 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)}d`;
 }
 
-export default function AdminTopbar() {
+interface Props {
+  onMenuToggle: () => void;
+}
+
+export default function AdminTopbar({ onMenuToggle }: Props) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notif[]>([]);
+  const notifRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const title = Object.entries(titles).find(([k]) => pathname.startsWith(k) && (k === '/admin' ? pathname === '/admin' : true))?.[1] ?? 'Admin';
+
+  const title =
+    Object.entries(titles).find(
+      ([k]) => pathname.startsWith(k) && (k === '/admin' ? pathname === '/admin' : true)
+    )?.[1] ?? 'Admin';
 
   const userName = session?.user?.name ?? 'Admin';
   const userInitial = userName.charAt(0).toUpperCase();
@@ -60,7 +69,7 @@ export default function AdminTopbar() {
 
   function fetchNotifications() {
     fetch('/api/admin/notifications')
-      .then((r) => r.ok ? r.json() : null)
+      .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (d?.notifications) setNotifications(d.notifications); })
       .catch(() => {});
   }
@@ -71,14 +80,37 @@ export default function AdminTopbar() {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, []);
 
+  // Fechar notificações ao clicar fora
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    }
+    if (notifOpen) document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [notifOpen]);
+
   return (
-    <header className="h-16 border-b border-slate-800 flex items-center px-6 gap-4 flex-shrink-0"
-      style={{ background: '#0f172a' }}>
+    <header
+      className="h-16 border-b border-slate-800 flex items-center px-4 gap-3 flex-shrink-0"
+      style={{ background: '#0f172a' }}
+    >
+      {/* Hambúrguer — mobile */}
+      <button
+        onClick={onMenuToggle}
+        className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-all active:scale-95"
+        aria-label="Abrir menu"
+      >
+        <Menu className="w-4 h-4" />
+      </button>
 
-      <h1 className="text-white font-bold text-lg flex-1">{title}</h1>
+      {/* Título da página */}
+      <h1 className="text-white font-bold text-base flex-1 truncate">{title}</h1>
 
-      <div className="hidden sm:flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 w-56">
-        <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Busca — desktop */}
+      <div className="hidden md:flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 w-52">
+        <svg className="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
@@ -87,10 +119,12 @@ export default function AdminTopbar() {
         />
       </div>
 
-      <div className="relative">
+      {/* Notificações */}
+      <div className="relative flex-shrink-0" ref={notifRef}>
         <button
-          onClick={() => setNotifOpen(v => !v)}
-          className="relative w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-all"
+          onClick={() => setNotifOpen((v) => !v)}
+          className="relative w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-all active:scale-95"
+          aria-label="Notificações"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -104,7 +138,7 @@ export default function AdminTopbar() {
         </button>
 
         {notifOpen && (
-          <div className="absolute right-0 top-12 w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+          <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
               <p className="text-white font-bold text-sm">Notificações</p>
               <span className="text-slate-500 text-xs">{notifications.length} recentes</span>
@@ -141,33 +175,28 @@ export default function AdminTopbar() {
         )}
       </div>
 
-      <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold"
-          style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}>
+      {/* Perfil — desktop */}
+      <div className="hidden md:flex items-center gap-2.5 flex-shrink-0">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold"
+          style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+        >
           {userInitial}
         </div>
-        <div className="hidden sm:block">
+        <div>
           <p className="text-white text-xs font-bold leading-none">{userName}</p>
           <p className="text-slate-500 text-[10px]">Metalab Store</p>
         </div>
       </div>
 
+      {/* Sair — desktop */}
       <button
         onClick={handleLogout}
-        className="hidden sm:flex h-9 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-400 transition-all hover:border-purple-500/40 hover:bg-slate-700 hover:text-slate-100 active:scale-95"
+        className="hidden md:flex h-9 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-400 transition-all hover:border-purple-500/40 hover:bg-slate-700 hover:text-slate-100 active:scale-95 flex-shrink-0"
         title="Sair do painel"
       >
         <LogOut className="h-3.5 w-3.5" strokeWidth={1.9} />
         Sair
-      </button>
-
-      <button
-        onClick={handleLogout}
-        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:border-purple-500/40 hover:bg-slate-700 hover:text-slate-100 active:scale-95 sm:hidden"
-        title="Sair do painel"
-        aria-label="Sair do painel"
-      >
-        <LogOut className="h-4 w-4" strokeWidth={1.9} />
       </button>
     </header>
   );
