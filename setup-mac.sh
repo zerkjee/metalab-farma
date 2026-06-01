@@ -90,14 +90,21 @@ fi
 # ══════════════════════════════════════════════════════════════════════════════
 header "4. Variáveis de ambiente (.env.local)"
 # ══════════════════════════════════════════════════════════════════════════════
+
+# Credenciais pré-configuradas — trocar senha no Supabase após primeiro uso
+_DB_URL="postgresql://postgres.ndbbpkwnfqypajjneabx:P3dro*mancio@aws-1-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
+
 if [[ -f ".env.local" ]]; then
   DB_EXISTING=$(grep '^DATABASE_URL=' .env.local | cut -d'=' -f2- | tr -d '"')
   if [[ -n "$DB_EXISTING" ]]; then
-    ok ".env.local já configurado com DATABASE_URL"
+    ok ".env.local já configurado"
     SKIP_ENV=true
   else
-    warn ".env.local existe mas DATABASE_URL está vazio"
-    SKIP_ENV=false
+    warn ".env.local existe mas DATABASE_URL está vazio — preenchendo automaticamente"
+    sed -i '' "s|^DATABASE_URL=.*|DATABASE_URL=\"$_DB_URL\"|" .env.local 2>/dev/null \
+      || sed -i "s|^DATABASE_URL=.*|DATABASE_URL=\"$_DB_URL\"|" .env.local
+    ok "DATABASE_URL preenchido"
+    SKIP_ENV=true
   fi
 else
   warn ".env.local não encontrado — criando..."
@@ -105,27 +112,9 @@ else
 fi
 
 if [[ "$SKIP_ENV" != "true" ]]; then
-  echo ""
-  echo -e "  ${BOLD}Onde encontrar o DATABASE_URL:${RESET}"
-  echo "  ┌─────────────────────────────────────────────────────────┐"
-  echo "  │  supabase.com → seu projeto → Settings → Database       │"
-  echo "  │  → Connection string → Session mode (porta 5432)         │"
-  echo "  │                                                           │"
-  echo "  │  Formato:                                                 │"
-  echo "  │  postgresql://postgres.[ref]:[SENHA]@aws-0-[region]      │"
-  echo "  │  .pooler.supabase.com:5432/postgres?sslmode=require      │"
-  echo "  └─────────────────────────────────────────────────────────┘"
-  echo ""
-  read -rp "  Cole o DATABASE_URL aqui: " USER_DB_URL
-
-  if [[ -z "$USER_DB_URL" ]]; then
-    fail "DATABASE_URL não pode ser vazio"
-    exit 1
-  fi
-
   cat > .env.local << ENVEOF
 # ─── BANCO (Supabase) ─────────────────────────────────────────────────────────
-DATABASE_URL="${USER_DB_URL}"
+DATABASE_URL="${_DB_URL}"
 
 # ─── AUTH (NextAuth v5) ───────────────────────────────────────────────────────
 # Secret compartilhado entre todos os ambientes do projeto
