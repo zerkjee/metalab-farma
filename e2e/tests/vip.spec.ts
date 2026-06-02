@@ -54,6 +54,10 @@ test.describe('VIP — Acesso com login', () => {
 
 test.describe('VIP — Estrutura da página', () => {
   test('deve exibir tabela de benefícios por tier', async ({ page }) => {
+    const email    = process.env.E2E_USER_EMAIL
+    const password = process.env.E2E_USER_PASSWORD
+    if (!email || !password) test.skip(true, 'VIP redireciona não-autenticados — E2E_USER_EMAIL/PASSWORD não definidos')
+
     const vip = new VipPage(page)
     await vip.goto()
     const hasTiers = await page.locator('text=/silver|gold|black/i').first().isVisible().catch(() => false)
@@ -61,6 +65,10 @@ test.describe('VIP — Estrutura da página', () => {
   })
 
   test('deve exibir percentuais de cashback', async ({ page }) => {
+    const email    = process.env.E2E_USER_EMAIL
+    const password = process.env.E2E_USER_PASSWORD
+    if (!email || !password) test.skip(true, 'VIP redireciona não-autenticados — E2E_USER_EMAIL/PASSWORD não definidos')
+
     const vip = new VipPage(page)
     await vip.goto()
     await expect(page.locator('text=/cashback|%/i').first()).toBeVisible()

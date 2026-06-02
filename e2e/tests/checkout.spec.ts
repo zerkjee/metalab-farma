@@ -272,7 +272,8 @@ test.describe('Checkout — Resumo do pedido', () => {
     await checkout.goto()
 
     // O resumo deve conter o produto adicionado
-    await expect(page.locator('text=/R\\$/').first()).toBeVisible()
+    // Usar filter({visible:true}) pois o toggle mobile (lg:hidden) é o primeiro hit em DOM mas está CSS-hidden no desktop
+    await expect(page.locator('text=/R\\$/').filter({ visible: true }).first()).toBeVisible({ timeout: 10_000 })
   })
 
   test('deve exibir total no resumo', async ({ page }) => {
