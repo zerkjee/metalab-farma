@@ -53,22 +53,24 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    const [produtos, total] = await Promise.all([
-      prisma.produto.findMany({
-        where,
-        include: {
-          imagens:   { orderBy: { ordem: "asc" }, take: 1 },
-          categoria: { select: { id: true, nome: true, slug: true } },
-        },
-        orderBy: [{ destaque: "desc" }, { criadoEm: "desc" }],
-        skip: (pagina - 1) * porPagina,
-        take: porPagina,
-      }),
-      prisma.produto.count({ where }),
-    ])
+    const rows = await prisma.produto.findMany({
+      where,
+      include: {
+        imagens:   { orderBy: { ordem: "asc" }, take: 1 },
+        categoria: { select: { id: true, nome: true, slug: true } },
+      },
+      orderBy: [{ destaque: "desc" }, { criadoEm: "desc" }],
+      skip: (pagina - 1) * porPagina,
+      take: porPagina,
+    })
+
+    // Evita query de contagem quando o resultado cabe em uma página
+    const total = rows.length < porPagina
+      ? (pagina - 1) * porPagina + rows.length
+      : await prisma.produto.count({ where })
 
     return NextResponse.json({
-      produtos: produtos.map((p) => ({
+      produtos: rows.map((p) => ({
         ...p,
         preco:         Number(p.preco),
         precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
@@ -76,6 +78,8 @@ export async function GET(request: NextRequest) {
       total,
       pagina,
       totalPaginas: Math.ceil(total / porPagina),
+    }, {
+      headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' },
     })
   } catch (error) {
     logger.error("Erro listando produtos", error)

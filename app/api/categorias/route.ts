@@ -11,7 +11,9 @@ export async function GET() {
       orderBy: [{ ordem: "asc" }, { nome: "asc" }],
       select: { id: true, nome: true, slug: true, ordem: true },
     })
-    return NextResponse.json({ categorias })
+    return NextResponse.json({ categorias }, {
+      headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate=600' },
+    })
   } catch (error) {
     logger.error("Erro listando categorias", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
