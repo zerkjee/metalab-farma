@@ -22,7 +22,7 @@ export class AuthPage {
 
   // ── Locators — Login ──────────────────────────────────────────────────────
 
-  get loginEmailInput()    { return this.page.getByPlaceholder(/seu@email/i) }
+  get loginEmailInput()    { return this.page.locator('input[type="email"]').first() }
   get loginPasswordInput() { return this.page.locator('input[type="password"]').first() }
   get loginSubmitButton()  { return this.page.getByRole('button', { name: /entrar/i }) }
   get loginErrorMessage()  { return this.page.locator('#login-error').or(this.page.getByText(/email ou senha inválidos/i)) }
@@ -82,7 +82,7 @@ export class AuthPage {
   }
 
   async adminLogin(email: string, password: string) {
-    await this.page.getByPlaceholder(/email/i).fill(email)
+    await this.page.locator('input[type="email"]').fill(email)
     await this.page.locator('input[type="password"]').fill(password)
     await this.page.getByRole('button', { name: /entrar/i }).click()
     await this.page.waitForURL('**/admin', { timeout: 15_000 })

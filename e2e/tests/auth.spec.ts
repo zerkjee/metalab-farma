@@ -191,8 +191,8 @@ test.describe('Proteção de rotas', () => {
 
   test('/pedidos deve redirecionar para login sem autenticação', async ({ page }) => {
     await page.goto('/pedidos')
-    await page.waitForLoadState('domcontentloaded')
-    // Pode redirecionar ou mostrar mensagem de login necessário
+    // /pedidos usa client-side redirect via useSession — aguarda React hydrate e efeito disparar
+    await page.waitForURL(/login/, { timeout: 5_000 }).catch(() => {})
     const url = page.url()
     const hasLoginPrompt = await page.locator('text=/faça login|entrar/i').isVisible().catch(() => false)
     expect(url.includes('login') || hasLoginPrompt).toBeTruthy()
