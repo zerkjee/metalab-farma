@@ -38,7 +38,7 @@ export class AuthPage {
   get regPasswordInput() { return this.page.locator('input[type="password"]').first() }
   get regSubmitButton()  { return this.page.getByRole('button', { name: /criar conta|cadastrar|registrar/i }) }
   get regSuccessIndicator() { return this.page.locator('text=/conta criada|bem-vindo|entrando/i') }
-  get regErrorMessage()  { return this.page.locator('text=/erro|já cadastrado|inválido/i') }
+  get regErrorMessage()  { return this.page.locator('text=/erro|já cadastrado|inválido|obrigatório|deve ter|não conferem|confirme/i').first() }
 
   // Indicadores de força de senha
   get passwordRequirements() { return this.page.locator('text=/mínimo 8|maiúscula|minúscula|número|caractere especial/i') }
