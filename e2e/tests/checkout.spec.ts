@@ -38,12 +38,12 @@ test.describe('Checkout — Acesso', () => {
     })
     await page.goto('/checkout')
     // CartContext hidrata via useEffect — aguarda o empty state aparecer antes de checar
-    await page.locator('text=/carrinho vazio|Seu carrinho|nenhum item|adicione produtos/i')
-      .waitFor({ timeout: 5_000 })
-      .catch(() => {})
+    // "Seu carrinho está vazio" é o texto real na página (não "carrinho vazio")
+    const emptyLocator = page.locator('text=/Seu carrinho|carrinho está vazio|nenhum item|adicione produtos/i')
+    await emptyLocator.waitFor({ timeout: 5_000 }).catch(() => {})
     const url = page.url()
     const isEmpty = url.includes('checkout')
-      ? await page.locator('text=/carrinho vazio|nenhum item|adicione produtos/i').isVisible().catch(() => false)
+      ? await emptyLocator.isVisible().catch(() => false)
       : true
     expect(isEmpty || !url.includes('checkout')).toBeTruthy()
   })
@@ -68,9 +68,9 @@ test.describe('Checkout — Formulário de dados', () => {
 
     // Para usuário não logado, campos editáveis devem aparecer
     // Para logado, campos somente-leitura aparecem — ambos são válidos
-    const hasEditableForm = await checkout.nameInput.isVisible().catch(() => false)
-    const hasReadonlyForm = await page.locator('text=/nome completo|identificação/i').isVisible().catch(() => false)
-    expect(hasEditableForm || hasReadonlyForm).toBeTruthy()
+    // Aguarda hydration do CartContext antes de checar (isVisible() sem espera é flaky)
+    const editableOrReadonly = checkout.nameInput.or(page.locator('text=/nome completo|identificação/i'))
+    await expect(editableOrReadonly.first()).toBeVisible({ timeout: 8_000 })
   })
 
   test('deve aceitar preenchimento dos dados pessoais', async ({ page }) => {
