@@ -14,7 +14,8 @@ export default function AdminAuthShell({ children }: { children: React.ReactNode
   const [mobileOpen, setMobileOpen] = useState(false);
   const isLogin = pathname === '/admin/login';
 
-  // Fecha o menu ao navegar
+  // Fecha o menu ao navegar — padrão correto para reset de estado em navegação
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   // Bloqueia scroll do body enquanto drawer estiver aberto

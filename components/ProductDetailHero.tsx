@@ -24,7 +24,6 @@ export default function ProductDetailHero({
   const precoOriginal = product.precoOriginal ? Number(product.precoOriginal) : null;
   const descontoBase = precoOriginal ? Math.round((1 - preco / precoOriginal) * 100) : 0;
 
-  const temEstoque = product.estoque > 0;
   const kits = product.kitsDisponiveis ?? [];
   const temKits = product.tipo === 'SIMPLES' && kits.length > 0;
 
