@@ -9,7 +9,7 @@ import { useCart } from '@/context/CartContext';
 
 const navItems = [
   { label: 'Início', href: '/' },
-  { label: 'Produtos', href: '/#produtos' },
+  { label: 'Produtos', href: '/produtos' },
   { label: 'Avaliações', href: '/avaliacoes' },
   { label: 'VIP', href: '/vip', highlight: true },
   { label: 'Contato', href: '/#contato' },
