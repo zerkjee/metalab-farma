@@ -31,9 +31,22 @@ const securityHeaders = [
   },
 ];
 
+// Cache headers para rotas públicas da API — servidas pelo CDN da Vercel
+const apiCacheHeaders = [
+  { key: "Cache-Control", value: "s-maxage=60, stale-while-revalidate=120" },
+]
+const categoriaCacheHeaders = [
+  { key: "Cache-Control", value: "s-maxage=300, stale-while-revalidate=600" },
+]
+
 const nextConfig: NextConfig = {
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      { source: "/(.*)", headers: securityHeaders },
+      { source: "/api/produtos", headers: apiCacheHeaders },
+      { source: "/api/banners",  headers: apiCacheHeaders },
+      { source: "/api/categorias", headers: categoriaCacheHeaders },
+    ];
   },
   images: {
     formats: ["image/avif", "image/webp"],
