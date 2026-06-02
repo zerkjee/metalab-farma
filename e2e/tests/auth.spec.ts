@@ -22,9 +22,8 @@ test.describe('Login — Estrutura da página', () => {
   test('deve ter link para criar conta', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.gotoLogin()
-    const registerLink = page.getByRole('link', { name: /criar conta|cadastro|registrar/i })
-    const visible = await registerLink.isVisible().catch(() => false)
-    expect(visible).toBeTruthy()
+    // toBeVisible aguarda hydration — isVisible() sem espera era flaky
+    await expect(page.getByRole('link', { name: /criar conta|cadastro|registrar/i })).toBeVisible({ timeout: 5_000 })
   })
 
   test('deve ter opção de mostrar/ocultar senha', async ({ page }) => {

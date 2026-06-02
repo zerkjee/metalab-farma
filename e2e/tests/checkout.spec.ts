@@ -37,9 +37,10 @@ test.describe('Checkout — Acesso', () => {
       localStorage.removeItem('metalab_cart_state_v2')
     })
     await page.goto('/checkout')
-    await page.waitForLoadState('domcontentloaded')
-    // Deve redirecionar ou mostrar mensagem de carrinho vazio
-    const checkout = new CheckoutPage(page)
+    // CartContext hidrata via useEffect — aguarda o empty state aparecer antes de checar
+    await page.locator('text=/carrinho vazio|Seu carrinho|nenhum item|adicione produtos/i')
+      .waitFor({ timeout: 5_000 })
+      .catch(() => {})
     const url = page.url()
     const isEmpty = url.includes('checkout')
       ? await page.locator('text=/carrinho vazio|nenhum item|adicione produtos/i').isVisible().catch(() => false)
