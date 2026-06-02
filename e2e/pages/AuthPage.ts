@@ -25,7 +25,7 @@ export class AuthPage {
   get loginEmailInput()    { return this.page.getByPlaceholder(/seu@email/i) }
   get loginPasswordInput() { return this.page.locator('input[type="password"]').first() }
   get loginSubmitButton()  { return this.page.getByRole('button', { name: /entrar/i }) }
-  get loginErrorMessage()  { return this.page.locator('[id="login-error"], text=/email ou senha inválidos/i') }
+  get loginErrorMessage()  { return this.page.locator('#login-error').or(this.page.getByText(/email ou senha inválidos/i)) }
   get loginLink()          { return this.page.getByRole('link', { name: /entrar|login/i }) }
   get registerLink()       { return this.page.getByRole('link', { name: /criar conta|cadastro|registr/i }) }
 
