@@ -5,7 +5,14 @@ import { getToken } from 'next-auth/jwt'
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const secureCookie = request.nextUrl.protocol === 'https:'
-  const opts = { req: request, secret: process.env.NEXTAUTH_SECRET, secureCookie }
+  // NextAuth v5 renomeou o cookie de "next-auth.session-token" para "authjs.session-token"
+  const cookieName = secureCookie ? '__Secure-authjs.session-token' : 'authjs.session-token'
+  const opts = {
+    req: request,
+    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+    secureCookie,
+    cookieName,
+  }
 
   // /admin/login: redirect logged-in admins to dashboard, allow others through
   if (pathname === '/admin/login') {
