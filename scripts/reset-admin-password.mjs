@@ -14,6 +14,9 @@
  * Nunca imprime senha nem hash.
  */
 
+// Desabilita verificação SSL — necessário para Supabase com self-signed chain
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { createRequire } from 'module'
