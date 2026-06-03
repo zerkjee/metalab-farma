@@ -28,7 +28,8 @@ export class VipPage {
   }
 
   async assertLoginRedirectOrPrompt() {
-    // Pode redirecionar para /login ou mostrar um prompt de login na própria página
+    // VIP redireciona não-autenticados client-side — aguarda o redirect acontecer
+    await this.page.waitForURL(/login/, { timeout: 5_000 }).catch(() => {})
     const isLoginPage = this.page.url().includes('/login')
     const hasLoginPrompt = await this.loginPrompt.isVisible().catch(() => false)
     expect(isLoginPage || hasLoginPrompt).toBeTruthy()
