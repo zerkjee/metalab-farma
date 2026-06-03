@@ -85,14 +85,13 @@ export class AdminPage {
 
   async navigateTo(section: string) {
     await this.page.goto(`/admin/${section}`)
-    await this.page.waitForLoadState('domcontentloaded')
+    // 'load' garante que React hidratou e o UI inicial é interativo
+    await this.page.waitForLoadState('load')
   }
 
   async waitForTable() {
-    await this.page.waitForFunction(
-      () => document.querySelectorAll('tr').length > 1 || document.querySelectorAll('[role="row"]').length > 1,
-      { timeout: 10_000 }
-    )
+    // Espera row real com preço — skeleton rows não têm "R$"
+    await expect(this.page.locator('tr').filter({ hasText: /R\$/ }).first()).toBeVisible({ timeout: 10_000 })
   }
 
   async createProduct(data: { name: string; sku: string; price: number; stock: number }) {
