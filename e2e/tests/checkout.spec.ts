@@ -37,13 +37,13 @@ test.describe('Checkout — Acesso', () => {
       localStorage.removeItem('metalab_cart_state_v2')
     })
     await page.goto('/checkout')
-    // CartContext hidrata via useEffect — aguarda o empty state aparecer antes de checar
-    // "Seu carrinho está vazio" é o texto real na página (não "carrinho vazio")
-    const emptyLocator = page.locator('text=/Seu carrinho|carrinho está vazio|nenhum item|adicione produtos/i')
-    await emptyLocator.waitFor({ timeout: 5_000 }).catch(() => {})
+    // CartContext hidrata via useEffect — aguarda o heading do empty state (único elemento h1)
+    // Usar locator específico evita strict mode violation com múltiplos matches
+    const emptyHeading = page.locator('h1', { hasText: /carrinho|vazio/i })
+    await emptyHeading.waitFor({ timeout: 5_000 }).catch(() => {})
     const url = page.url()
     const isEmpty = url.includes('checkout')
-      ? await emptyLocator.isVisible().catch(() => false)
+      ? await emptyHeading.isVisible().catch(() => false)
       : true
     expect(isEmpty || !url.includes('checkout')).toBeTruthy()
   })

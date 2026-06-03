@@ -13,7 +13,7 @@ export class ProductPage {
   get addToCartButton()    { return this.page.getByRole('button', { name: /adicionar ao carrinho/i }).first() }
   get moreInfoButton()     { return this.page.getByRole('button', { name: /mais informações/i }) }
   get priceDisplay()       { return this.page.locator('text=/R\$/').first() }
-  get stockStatus()        { return this.page.locator('text=/em estoque|fora de estoque/i') }
+  get stockStatus()        { return this.page.locator('text=/em estoque|fora de estoque/i').first() }
   get kitSelector()        { return this.page.locator('text=/escolha a quantidade/i') }
   get kitBaseOption()      { return this.page.getByRole('button', { name: /1 unidade/i }) }
   get brandBadge()         { return this.page.locator('span').filter({ hasText: /Metalab|metalab/i }).first() }
