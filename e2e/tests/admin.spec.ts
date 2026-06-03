@@ -238,7 +238,8 @@ test.describe('Admin — Banners', () => {
     const modal = page.locator('[role="dialog"]').or(page.locator('[class*="Modal"]'))
     await expect(modal).toBeVisible({ timeout: 5_000 })
 
-    const inputs = await modal.locator('input[type="text"]').count()
+    // Inputs do banner não têm type="text" explícito — contar todos os inputs de texto
+    const inputs = await modal.locator('input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"])').count()
     expect(inputs).toBeGreaterThan(0)
   })
 
@@ -291,8 +292,10 @@ test.describe('Admin — Pedidos', () => {
     const admin = new AdminPage(page)
     await admin.navigateTo('pedidos')
 
-    // Deve ter algum filtro ou campo de busca — aguarda hydration
-    const filterOrSearch = page.locator('select, [role="combobox"]').or(page.locator('input[type="text"], input[type="search"]'))
+    // Filtros de status são botões (tabs/chips), não select/input
+    const filterOrSearch = page.locator('select, [role="combobox"]')
+      .or(page.locator('input[type="text"], input[type="search"]'))
+      .or(page.locator('button').filter({ hasText: /todos|pendentes|pago|aguardando|em separação|enviado|cancelado/i }))
     await expect(filterOrSearch.first()).toBeVisible({ timeout: 8_000 })
   })
 })

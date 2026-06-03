@@ -11,7 +11,7 @@ export class CartPage {
   get checkoutButton()  { return this.drawer.getByRole('link', { name: /finalizar|checkout|comprar/i }) }
   get couponInput()     { return this.drawer.getByPlaceholder(/PRIMEIRA|cupom|código/i) }
   get applyCouponBtn()  { return this.drawer.getByRole('button', { name: /aplicar/i }) }
-  get couponSuccess()   { return this.drawer.locator('text=/cupom aplicado|desconto/i') }
+  get couponSuccess()   { return this.drawer.locator('text=/cupom aplicado|desconto/i').first() }
   get couponError()     { return this.drawer.locator('text=/inválido|expirado|não encontrado/i') }
   get totalValue()      { return this.drawer.locator('text=/total/i').locator('..').last() }
 
