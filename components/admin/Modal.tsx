@@ -29,7 +29,8 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'max-
       />
 
       {/* Panel */}
-      <div className={`relative w-full ${maxWidth} rounded-2xl border border-slate-700 shadow-2xl overflow-hidden`}
+      <div role="dialog" aria-modal="true" aria-label={title}
+        className={`relative w-full ${maxWidth} rounded-2xl border border-slate-700 shadow-2xl overflow-hidden`}
         style={{ background: '#1e293b' }}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
           <h2 className="text-white font-bold text-base">{title}</h2>

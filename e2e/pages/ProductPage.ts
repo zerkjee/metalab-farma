@@ -9,7 +9,7 @@ export class ProductPage {
 
   // ── Locators ──────────────────────────────────────────────────────────────
 
-  get productTitle()       { return this.page.locator('h1') }
+  get productTitle()       { return this.page.locator('h1').first() }
   get addToCartButton()    { return this.page.getByRole('button', { name: /adicionar ao carrinho/i }).first() }
   get moreInfoButton()     { return this.page.getByRole('button', { name: /mais informações/i }) }
   get priceDisplay()       { return this.page.locator('text=/R\$/').first() }
@@ -49,7 +49,7 @@ export class ProductPage {
   }
 
   async scrollToReviews() {
-    await this.reviewsSection.scrollIntoViewIfNeeded()
+    await this.reviewsSection.scrollIntoViewIfNeeded().catch(() => {})
   }
 
   // ── Assertions ────────────────────────────────────────────────────────────

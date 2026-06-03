@@ -88,8 +88,9 @@ test.describe('PDP — Seções de conteúdo', () => {
     const slug = await resolveSlug(page)
     const pdp = new ProductPage(page)
     await pdp.goto(slug)
-    await page.locator('text=/informações importantes/i').scrollIntoViewIfNeeded()
-    await expect(page.locator('text=/informações importantes/i')).toBeVisible()
+    const infoSection = page.locator('text=/informações importantes/i').first()
+    await infoSection.scrollIntoViewIfNeeded().catch(() => {})
+    await expect(infoSection).toBeVisible({ timeout: 5_000 })
   })
 
   test('deve exibir seção de avaliações', async ({ page }) => {

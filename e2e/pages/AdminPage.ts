@@ -27,12 +27,10 @@ export class AdminPage {
 
   // ── Produtos ──────────────────────────────────────────────────────────────
 
-  get newProductButton()  { return this.page.getByRole('button', { name: /novo produto|criar produto|adicionar produto/i }).or(
-                              this.page.locator('button').filter({ has: this.page.locator('svg') }).filter({ hasText: /novo|produto/i })
-                            ).first() }
+  get newProductButton()  { return this.page.getByRole('button', { name: /novo produto/i }).first() }
   get productTable()      { return this.page.locator('table, [role="table"]').first() }
   get productRows()       { return this.productTable.locator('tr, [role="row"]').filter({ hasText: /R\$/ }) }
-  get searchInput()       { return this.page.getByPlaceholder(/buscar|pesquisar|search/i) }
+  get searchInput()       { return this.page.getByPlaceholder(/buscar por nome|slug|SKU/i).or(this.page.getByPlaceholder(/buscar por nome, slug/i)).first() }
 
   // Modal de produto
   get productModal()      { return this.page.locator('[role="dialog"], [class*="Modal"]').first() }
