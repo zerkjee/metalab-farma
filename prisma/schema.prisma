@@ -253,10 +253,24 @@ model Pedido {
   criadoEm    DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 
+  // ─── Integração ERP Tiny ──────────────────────────────────────────────────
+  tinyPedidoId       String?          // ID gerado pelo Tiny ao criar o pedido
+  tinyStatus         String?          // Situação mais recente retornada pelo Tiny
+  tinySyncStatus     TinySyncStatus   @default(PENDENTE)
+  tinySyncAt         DateTime?        // Última tentativa de sincronização
+  tinyErro           String?          @db.Text  // Mensagem de erro para debug
+  nfNumero           String?          // Número da NF-e emitida pelo Tiny
+  nfChave            String?          // Chave de acesso NF-e (44 dígitos)
+  nfUrl              String?          // URL do DANFE/PDF
+  tinyPayload        String?          @db.Text  // Payload bruto da última resposta Tiny
+  tinyLastWebhookAt  DateTime?        // Último webhook recebido do Tiny
+
   @@index([usuarioId, criadoEm])
   @@index([pagamentoId])
   @@index([compradorEmail])
   @@index([status])
+  @@index([tinySyncStatus])
+  @@index([tinyPedidoId])
   @@map("pedidos")
 }
 
@@ -275,6 +289,14 @@ enum MetodoPagamento {
   CARTAO_CREDITO
   CARTAO_DEBITO
   BOLETO
+}
+
+enum TinySyncStatus {
+  PENDENTE     // Pedido aprovado, ainda não enviado ao Tiny
+  PROCESSANDO  // Sync em andamento (lock atômico — uso na Wave 2/3)
+  ENVIADO      // Criado no Tiny com sucesso
+  ERRO         // Falhou após todas as tentativas
+  IGNORADO     // Cancelado antes de ser enviado
 }
 
 model ItemPedido {
