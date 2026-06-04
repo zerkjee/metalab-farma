@@ -31,6 +31,21 @@ function createPrismaClient() {
   })
 }
 
-export const prisma = global._prisma ?? createPrismaClient()
+// Lazy init: o client só é criado no primeiro acesso a uma propriedade (runtime),
+// nunca no mero import do módulo. Isso evita que `next build` → "Collecting page data"
+// — que importa todos os route handlers — dispare createPrismaClient() (e o throw de
+// DATABASE_URL) em ambientes sem a env var (ex.: Preview da Vercel).
+function getClient(): PrismaClient {
+  const client = global._prisma ?? createPrismaClient()
+  if (process.env.NODE_ENV !== "production") global._prisma = client
+  return client
+}
 
-if (process.env.NODE_ENV !== "production") global._prisma = prisma
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop, receiver) {
+    const client = getClient()
+    const value = Reflect.get(client, prop, receiver)
+    // Liga métodos ao client real para preservar o `this` (ex.: $transaction).
+    return typeof value === "function" ? value.bind(client) : value
+  },
+})
