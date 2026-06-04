@@ -19,6 +19,7 @@ export default defineConfig({
         'lib/adminGuard.ts',
         'lib/validations.ts',
         'lib/freteUtils.ts',
+        'lib/tiny.ts',
       ],
       reporter: ['text', 'html'],
     },
