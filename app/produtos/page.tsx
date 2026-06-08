@@ -4,6 +4,7 @@ import Footer from "@/components/Footer"
 import { CatalogClient } from "./CatalogClient"
 import { Product } from "@/types/product"
 import { prisma } from "@/lib/prisma"
+import { publicStock } from "@/lib/publicProduct"
 import { products as localProducts } from "@/data/products"
 
 export const revalidate = 60
@@ -56,7 +57,7 @@ async function getData(): Promise<{ produtos: Product[]; categorias: Categoria[]
       tipo: p.tipo as "SIMPLES" | "KIT",
       preco: Number(p.preco),
       precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
-      estoque: p.estoque,
+      estoque: publicStock(p.estoque),
       descricaoCurta: p.descricaoCurta ?? null,
       descricaoHtml: p.descricaoHtml ?? null,
       imagemUrl: p.imagemUrl ?? null,

@@ -84,7 +84,7 @@ export interface PixExpiryData {
 export async function sendPixExpiryEmail(data: PixExpiryData) {
   if (!process.env.RESEND_API_KEY) return
   const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
-  const from = process.env.EMAIL_FROM ?? 'Metalab Store <onboarding@resend.dev>'
+  const from = process.env.EMAIL_FROM || 'Metalab Store <onboarding@resend.dev>'
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -136,7 +136,7 @@ export interface AbandonedCartData {
 export async function sendAbandonedCartEmail(data: AbandonedCartData) {
   if (!process.env.RESEND_API_KEY) return
   const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
-  const from = process.env.EMAIL_FROM ?? 'Metalab Store <onboarding@resend.dev>'
+  const from = process.env.EMAIL_FROM || 'Metalab Store <onboarding@resend.dev>'
   const firstName = data.nome?.split(' ')[0] ?? 'Cliente'
 
   const itensHtml = data.items
@@ -202,7 +202,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
     return
   }
 
-  const from = process.env.EMAIL_FROM ?? "Metalab Store <onboarding@resend.dev>"
+  const from = process.env.EMAIL_FROM || "Metalab Store <onboarding@resend.dev>"
 
   try {
     const { Resend } = await import("resend")

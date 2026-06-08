@@ -12,6 +12,7 @@ import { getProductDetail } from '@/utils/productDetails';
 import type { Ingrediente } from '@/utils/productDetails';
 import { Product } from '@/types/product';
 import { prisma } from '@/lib/prisma';
+import { publicStock } from '@/lib/publicProduct';
 
 // Converte o texto de composição do banco em Ingrediente[] para o ComposicaoSection
 function composicaoFromText(text: string): Ingrediente[] {
@@ -57,7 +58,7 @@ async function getProduto(idParam: string): Promise<Product | null> {
         tipo: p.tipo as 'SIMPLES' | 'KIT',
         preco: Number(p.preco),
         precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
-        estoque: p.estoque,
+        estoque: publicStock(p.estoque),
         descricaoCurta: p.descricaoCurta ?? null,
         descricaoHtml: p.descricaoHtml ?? null,
         imagemUrl: p.imagemUrl ?? null,

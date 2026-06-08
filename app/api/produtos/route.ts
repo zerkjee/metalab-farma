@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { publicStock } from "@/lib/publicProduct"
 import { auth } from "@/lib/auth"
 import { produtoSchema } from "@/lib/validations"
 import { logger } from "@/lib/logger"
@@ -74,6 +75,9 @@ export async function GET(request: NextRequest) {
         ...p,
         preco:         Number(p.preco),
         precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
+        // Estoque é info administrativa — cliente só vê se tem ou não
+        estoque:       publicStock(p.estoque),
+        estoqueMin:    undefined,
       })),
       total,
       pagina,
