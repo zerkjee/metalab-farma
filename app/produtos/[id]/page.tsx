@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import ProductDetailHero from '@/components/ProductDetailHero';
+import ProductSection from '@/components/ProductSection';
 import ComposicaoSection from '@/components/ComposicaoSection';
 import ProductReviews from '@/components/reviews/ProductReviews';
 import PurchaseNotification from '@/components/social-proof/PurchaseNotification';
@@ -66,6 +67,7 @@ async function getProduto(idParam: string): Promise<Product | null> {
         ativo: p.ativo,
         destaque: p.destaque,
         corPrincipal: p.corPrincipal ?? null,
+        categoriaId: p.categoriaId ?? null,
         composicao: p.composicao ?? null,
         modoDeUso: p.modoDeUso ?? null,
         criadoEm: p.criadoEm.toISOString(),
@@ -76,6 +78,35 @@ async function getProduto(idParam: string): Promise<Product | null> {
   }
 
   return localProducts.find((p) => p.id === idParam || p.slug === idParam) ?? null
+}
+
+// Cross-sell: produtos ativos da mesma categoria (exceto o atual)
+async function getRelacionados(categoriaId: string | null | undefined, excluirId: string): Promise<Product[]> {
+  if (!categoriaId) return []
+  try {
+    const rows = await prisma.produto.findMany({
+      where: { ativo: true, categoriaId, id: { not: excluirId } },
+      orderBy: [{ destaque: 'desc' }, { criadoEm: 'desc' }],
+      take: 4,
+    })
+    return rows.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      nome: p.nome,
+      marca: p.marca,
+      tipo: p.tipo as 'SIMPLES' | 'KIT',
+      preco: Number(p.preco),
+      precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
+      estoque: publicStock(p.estoque),
+      descricaoCurta: p.descricaoCurta ?? null,
+      imagemUrl: p.imagemUrl ?? null,
+      corPrincipal: p.corPrincipal ?? null,
+      tags: p.tags,
+      ativo: true,
+    }))
+  } catch {
+    return []
+  }
 }
 
 const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
@@ -115,6 +146,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const produto = await getProduto(idParam)
 
   if (!produto) notFound()
+
+  const relacionados = await getRelacionados(produto.categoriaId, produto.id)
 
   const numericId = parseInt(produto.id.replace('local-', '')) || 0
   const detail = getProductDetail(numericId)
@@ -245,6 +278,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </div>
       </section>
+
+      {relacionados.length > 0 && (
+        <ProductSection
+          title="Da mesma categoria"
+          subtitle="Clientes que viram este produto também levaram estes — aproveite e combine."
+          products={relacionados}
+          color={corPrincipal}
+        />
+      )}
 
       <ProductReviews productId={produto.id} color={corPrincipal} />
 
