@@ -4,14 +4,28 @@ import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { z } from "zod"
 
-// GET /api/categorias — público
+// GET /api/categorias — público. Retorna só categorias com >= 1 produto ATIVO,
+// já com a contagem, para o menu/filtro nunca levar o cliente a um beco vazio.
 export async function GET() {
   try {
-    const categorias = await prisma.categoria.findMany({
-      orderBy: [{ ordem: "asc" }, { nome: "asc" }],
-      select: { id: true, nome: true, slug: true, ordem: true },
-    })
-    return NextResponse.json({ categorias }, {
+    const [categorias, counts] = await Promise.all([
+      prisma.categoria.findMany({
+        orderBy: [{ ordem: "asc" }, { nome: "asc" }],
+        select: { id: true, nome: true, slug: true, ordem: true },
+      }),
+      prisma.produto.groupBy({
+        by: ["categoriaId"],
+        where: { ativo: true, categoriaId: { not: null } },
+        _count: { _all: true },
+      }),
+    ])
+
+    const countMap = new Map(counts.map((c) => [c.categoriaId, c._count._all]))
+    const comProdutos = categorias
+      .map((c) => ({ ...c, totalProdutos: countMap.get(c.id) ?? 0 }))
+      .filter((c) => c.totalProdutos > 0)
+
+    return NextResponse.json({ categorias: comProdutos }, {
       headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate=600' },
     })
   } catch (error) {
