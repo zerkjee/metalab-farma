@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/context/CartContext';
+import SearchBar from '@/components/SearchBar';
 
 const navItems = [
   { label: 'Início', href: '/' },
@@ -176,9 +177,15 @@ export default function Header() {
           </div>
         </div>
 
+        {/* Busca — desktop */}
+        <div className="hidden md:flex justify-center pb-3">
+          <SearchBar />
+        </div>
+
         {/* Nav mobile */}
         {menuOpen && (
           <div id="mobile-nav" className="md:hidden border-t border-gray-100 py-4 flex flex-col gap-4">
+            <SearchBar compact onNavigate={() => setMenuOpen(false)} />
             {navItems.map((item) => (
               <Link
                 key={item.label}
