@@ -79,7 +79,7 @@ function RightPanel({ id, accent, transitioning }: { id: number; accent: string;
   const style = {
     opacity: transitioning ? 0 : 1,
     transform: transitioning ? 'translateX(24px)' : 'translateX(0)',
-    transition: 'opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
   };
 
   if (id === 1) return (
@@ -230,17 +230,31 @@ export default function BannerCarousel() {
   const [paused, setPaused] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const transitioningRef = useRef(false);
+  const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Troca em duas fases para nao "piscar" o banner novo:
+  // 1) fade-out do conteudo atual (transitioning=true);
+  // 2) apos o fade, troca o slide enquanto ainda esta invisivel (opacity 0);
+  // 3) no proximo frame, fade-in do novo conteudo (transitioning=false).
+  // Trocar o conteudo junto com o fade-out fazia o slide novo aparecer 1 frame
+  // em opacity 1 (o "pisca") antes de sumir e reaparecer.
   const goTo = useCallback((index: number) => {
     if (transitioningRef.current) return;
     transitioningRef.current = true;
-    setTransitioning(true);
-    setCurrent(index);
-    setTimeout(() => {
-      transitioningRef.current = false;
-      setTransitioning(false);
-    }, 600);
+    setTransitioning(true); // 1) fade-out
+    swapTimerRef.current = setTimeout(() => {
+      setCurrent(index); // 2) troca enquanto invisivel
+      // 3) espera o paint em opacity 0 antes de fazer o fade-in
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTransitioning(false);
+          transitioningRef.current = false;
+        });
+      });
+    }, 300);
   }, []);
+
+  useEffect(() => () => { if (swapTimerRef.current) clearTimeout(swapTimerRef.current); }, []);
 
   const prev = useCallback(() => goTo(prevIndex(current, slides.length)), [current, goTo]);
   const next = useCallback(() => goTo(nextIndex(current, slides.length)), [current, goTo]);
@@ -287,7 +301,7 @@ export default function BannerCarousel() {
 
               {/* Badge */}
               <div
-                className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 self-start transition-opacity duration-500"
+                className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 self-start transition-opacity duration-300"
                 style={{ opacity: transitioning ? 0 : 1 }}
               >
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: slide.dot }} />
@@ -296,7 +310,7 @@ export default function BannerCarousel() {
 
               {/* Título */}
               <h1
-                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight transition-all duration-500"
+                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight transition-all duration-300"
                 style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(12px)' : 'translateY(0)' }}
               >
                 {slide.title.split('\n').map((line, i) => (
@@ -309,7 +323,7 @@ export default function BannerCarousel() {
 
               {/* Subtexto */}
               <p
-                className="text-base sm:text-lg text-white/70 leading-relaxed transition-all duration-500 delay-75"
+                className="text-base sm:text-lg text-white/70 leading-relaxed transition-all duration-300"
                 style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(8px)' : 'translateY(0)' }}
               >
                 {slide.subtitle}
@@ -317,7 +331,7 @@ export default function BannerCarousel() {
 
               {/* CTAs */}
               <div
-                className="flex flex-row flex-wrap gap-4 transition-all duration-500 delay-100"
+                className="flex flex-row flex-wrap gap-4 transition-all duration-300"
                 style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(6px)' : 'translateY(0)' }}
               >
                 <Link href={slide.cta.href}
