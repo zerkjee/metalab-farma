@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { nextIndex, prevIndex } from '@/lib/carousel';
 
 const slides = [
   {
@@ -228,7 +229,6 @@ export default function BannerCarousel() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transitioningRef = useRef(false);
 
   const goTo = useCallback((index: number) => {
@@ -242,15 +242,20 @@ export default function BannerCarousel() {
     }, 600);
   }, []);
 
-  const prev = useCallback(() => goTo((current - 1 + slides.length) % slides.length), [current, goTo]);
-  const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo]);
+  const prev = useCallback(() => goTo(prevIndex(current, slides.length)), [current, goTo]);
+  const next = useCallback(() => goTo(nextIndex(current, slides.length)), [current, goTo]);
 
+  // Autoplay: a self-resetting timer keyed on `current`. Because the effect
+  // re-runs whenever the slide changes (auto OR manual), every navigation
+  // restarts the countdown — so a manual tap never collides with a pending
+  // tick to double-advance. Routed through `goTo` so autoplay fades like
+  // manual nav and respects the in-flight transition guard.
   useEffect(() => {
     if (paused) return;
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    intervalRef.current = setInterval(() => setCurrent((c) => (c + 1) % slides.length), 5500);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [paused]);
+    const timer = setTimeout(() => goTo(nextIndex(current, slides.length)), 5500);
+    return () => clearTimeout(timer);
+  }, [current, paused, goTo]);
 
   const slide = slides[current];
 
@@ -258,8 +263,8 @@ export default function BannerCarousel() {
     <section
       className="relative overflow-hidden transition-[background] duration-700 h-[62vh] min-h-[380px] sm:h-[75vh] sm:min-h-[500px] lg:h-[88vh] lg:min-h-[600px]"
       style={{ background: slide.bg }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') setPaused(true); }}
+      onPointerLeave={(e) => { if (e.pointerType === 'mouse') setPaused(false); }}
     >
       {/* Grid decorativo */}
       <div className="absolute inset-0 opacity-[0.06]"
@@ -381,9 +386,9 @@ export default function BannerCarousel() {
       {/* Barra de progresso */}
       <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10">
         <div
-          key={`${current}-${paused}`}
+          key={current}
           className="h-full rounded-full"
-          style={{ backgroundColor: slide.dot, animation: paused ? 'none' : 'progress 5.5s linear forwards' }}
+          style={{ backgroundColor: slide.dot, animation: 'progress 5.5s linear forwards', animationPlayState: paused ? 'paused' : 'running' }}
         />
       </div>
 
