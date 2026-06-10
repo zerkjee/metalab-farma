@@ -1,4 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// selecionarOpcaoFrete é pura, mas lib/frete importa @/lib/prisma no topo do módulo.
+// Mockamos o prisma para não exigir o Prisma Client gerado no job de unit tests do CI.
+vi.mock('@/lib/prisma', () => ({ prisma: {} }))
+
 import { selecionarOpcaoFrete } from '@/lib/frete'
 
 const opcoes = [
