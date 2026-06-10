@@ -25,6 +25,7 @@ const { mockTx, mockPrisma } = vi.hoisted(() => {
 const { mockAuth } = vi.hoisted(() => ({ mockAuth: vi.fn() }))
 const { mockEnqueue } = vi.hoisted(() => ({ mockEnqueue: vi.fn() }))
 const { mockRateLimit } = vi.hoisted(() => ({ mockRateLimit: vi.fn() }))
+const { mockCotarFrete } = vi.hoisted(() => ({ mockCotarFrete: vi.fn() }))
 
 // ─── Mocks de módulos ─────────────────────────────────────────────────────────
 
@@ -34,6 +35,13 @@ vi.mock('@/lib/qstash',    () => ({ enqueueOrderEmail: mockEnqueue }))
 vi.mock('@/lib/rateLimit', () => ({
   pedidoRatelimit: { limit: mockRateLimit },
   getIp: vi.fn().mockReturnValue('127.0.0.1'),
+}))
+vi.mock('@/lib/frete', () => ({
+  cotarFrete: mockCotarFrete,
+  selecionarOpcaoFrete: (
+    opcoes: Array<{ id: string }>,
+    servicoId: string,
+  ) => opcoes.find((o) => o.id === servicoId) ?? null,
 }))
 vi.mock('@/lib/logger', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
@@ -60,9 +68,12 @@ const VALID_BODY = {
   itens: [{ slug: 'whey-protein', quantidade: 1 }],
   cliente: { nome: 'Pedro Test', email: 'pedro@test.com', cpf: '12345678909', telefone: '11999999999' },
   endereco: { cep: '31742227', logradouro: 'Rua das Flores', numero: '100', bairro: 'Jardim', cidade: 'Belo Horizonte', estado: 'MG' },
-  frete: { preco: 10 },
+  frete: { servicoId: 'standard' as const },
   metodoPagamento: 'PIX' as const,
 }
+
+// Opção de frete padrão devolvida pela cotação do servidor (preço autoritativo).
+const FRETE_STANDARD = { id: 'standard', label: 'PAC', description: '', price: 10, estimate: '' }
 
 function makeRequest(body: unknown) {
   return new NextRequest('http://localhost/api/pedidos', {
@@ -80,6 +91,7 @@ beforeEach(() => {
   mockAuth.mockResolvedValue(null)                              // guest por padrão
   mockRateLimit.mockResolvedValue({ success: true })            // sem rate limit
   mockEnqueue.mockResolvedValue(undefined)                      // QStash ok
+  mockCotarFrete.mockResolvedValue({ ok: true, opcoes: [FRETE_STANDARD] }) // cotação servidor
 
   mockPrisma.produto.findMany.mockResolvedValue([MOCK_PRODUCT])
   mockPrisma.cupom.findUnique.mockResolvedValue(null)
@@ -282,5 +294,52 @@ describe('POST /api/pedidos — retry P2002', () => {
     const res = await POST(makeRequest(VALID_BODY))
     expect(res.status).toBe(500)
     expect(mockPrisma.$transaction).toHaveBeenCalledTimes(3)
+  })
+})
+
+// ─── Frete recalculado no servidor (P0) ───────────────────────────────────────
+
+describe('POST /api/pedidos — frete server-side', () => {
+  it('retorna 400 quando não há frete escolhido nem frete grátis', async () => {
+    const { frete: _omit, ...semFrete } = VALID_BODY
+    void _omit
+    const res = await POST(makeRequest(semFrete))
+    expect(res.status).toBe(400)
+    expect((await res.json()).erro).toMatch(/selecione uma opção de frete/i)
+    expect(mockCotarFrete).not.toHaveBeenCalled()
+  })
+
+  it('usa o preço da COTAÇÃO DO SERVIDOR, ignorando o cliente', async () => {
+    // Cliente nem consegue mais enviar preço; servidor cota 25 → total 125.
+    mockCotarFrete.mockResolvedValue({
+      ok: true,
+      opcoes: [{ id: 'standard', label: 'PAC', description: '', price: 25, estimate: '' }],
+    })
+    const res = await POST(makeRequest(VALID_BODY))
+    expect(res.status).toBe(201)
+    const data = mockTx.pedido.create.mock.calls[0]?.[0]?.data
+    expect(data?.frete).toBe(25)
+    expect(data?.total).toBe(125)
+  })
+
+  it('repassa o erro quando a cotação falha (não cai em preço do cliente)', async () => {
+    mockCotarFrete.mockResolvedValue({ ok: false, status: 422, erro: 'Nenhuma opção de frete disponível para este CEP' })
+    const res = await POST(makeRequest(VALID_BODY))
+    expect(res.status).toBe(422)
+    expect(mockTx.pedido.create).not.toHaveBeenCalled()
+  })
+
+  it('com cupom FRETE_GRATIS: frete = 0 e nem cota o servidor', async () => {
+    const cupomFrete = { id: 'cf1', codigo: 'FRETEGRATIS', ativo: true, tipo: 'FRETE_GRATIS', valor: 0, usoMaximo: null, usoAtual: 0, validade: null }
+    mockPrisma.cupom.findUnique.mockResolvedValue(cupomFrete)
+    mockTx.cupom.findUnique.mockResolvedValue(cupomFrete)
+
+    const body = { ...VALID_BODY, cupomFreteCodigo: 'FRETEGRATIS', frete: { servicoId: 'express' as const } }
+    const res = await POST(makeRequest(body))
+    expect(res.status).toBe(201)
+    const data = mockTx.pedido.create.mock.calls[0]?.[0]?.data
+    expect(data?.frete).toBe(0)
+    expect(data?.total).toBe(100)
+    expect(mockCotarFrete).not.toHaveBeenCalled()
   })
 })

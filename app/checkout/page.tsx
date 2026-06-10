@@ -302,7 +302,7 @@ export default function CheckoutPage() {
           cidade: form.city,
           estado: form.state,
         },
-        frete: { preco: selectedShipping.price },
+        frete: { servicoId: selectedShipping.id },
         cupomCodigo: coupons.discount?.code ?? undefined,
         cupomFreteCodigo: coupons.freeShipping?.code ?? undefined,
         metodoPagamento: selectedPaymentId,
@@ -334,10 +334,9 @@ export default function CheckoutPage() {
         });
 
         if (!pixRes.ok) {
-          // Pedido foi criado mas o PIX falhou — redireciona para Meus pedidos
+          // PIX falhou — o pedido foi cancelado e o estoque devolvido no servidor.
           setSubmitError(
-            'Pedido criado, mas não foi possível gerar o QR Code PIX. ' +
-            'Acesse "Meus pedidos" para tentar novamente.',
+            'Não foi possível processar o pagamento. Tente novamente.',
           );
           return;
         }

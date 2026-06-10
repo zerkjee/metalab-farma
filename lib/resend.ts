@@ -11,6 +11,16 @@ export interface OrderEmailData {
 const _fmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
 function fmtCurrency(v: number) { return _fmt.format(v) }
 
+// Remetente do e-mail. Em produção, EMAIL_FROM é obrigatório (validado no boot por lib/env.ts),
+// então o domínio sandbox onboarding@resend.dev NUNCA é usado em produção.
+function resolveEmailFrom(): string {
+  const from = process.env.EMAIL_FROM
+  if (from && from.trim()) return from
+  if (process.env.NODE_ENV !== "production") return "Metalab Store <onboarding@resend.dev>"
+  // Inalcançável em produção por causa do fail-fast de env; falha clara em vez de cair no sandbox.
+  throw new Error("EMAIL_FROM ausente em produção")
+}
+
 function buildOrderEmailHtml(data: OrderEmailData) {
   const isPix = data.metodoPagamento === "PIX"
   const itensHtml = data.itens
@@ -84,7 +94,7 @@ export interface PixExpiryData {
 export async function sendPixExpiryEmail(data: PixExpiryData) {
   if (!process.env.RESEND_API_KEY) return
   const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
-  const from = process.env.EMAIL_FROM || 'Metalab Store <onboarding@resend.dev>'
+  const from = resolveEmailFrom()
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -136,7 +146,7 @@ export interface AbandonedCartData {
 export async function sendAbandonedCartEmail(data: AbandonedCartData) {
   if (!process.env.RESEND_API_KEY) return
   const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
-  const from = process.env.EMAIL_FROM || 'Metalab Store <onboarding@resend.dev>'
+  const from = resolveEmailFrom()
   const firstName = data.nome?.split(' ')[0] ?? 'Cliente'
 
   const itensHtml = data.items
@@ -202,7 +212,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
     return
   }
 
-  const from = process.env.EMAIL_FROM || "Metalab Store <onboarding@resend.dev>"
+  const from = resolveEmailFrom()
 
   try {
     const { Resend } = await import("resend")
