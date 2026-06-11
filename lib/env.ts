@@ -67,11 +67,17 @@ export function checkEnv(): EnvReport {
 }
 
 /**
- * Valida o ambiente. Em produção, lança se faltar variável crítica.
- * Chamado no boot via instrumentation.ts.
+ * Valida o ambiente. Chamado no boot via instrumentation.ts.
+ *
+ * O hard-fail (derrubar o boot) só ocorre em PRODUÇÃO REAL (deploy de produção na Vercel,
+ * VERCEL_ENV === 'production'). Em previews da Vercel, CI/E2E e builds o NODE_ENV também é
+ * 'production', mas esses contextos legitimamente não têm os secrets de runtime — ali apenas
+ * logamos o erro (sem derrubar), para não inviabilizar previews e testes.
  */
 export function validateEnv(): void {
   const isProd = process.env.NODE_ENV === 'production'
+  // Produção real = deploy de produção na Vercel. Previews/CI não setam isso como 'production'.
+  const isRealProd = process.env.VERCEL_ENV === 'production'
   const { criticasAusentes, operacionaisAusentes } = checkEnv()
 
   if (!isProd) {
@@ -94,7 +100,9 @@ export function validateEnv(): void {
     // Mensagem clara, somente nomes — nunca valores.
     const msg = `[env] variáveis CRÍTICAS ausentes em produção: ${criticasAusentes.join(', ')}`
     logger.error(msg)
-    throw new Error(msg)
+    // Fail-fast apenas em produção real; em preview/CI segue (degradado) para não quebrar testes.
+    if (isRealProd) throw new Error(msg)
+    return
   }
 
   logger.info('[env] validação OK')

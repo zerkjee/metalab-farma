@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger'
 
 const CRITICAS = ['DATABASE_URL', 'AUTH_SECRET', 'NEXTAUTH_URL', 'MERCADOPAGO_ACCESS_TOKEN', 'MP_WEBHOOK_SECRET', 'RESEND_API_KEY', 'EMAIL_FROM']
 const OPERACIONAIS = ['MELHOR_ENVIO_TOKEN', 'MELHOR_ENVIO_ORIGIN_CEP', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'QSTASH_CURRENT_SIGNING_KEY', 'QSTASH_TOKEN']
-const EXTRAS = ['NEXTAUTH_SECRET', 'NEXT_PUBLIC_URL', 'NODE_ENV']
+const EXTRAS = ['NEXTAUTH_SECRET', 'NEXT_PUBLIC_URL', 'NODE_ENV', 'VERCEL_ENV']
 
 const ALL = [...CRITICAS, ...OPERACIONAIS, ...EXTRAS]
 let saved: Record<string, string | undefined>
@@ -20,6 +20,12 @@ function setAllPresent() {
 
 function setNodeEnv(v: string) {
   ;(process.env as Record<string, string | undefined>).NODE_ENV = v
+}
+
+// Simula produção REAL na Vercel (NODE_ENV=production + VERCEL_ENV=production).
+function setRealProd() {
+  setNodeEnv('production')
+  process.env.VERCEL_ENV = 'production'
 }
 
 beforeEach(() => {
@@ -65,16 +71,16 @@ describe('checkEnv', () => {
 })
 
 describe('validateEnv', () => {
-  it('lança em produção quando falta variável crítica', () => {
+  it('lança em produção REAL (VERCEL_ENV=production) quando falta variável crítica', () => {
     setAllPresent()
-    setNodeEnv('production')
+    setRealProd()
     delete process.env.EMAIL_FROM
     expect(() => validateEnv()).toThrow(/EMAIL_FROM/)
   })
 
   it('a mensagem de erro lista nomes, nunca valores/segredos', () => {
     setAllPresent()
-    setNodeEnv('production')
+    setRealProd()
     process.env.DATABASE_URL = 'postgres://user:SUPERSECRET@host/db'
     delete process.env.EMAIL_FROM
     try {
@@ -87,9 +93,27 @@ describe('validateEnv', () => {
     }
   })
 
-  it('NÃO lança quando só faltam operacionais (apenas loga)', () => {
+  it('NÃO derruba CI/preview (NODE_ENV=production sem VERCEL_ENV=production) — só loga', () => {
+    setAllPresent()
+    setNodeEnv('production')          // CI/E2E: next start, mas não é prod real
+    delete process.env.VERCEL_ENV
+    delete process.env.MERCADOPAGO_ACCESS_TOKEN
+    delete process.env.EMAIL_FROM
+    expect(() => validateEnv()).not.toThrow()
+    expect(logger.error).toHaveBeenCalled()
+  })
+
+  it('preview da Vercel (VERCEL_ENV=preview) também não derruba', () => {
     setAllPresent()
     setNodeEnv('production')
+    process.env.VERCEL_ENV = 'preview'
+    delete process.env.RESEND_API_KEY
+    expect(() => validateEnv()).not.toThrow()
+  })
+
+  it('NÃO lança quando só faltam operacionais (apenas loga)', () => {
+    setAllPresent()
+    setRealProd()
     delete process.env.UPSTASH_REDIS_REST_URL
     expect(() => validateEnv()).not.toThrow()
     expect(logger.error).toHaveBeenCalled()
