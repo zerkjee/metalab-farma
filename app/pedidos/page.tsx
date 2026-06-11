@@ -168,38 +168,37 @@ export default function PedidosPage() {
 
   const isGuest = status === 'unauthenticated';
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setFetchError(false);
-    try {
-      if (status === 'authenticated') {
-        const r = await fetch('/api/pedidos');
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const data = await r.json();
-        setOrders(Array.isArray(data) ? (data as Order[]) : []);
-      } else {
-        // Convidado: acompanha pelos pedidos salvos neste navegador (sem login).
-        const refs = lerPedidosLocais();
-        const results = await Promise.all(
-          refs.map((ref) =>
-            fetch(`/api/pedidos/${ref.id}/status`)
-              .then((r) => (r.ok ? r.json() : null))
-              .catch(() => null),
-          ),
-        );
-        setOrders(results.filter(Boolean) as Order[]);
-      }
-    } catch {
-      setFetchError(true);
-    } finally {
-      setLoading(false);
+  // load() só busca os dados (sem setState). O setState fica nos callbacks de run().
+  const load = useCallback(async (): Promise<Order[]> => {
+    if (status === 'authenticated') {
+      const r = await fetch('/api/pedidos');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      return Array.isArray(data) ? (data as Order[]) : [];
     }
+    // Convidado: acompanha pelos pedidos salvos neste navegador (sem login).
+    const refs = lerPedidosLocais();
+    const results = await Promise.all(
+      refs.map((ref) =>
+        fetch(`/api/pedidos/${ref.id}/status`)
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+      ),
+    );
+    return results.filter(Boolean) as Order[];
   }, [status]);
+
+  const run = useCallback(() => {
+    load()
+      .then((o) => { setOrders(o); setFetchError(false); })
+      .catch(() => setFetchError(true))
+      .finally(() => setLoading(false));
+  }, [load]);
 
   useEffect(() => {
     if (status === 'loading') return;
-    void load();
-  }, [status, load]);
+    run();
+  }, [status, run]);
 
   if (status === 'loading') {
     return (
@@ -246,7 +245,7 @@ export default function PedidosPage() {
               <p className="mt-1 text-sm text-gray-500">Verifique sua conexão e tente novamente.</p>
             </div>
             <button
-              onClick={() => { void load(); }}
+              onClick={() => { setLoading(true); run(); }}
               className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-600 transition-all hover:bg-red-50"
             >
               Tentar novamente

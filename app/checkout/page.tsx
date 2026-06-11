@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
 import PixPending from '@/components/checkout/PixPending';
+import CriarContaPrompt from '@/components/checkout/CriarContaPrompt';
 import OrderSummary from '@/components/checkout/OrderSummary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -390,6 +391,7 @@ export default function CheckoutPage() {
         <Header />
         <main className="bg-[#fafafa] px-4 py-14 sm:px-6 lg:px-8">
           <PixPending order={checkoutStage.order} onConfirmed={handlePixConfirmed} />
+          {!session?.user && <CriarContaPrompt customer={checkoutStage.order.customer} />}
         </main>
         <Footer />
       </>
@@ -402,6 +404,7 @@ export default function CheckoutPage() {
         <Header />
         <main className="bg-[#fafafa] px-4 py-14 sm:px-6 lg:px-8">
           <CheckoutSuccess order={checkoutStage.order} />
+          {!session?.user && <CriarContaPrompt customer={checkoutStage.order.customer} />}
         </main>
         <Footer />
       </>
