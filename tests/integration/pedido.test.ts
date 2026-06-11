@@ -15,6 +15,7 @@ const { mockTx, mockPrisma } = vi.hoisted(() => {
   }
   const mockPrisma = {
     produto:     { findMany: vi.fn() },
+    pedido:      { findMany: vi.fn() },
     cupom:       { findUnique: vi.fn() },
     cartSession: { updateMany: vi.fn() },
     $transaction: vi.fn(),
@@ -49,7 +50,7 @@ vi.mock('@/lib/logger', () => ({
 
 // ─── Import do handler (depois dos mocks) ─────────────────────────────────────
 
-import { POST } from '@/app/api/pedidos/route'
+import { POST, GET } from '@/app/api/pedidos/route'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -341,5 +342,48 @@ describe('POST /api/pedidos — frete server-side', () => {
     expect(data?.frete).toBe(0)
     expect(data?.total).toBe(100)
     expect(mockCotarFrete).not.toHaveBeenCalled()
+  })
+})
+
+// ─── GET /api/pedidos — área do cliente (P0 follow-up) ─────────────────────────
+
+describe('GET /api/pedidos — lista do cliente', () => {
+  beforeEach(() => {
+    mockPrisma.pedido.findMany.mockResolvedValue([])
+  })
+
+  it('retorna 401 quando não logado', async () => {
+    mockAuth.mockResolvedValue(null)
+    const res = await GET()
+    expect(res.status).toBe(401)
+    expect(mockPrisma.pedido.findMany).not.toHaveBeenCalled()
+  })
+
+  it('filtra pelos pedidos do próprio usuário + convidado com mesmo e-mail', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-1', email: 'cliente@test.com', role: 'CLIENTE' } })
+    await GET()
+    const where = mockPrisma.pedido.findMany.mock.calls[0]?.[0]?.where
+    expect(where).toEqual({
+      OR: [
+        { usuarioId: 'user-1' },
+        { usuarioId: null, compradorEmail: 'cliente@test.com' },
+      ],
+    })
+  })
+
+  it('admin NÃO vê todos os pedidos da loja aqui (só os próprios)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'admin-1', email: 'admin@metalab.com.br', role: 'SUPER_ADMIN' } })
+    await GET()
+    const where = mockPrisma.pedido.findMany.mock.calls[0]?.[0]?.where
+    // Não pode ser o filtro vazio {} (que devolveria a loja inteira)
+    expect(where).not.toEqual({})
+    expect(where.OR[0]).toEqual({ usuarioId: 'admin-1' })
+  })
+
+  it('sem e-mail na sessão: filtra só por usuarioId', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-2', role: 'CLIENTE' } })
+    await GET()
+    const where = mockPrisma.pedido.findMany.mock.calls[0]?.[0]?.where
+    expect(where).toEqual({ OR: [{ usuarioId: 'user-2' }] })
   })
 })

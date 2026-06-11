@@ -268,24 +268,31 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/pedidos — listar pedidos do usuário logado ou todos (admin)
+// GET /api/pedidos — lista os pedidos DO PRÓPRIO usuário logado (área do cliente).
+// A visão geral de todos os pedidos da loja fica em /api/admin/pedidos (área admin).
+// Inclui também pedidos feitos como convidado (usuarioId nulo) com o mesmo e-mail da conta.
 export async function GET() {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 
-    const isAdmin = session.user.role?.includes("ADMIN")
+    const email = session.user.email
 
     const pedidos = await prisma.pedido.findMany({
-      where: isAdmin ? {} : { usuarioId: session.user.id },
+      where: {
+        OR: [
+          { usuarioId: session.user.id },
+          ...(email ? [{ usuarioId: null, compradorEmail: email }] : []),
+        ],
+      },
       include: {
         itens: { include: { produto: { select: { nome: true, imagemUrl: true } } } },
         cupom: { select: { codigo: true } },
       },
       orderBy: { criadoEm: "desc" },
-      ...(isAdmin ? {} : { take: 20 }),
+      take: 20,
     })
 
     return NextResponse.json(
