@@ -4,6 +4,11 @@ import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
+    // Rota de diagnóstico: nunca disponível em produção (não deve haver erro proposital em prod)
+    if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ erro: 'Não encontrado' }, { status: 404 })
+    }
+
     const session = await requireAdmin()
     if (!session) return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
 
