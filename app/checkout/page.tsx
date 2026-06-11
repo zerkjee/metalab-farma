@@ -14,6 +14,7 @@ import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { calculateCartTotals } from '@/services/cartTotals';
 import { fmtCurrency } from '@/utils/formatters';
+import { salvarPedidoLocal } from '@/lib/pedidosLocais';
 import type {
   CheckoutForm as CheckoutFormValues,
   CheckoutStage,
@@ -321,6 +322,10 @@ export default function CheckoutPage() {
         setSubmitError(data.erro ?? 'Erro ao criar pedido. Tente novamente.');
         return;
       }
+
+      // Acompanhamento local (convidado): guarda a referência do pedido neste navegador,
+      // para que apareça em "Meus pedidos" mesmo sem login.
+      salvarPedidoLocal({ id: data.pedidoId, numero: data.pedidoNumero });
 
       // 2. Cria pagamento PIX no Mercado Pago
       let pixQrCode: string | undefined;
