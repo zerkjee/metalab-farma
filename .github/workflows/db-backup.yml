@@ -27,19 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Instalar PostgreSQL client 17 (PGDG)
-        run: |
-          set -euo pipefail
-          sudo install -d /usr/share/postgresql-common/pgdg
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-            | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
-            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client-17
-          pg_dump --version
-
-      - name: Dump, comprimir e cifrar
+      - name: Dump (postgres:17), comprimir e cifrar
         env:
           # Nunca impressos: usados apenas como entrada de processos.
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -55,13 +43,17 @@ jobs:
           CONN="${DATABASE_URL%%\?*}"
           CONN="${CONN//:6543/:5432}"
           CONN="${CONN}?sslmode=require"
+          export CONN
 
           STAMP="$(date -u +%Y-%m-%d-%H-%M)"
           OUT="metalab-backup-${STAMP}.sql.gz.gpg"
           echo "OUT=$OUT" >> "$GITHUB_ENV"
 
-          # pg_dump → gzip → gpg(AES256). pipefail garante que falha em qualquer etapa aborta.
-          pg_dump "$CONN" --no-owner --no-privileges \
+          # pg_dump roda na imagem oficial postgres:17 (versão casada com o servidor;
+          # evita apt/gpg keys). A URL vai por env (-e CONN), nunca em argv nem em log.
+          # Saída: pg_dump → gzip → gpg(AES256) no host. pipefail aborta em qualquer falha.
+          docker run --rm -e CONN postgres:17 \
+            sh -c 'pg_dump "$CONN" --no-owner --no-privileges' \
             | gzip -9 \
             | gpg --batch --yes --symmetric --cipher-algo AES256 \
                   --passphrase-fd 3 -o "$OUT" 3<<<"$BACKUP_PASSPHRASE"
