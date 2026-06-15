@@ -76,6 +76,10 @@ test.describe('VIP — Estrutura da página', () => {
   })
 
   test('deve ter CTA para começar compras', async ({ page }) => {
+    const email    = process.env.E2E_USER_EMAIL
+    const password = process.env.E2E_USER_PASSWORD
+    if (!email || !password) test.skip(true, 'VIP redireciona não-autenticados — E2E_USER_EMAIL/PASSWORD não definidos')
+
     const vip = new VipPage(page)
     await vip.goto()
     const cta = page.getByRole('link', { name: /comprar|produtos|começar/i })
