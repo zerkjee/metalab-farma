@@ -170,12 +170,10 @@ export default function ProductDetailHero({
               )}
             </div>
 
-            {/* Estoque */}
+            {/* Estoque — sem expor a quantidade ao cliente (info só do admin) */}
             <div className={`flex items-center gap-1.5 text-sm font-semibold ${temEstoqueAtual ? 'text-emerald-600' : 'text-red-600'}`}>
               <span className={`w-2 h-2 rounded-full ${temEstoqueAtual ? 'bg-emerald-500' : 'bg-red-500'}`} />
-              {temEstoqueAtual
-                ? `Em estoque · ${estoqueAtual} unidade${estoqueAtual !== 1 ? 's' : ''} disponível${estoqueAtual !== 1 ? 'is' : ''}`
-                : 'Fora de estoque'}
+              {temEstoqueAtual ? 'Em estoque · pronta entrega' : 'Fora de estoque'}
             </div>
 
             {/* Kit selector */}

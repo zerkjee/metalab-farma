@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { publicStock } from "@/lib/publicProduct"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
@@ -112,7 +113,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         slug:          k.kit.slug,
         preco:         Number(k.kit.preco),
         precoOriginal: k.kit.precoOriginal != null ? Number(k.kit.precoOriginal) : null,
-        estoque:       k.kit.estoque,
+        estoque:       publicStock(k.kit.estoque),
         quantidade:    k.quantidade,
       }))
 
@@ -120,6 +121,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
       ...produto,
       preco:         Number(produto.preco),
       precoOriginal: produto.precoOriginal != null ? Number(produto.precoOriginal) : null,
+      // Estoque é info administrativa — cliente só vê se tem ou não
+      estoque:       publicStock(produto.estoque),
+      estoqueMin:    undefined,
       kitItens: produto.kitItens.map((k) => ({
         ...k,
         produto: { ...k.produto, preco: Number(k.produto.preco) },

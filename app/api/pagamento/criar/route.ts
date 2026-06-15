@@ -41,25 +41,55 @@ export async function POST(request: NextRequest) {
     const payment = new Payment(client)
 
     if (pedido.metodoPagamento === "PIX") {
-      const result = await payment.create({
-        body: {
-          transaction_amount: Number(pedido.total),
-          payment_method_id: "pix",
-          payer: {
-            email: pedido.compradorEmail,
-            first_name: pedido.compradorNome.split(" ")[0],
-            last_name: pedido.compradorNome.split(" ").slice(1).join(" ") || ".",
-            identification: {
-              type: "CPF",
-              number: pedido.compradorCpf,
+      let result
+      try {
+        result = await payment.create({
+          body: {
+            transaction_amount: Number(pedido.total),
+            payment_method_id: "pix",
+            payer: {
+              email: pedido.compradorEmail,
+              first_name: pedido.compradorNome.split(" ")[0],
+              last_name: pedido.compradorNome.split(" ").slice(1).join(" ") || ".",
+              identification: {
+                type: "CPF",
+                number: pedido.compradorCpf,
+              },
             },
+            external_reference: pedido.id,
+            notification_url: `${process.env.NEXT_PUBLIC_URL}/api/pagamento/webhook`,
+            description: `Pedido ${pedido.numero} - Metalab`,
+            date_of_expiration: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30min
           },
-          external_reference: pedido.id,
-          notification_url: `${process.env.NEXT_PUBLIC_URL}/api/pagamento/webhook`,
-          description: `Pedido ${pedido.numero} - Metalab`,
-          date_of_expiration: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30min
-        },
-      })
+        })
+      } catch (mpError) {
+        // PIX falhou após o pedido já existir e o estoque já ter sido decrementado.
+        // Rollback imediato e idempotente: cancela o pedido e devolve o estoque.
+        // O guard de status garante que não conflita com o safety-net de 2h.
+        await prisma.$transaction(async (tx) => {
+          const cancel = await tx.pedido.updateMany({
+            where: { id: pedido.id, pago: false, status: "AGUARDANDO_PAGAMENTO" },
+            data: { status: "CANCELADO" },
+          })
+          if (cancel.count === 1) {
+            for (const item of pedido.itens) {
+              await tx.produto.update({
+                where: { id: item.produtoId },
+                data: { estoque: { increment: item.quantidade } },
+              })
+            }
+          }
+        })
+        logger.error("PIX falhou — pedido cancelado e estoque restaurado", {
+          pedidoId: pedido.id,
+          numero: pedido.numero,
+          err: mpError instanceof Error ? mpError.message : String(mpError),
+        })
+        return NextResponse.json(
+          { erro: "Não foi possível gerar o pagamento. Tente novamente." },
+          { status: 502 },
+        )
+      }
 
       // Salvar dados do PIX no pedido
       await prisma.pedido.update({

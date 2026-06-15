@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp, PackageSearch, ShoppingBag } from 'lucide-react';
 import { fmtCurrency, fmtDate } from '@/utils/formatters';
+import { lerPedidosLocais } from '@/lib/pedidosLocais';
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
@@ -162,37 +162,45 @@ function OrderCard({ order }: { order: Order }) {
 
 export default function PedidosPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.replace('/login?callbackUrl=/pedidos');
-    }
-  }, [status, router]);
+  const isGuest = status === 'unauthenticated';
 
-  useEffect(() => {
-    if (status !== 'authenticated') return;
-    let cancelled = false;
-    fetch('/api/pedidos')
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data: unknown) => {
-        if (!cancelled) {
-          setFetchError(false);
-          setOrders(Array.isArray(data) ? (data as Order[]) : []);
-        }
-      })
-      .catch(() => { if (!cancelled) setFetchError(true); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+  // load() só busca os dados (sem setState). O setState fica nos callbacks de run().
+  const load = useCallback(async (): Promise<Order[]> => {
+    if (status === 'authenticated') {
+      const r = await fetch('/api/pedidos');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      return Array.isArray(data) ? (data as Order[]) : [];
+    }
+    // Convidado: acompanha pelos pedidos salvos neste navegador (sem login).
+    const refs = lerPedidosLocais();
+    const results = await Promise.all(
+      refs.map((ref) =>
+        fetch(`/api/pedidos/${ref.id}/status`)
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+      ),
+    );
+    return results.filter(Boolean) as Order[];
   }, [status]);
 
-  if (status === 'loading' || (status === 'unauthenticated')) {
+  const run = useCallback(() => {
+    load()
+      .then((o) => { setOrders(o); setFetchError(false); })
+      .catch(() => setFetchError(true))
+      .finally(() => setLoading(false));
+  }, [load]);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    run();
+  }, [status, run]);
+
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#0f2756] border-t-transparent" />
@@ -214,6 +222,12 @@ export default function PedidosPage() {
           {session?.user?.name && (
             <p className="mt-1 text-sm text-gray-400">Olá, {session.user.name.split(' ')[0]}!</p>
           )}
+          {isGuest && (
+            <p className="mt-1 text-sm text-gray-400">
+              Mostrando pedidos salvos neste dispositivo.{' '}
+              <Link href="/login?callbackUrl=/pedidos" className="font-semibold text-[#0f2756] hover:underline">Entrar</Link>{' '}para ver todos da sua conta.
+            </p>
+          )}
         </div>
 
         {/* content */}
@@ -231,7 +245,7 @@ export default function PedidosPage() {
               <p className="mt-1 text-sm text-gray-500">Verifique sua conexão e tente novamente.</p>
             </div>
             <button
-              onClick={() => { setFetchError(false); setLoading(true); fetch('/api/pedidos').then((r) => r.json()).then((data) => setOrders(Array.isArray(data) ? data : [])).catch(() => setFetchError(true)).finally(() => setLoading(false)); }}
+              onClick={() => { setLoading(true); run(); }}
               className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-600 transition-all hover:bg-red-50"
             >
               Tentar novamente

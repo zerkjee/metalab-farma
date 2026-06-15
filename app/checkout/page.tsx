@@ -8,12 +8,14 @@ import { useSession } from 'next-auth/react';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
 import PixPending from '@/components/checkout/PixPending';
+import CriarContaPrompt from '@/components/checkout/CriarContaPrompt';
 import OrderSummary from '@/components/checkout/OrderSummary';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { calculateCartTotals } from '@/services/cartTotals';
 import { fmtCurrency } from '@/utils/formatters';
+import { salvarPedidoLocal } from '@/lib/pedidosLocais';
 import type {
   CheckoutForm as CheckoutFormValues,
   CheckoutStage,
@@ -302,7 +304,7 @@ export default function CheckoutPage() {
           cidade: form.city,
           estado: form.state,
         },
-        frete: { preco: selectedShipping.price },
+        frete: { servicoId: selectedShipping.id },
         cupomCodigo: coupons.discount?.code ?? undefined,
         cupomFreteCodigo: coupons.freeShipping?.code ?? undefined,
         metodoPagamento: selectedPaymentId,
@@ -322,6 +324,10 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Acompanhamento local (convidado): guarda a referência do pedido neste navegador,
+      // para que apareça em "Meus pedidos" mesmo sem login.
+      salvarPedidoLocal({ id: data.pedidoId, numero: data.pedidoNumero });
+
       // 2. Cria pagamento PIX no Mercado Pago
       let pixQrCode: string | undefined;
       let pixQrCodeBase64: string | undefined;
@@ -334,10 +340,9 @@ export default function CheckoutPage() {
         });
 
         if (!pixRes.ok) {
-          // Pedido foi criado mas o PIX falhou — redireciona para Meus pedidos
+          // PIX falhou — o pedido foi cancelado e o estoque devolvido no servidor.
           setSubmitError(
-            'Pedido criado, mas não foi possível gerar o QR Code PIX. ' +
-            'Acesse "Meus pedidos" para tentar novamente.',
+            'Não foi possível processar o pagamento. Tente novamente.',
           );
           return;
         }
@@ -386,6 +391,7 @@ export default function CheckoutPage() {
         <Header />
         <main className="bg-[#fafafa] px-4 py-14 sm:px-6 lg:px-8">
           <PixPending order={checkoutStage.order} onConfirmed={handlePixConfirmed} />
+          {!session?.user && <CriarContaPrompt customer={checkoutStage.order.customer} />}
         </main>
         <Footer />
       </>
@@ -398,6 +404,7 @@ export default function CheckoutPage() {
         <Header />
         <main className="bg-[#fafafa] px-4 py-14 sm:px-6 lg:px-8">
           <CheckoutSuccess order={checkoutStage.order} />
+          {!session?.user && <CriarContaPrompt customer={checkoutStage.order.customer} />}
         </main>
         <Footer />
       </>

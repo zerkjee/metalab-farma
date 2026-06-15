@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { nextIndex, prevIndex } from '@/lib/carousel';
 
 const slides = [
   {
@@ -74,12 +75,8 @@ function Star({ filled }: { filled: boolean }) {
   );
 }
 
-function RightPanel({ id, accent, transitioning }: { id: number; accent: string; transitioning: boolean }) {
-  const style = {
-    opacity: transitioning ? 0 : 1,
-    transform: transitioning ? 'translateX(24px)' : 'translateX(0)',
-    transition: 'opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s',
-  };
+function RightPanel({ id, accent }: { id: number; accent: string }) {
+  const style: React.CSSProperties | undefined = undefined;
 
   if (id === 1) return (
     <div style={style} className="flex flex-col gap-4">
@@ -227,30 +224,32 @@ function RightPanel({ id, accent, transitioning }: { id: number; accent: string;
 export default function BannerCarousel() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [transitioning, setTransitioning] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const transitioningRef = useRef(false);
+  const touchStartX = useRef<number | null>(null);
 
-  const goTo = useCallback((index: number) => {
-    if (transitioningRef.current) return;
-    transitioningRef.current = true;
-    setTransitioning(true);
-    setCurrent(index);
-    setTimeout(() => {
-      transitioningRef.current = false;
-      setTransitioning(false);
-    }, 600);
-  }, []);
+  // Sem fade-out manual: o conteudo do slide e remontado por `key={current}`
+  // e entra com UMA unica animacao CSS (bannerIn). Assim o slide novo nasce
+  // invisivel e aparece de uma vez — nada de "pisca, some e volta".
+  const goTo = useCallback((index: number) => setCurrent(index), []);
+  const prev = useCallback(() => setCurrent((c) => prevIndex(c, slides.length)), []);
+  const next = useCallback(() => setCurrent((c) => nextIndex(c, slides.length)), []);
 
-  const prev = useCallback(() => goTo((current - 1 + slides.length) % slides.length), [current, goTo]);
-  const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo]);
+  // Swipe no mobile: arrastar o dedo troca o slide.
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) > 40) { if (dx < 0) next(); else prev(); }
+  };
 
+  // Autoplay: timer auto-resetavel por slide — toda troca (auto ou manual)
+  // reinicia a contagem, entao nunca colide pra avancar duas vezes.
   useEffect(() => {
     if (paused) return;
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    intervalRef.current = setInterval(() => setCurrent((c) => (c + 1) % slides.length), 5500);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [paused]);
+    const timer = setTimeout(() => setCurrent((c) => nextIndex(c, slides.length)), 5500);
+    return () => clearTimeout(timer);
+  }, [current, paused]);
 
   const slide = slides[current];
 
@@ -258,8 +257,10 @@ export default function BannerCarousel() {
     <section
       className="relative overflow-hidden transition-[background] duration-700 h-[62vh] min-h-[380px] sm:h-[75vh] sm:min-h-[500px] lg:h-[88vh] lg:min-h-[600px]"
       style={{ background: slide.bg }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') setPaused(true); }}
+      onPointerLeave={(e) => { if (e.pointerType === 'mouse') setPaused(false); }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       {/* Grid decorativo */}
       <div className="absolute inset-0 opacity-[0.06]"
@@ -275,24 +276,20 @@ export default function BannerCarousel() {
       {/* Layout principal — 2 colunas */}
       <div className="absolute inset-0 flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          <div key={current} className="banner-slide-in grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
             {/* Coluna esquerda — texto */}
             <div className="flex flex-col gap-5">
 
               {/* Badge */}
-              <div
-                className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 self-start transition-opacity duration-500"
-                style={{ opacity: transitioning ? 0 : 1 }}
-              >
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 self-start">
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: slide.dot }} />
                 <span className="text-sm text-white/90 font-medium">{slide.badge}</span>
               </div>
 
               {/* Título */}
               <h1
-                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight transition-all duration-500"
-                style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(12px)' : 'translateY(0)' }}
+                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight"
               >
                 {slide.title.split('\n').map((line, i) => (
                   <span key={i}>
@@ -303,18 +300,12 @@ export default function BannerCarousel() {
               </h1>
 
               {/* Subtexto */}
-              <p
-                className="text-base sm:text-lg text-white/70 leading-relaxed transition-all duration-500 delay-75"
-                style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(8px)' : 'translateY(0)' }}
-              >
+              <p className="text-base sm:text-lg text-white/70 leading-relaxed">
                 {slide.subtitle}
               </p>
 
               {/* CTAs */}
-              <div
-                className="flex flex-row flex-wrap gap-4 transition-all duration-500 delay-100"
-                style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(6px)' : 'translateY(0)' }}
-              >
+              <div className="flex flex-row flex-wrap gap-4">
                 <Link href={slide.cta.href}
                   className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-white text-sm transition-all duration-200 hover:scale-105 hover:shadow-2xl whitespace-nowrap"
                   style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
@@ -344,24 +335,24 @@ export default function BannerCarousel() {
 
             {/* Coluna direita — visual único por slide */}
             <div className="hidden lg:block">
-              <RightPanel id={slide.id} accent={slide.accent} transitioning={transitioning} />
+              <RightPanel id={slide.id} accent={slide.accent} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Seta esquerda */}
+      {/* Seta esquerda — escondida no mobile (la usa-se o swipe) */}
       <button onClick={prev} aria-label="Slide anterior"
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition-all duration-200 hover:scale-110 z-10"
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 hidden sm:flex items-center justify-center text-white hover:bg-white/25 transition-all duration-200 hover:scale-110 z-10"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
-      {/* Seta direita */}
+      {/* Seta direita — escondida no mobile (la usa-se o swipe) */}
       <button onClick={next} aria-label="Próximo slide"
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition-all duration-200 hover:scale-110 z-10"
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 hidden sm:flex items-center justify-center text-white hover:bg-white/25 transition-all duration-200 hover:scale-110 z-10"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -381,13 +372,18 @@ export default function BannerCarousel() {
       {/* Barra de progresso */}
       <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10">
         <div
-          key={`${current}-${paused}`}
+          key={current}
           className="h-full rounded-full"
-          style={{ backgroundColor: slide.dot, animation: paused ? 'none' : 'progress 5.5s linear forwards' }}
+          style={{ backgroundColor: slide.dot, animation: 'progress 5.5s linear forwards', animationPlayState: paused ? 'paused' : 'running' }}
         />
       </div>
 
-      <style>{`@keyframes progress { from { width: 0% } to { width: 100% } }`}</style>
+      <style>{`
+        @keyframes progress { from { width: 0% } to { width: 100% } }
+        @keyframes bannerIn { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+        .banner-slide-in { animation: bannerIn 0.45s ease both }
+        @media (prefers-reduced-motion: reduce) { .banner-slide-in { animation: none } }
+      `}</style>
     </section>
   );
 }

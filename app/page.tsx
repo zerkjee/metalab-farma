@@ -14,6 +14,7 @@ import VipBanner from "@/components/loyalty/VipBanner";
 import { Product } from "@/types/product";
 import { products as localProducts } from "@/data/products";
 import { prisma } from "@/lib/prisma";
+import { publicStock } from "@/lib/publicProduct";
 
 export const revalidate = 60;
 
@@ -45,7 +46,7 @@ async function getProducts(): Promise<Product[]> {
         tipo: p.tipo as "SIMPLES" | "KIT",
         preco: Number(p.preco),
         precoOriginal: p.precoOriginal != null ? Number(p.precoOriginal) : null,
-        estoque: p.estoque,
+        estoque: publicStock(p.estoque),
         descricaoCurta: p.descricaoCurta ?? null,
         descricaoHtml: p.descricaoHtml ?? null,
         imagemUrl: p.imagemUrl ?? null,
