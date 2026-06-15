@@ -159,7 +159,9 @@ async function main() {
       id: "banner-inicial",
       titulo: "Suplementos de Alta Qualidade",
       subtitulo: "Desenvolvidos com rigor científico para sua saúde",
-      imagemUrl: "/banners/hero-banner.jpg",
+      // Sem asset de banner ainda — vazio = card só com texto + CTA (sem imagem
+      // quebrada). Defina pelo admin (/admin/banners) ao ter uma imagem real.
+      imagemUrl: "",
       linkUrl: "/produtos",
       ordem: 1,
       ativo: true,
