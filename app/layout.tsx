@@ -4,6 +4,7 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollToTop from "@/components/ScrollToTop";
 import Analytics from "@/components/analytics/Analytics";
 import CookieBanner from "@/components/cookies/CookieBanner";
 import "./globals.css";
@@ -88,6 +89,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[#fafafa]">
+        <ScrollToTop />
         <SessionProviderWrapper>
           <CartProvider>
             <ErrorBoundary section="Aplicação">
