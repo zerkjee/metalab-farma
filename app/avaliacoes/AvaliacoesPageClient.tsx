@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import ScrollToTop from '@/components/ScrollToTop';
 import ReviewCard from '@/components/reviews/ReviewCard';
 import StarRating from '@/components/reviews/StarRating';
 
@@ -126,7 +125,6 @@ export default function AvaliacoesPageClient() {
 
   return (
     <>
-      <ScrollToTop />
       <Header />
 
       {/* Hero */}

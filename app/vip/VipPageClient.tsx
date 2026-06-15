@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import ScrollToTop from '@/components/ScrollToTop';
 import LevelBadge from '@/components/loyalty/LevelBadge';
 import PointsRedemption from '@/components/loyalty/PointsRedemption';
 import { levels, achievements, getLevelConfig, getNextLevel, getProgressToNext } from '@/data/loyalty';
@@ -130,7 +129,6 @@ export default function VipPageClient() {
 
   return (
     <>
-      <ScrollToTop />
       <Header />
 
       {/* ── HERO ── */}

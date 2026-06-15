@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import ScrollToTop from '@/components/ScrollToTop';
 import ProductDetailHero from '@/components/ProductDetailHero';
 import ProductSection from '@/components/ProductSection';
 import ComposicaoSection from '@/components/ComposicaoSection';
@@ -197,7 +196,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <TrackViewItem id={produto.id} name={produto.nome} price={produto.preco} />
-      <ScrollToTop />
       <Header />
 
       <ProductDetailHero product={produto} corPrincipal={corPrincipal} />

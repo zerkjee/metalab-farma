@@ -197,7 +197,7 @@ jobs:
 
       - name: Run E2E — Chromium
         # Admin tests requerem auth real + DB — rodar localmente antes do merge
-        run: npx playwright test --project=chromium e2e/tests/home.spec.ts e2e/tests/cart.spec.ts e2e/tests/checkout.spec.ts e2e/tests/auth.spec.ts e2e/tests/product.spec.ts e2e/tests/mobile.spec.ts e2e/tests/vip.spec.ts e2e/tests/catalog.spec.ts
+        run: npx playwright test --project=chromium e2e/tests/home.spec.ts e2e/tests/cart.spec.ts e2e/tests/checkout.spec.ts e2e/tests/auth.spec.ts e2e/tests/product.spec.ts e2e/tests/mobile.spec.ts e2e/tests/vip.spec.ts e2e/tests/catalog.spec.ts e2e/tests/scroll.spec.ts
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

@@ -1,11 +1,46 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
+/**
+ * Garante que toda navegação entre rotas comece no TOPO da nova página.
+ *
+ * Por que existe: o body-scroll-lock do CartDrawer restaura `window.scrollTo(0, scrollY)`
+ * ao fechar (ex.: clique em "Continuar para checkout"), reposicionando a página nova na
+ * rolagem antiga — fazendo o /checkout abrir "lá embaixo". Como no React TODOS os cleanups
+ * rodam antes de TODOS os effects, este effect (disparado pela troca de pathname) roda
+ * depois do restore do drawer e reafirma o topo.
+ *
+ * - `behavior: 'instant'` ignora o `scroll-behavior: smooth` global (sem animação na troca).
+ * - Não interfere em âncoras internas (#secao): se há hash na URL, não mexe no scroll.
+ *
+ * Montado uma única vez no root layout — cobre todas as rotas.
+ */
 export default function ScrollToTop() {
+  const pathname = usePathname();
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    if (typeof window === 'undefined') return;
+    // Respeita navegação para âncoras (#produtos, #qualidade, etc.).
+    if (window.location.hash) return;
+
+    const toTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    // Imediato resolve o caso geral. O CartDrawer, porém, restaura a rolagem antiga
+    // (scrollTo(0, scrollY)) ao fechar e — dependendo da ordem de commits (observado no
+    // mobile) — esse restore pode rodar DEPOIS deste effect. Reafirmar nos 2 frames
+    // seguintes garante que o topo vença o restore tardio, sem tocar no carrinho.
+    toTop();
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      toTop();
+      raf2 = requestAnimationFrame(toTop);
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [pathname]);
 
   return null;
 }
