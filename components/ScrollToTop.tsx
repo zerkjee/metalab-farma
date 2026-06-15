@@ -24,7 +24,22 @@ export default function ScrollToTop() {
     if (typeof window === 'undefined') return;
     // Respeita navegação para âncoras (#produtos, #qualidade, etc.).
     if (window.location.hash) return;
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
+    const toTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    // Imediato resolve o caso geral. O CartDrawer, porém, restaura a rolagem antiga
+    // (scrollTo(0, scrollY)) ao fechar e — dependendo da ordem de commits (observado no
+    // mobile) — esse restore pode rodar DEPOIS deste effect. Reafirmar nos 2 frames
+    // seguintes garante que o topo vença o restore tardio, sem tocar no carrinho.
+    toTop();
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      toTop();
+      raf2 = requestAnimationFrame(toTop);
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
   }, [pathname]);
 
   return null;
