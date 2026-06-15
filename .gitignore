@@ -59,3 +59,11 @@ next-env.d.ts
 
 # Fichas técnicas e imports locais — não versionar binários grandes
 data/imports/
+
+# Backups do banco — NUNCA commitar dumps (contêm PII de clientes)
+*.sql
+*.sql.gz
+*.sql.gz.gpg
+*.dump
+/backups/
+metalab-backup-*

@@ -1,0 +1,80 @@
+name: DB Backup (Supabase)
+
+# Backup lógico diário do PostgreSQL (Supabase Free) via pg_dump.
+# O dump é CIFRADO (GPG AES256) antes do upload porque este repositório é PÚBLICO
+# e artifacts de repo público são baixáveis por terceiros — o .sql.gz.gpg é inútil
+# sem a passphrase (secret BACKUP_PASSPHRASE).
+#
+# Secrets necessários (Settings → Secrets and variables → Actions):
+#   - DATABASE_URL        (já existe; pooler Supabase — o job converte p/ session mode)
+#   - BACKUP_PASSPHRASE   (criar; passphrase forte p/ cifrar/decifrar o backup)
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC = 03:00 BRT, diário
+  workflow_dispatch: {} # execução manual
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Dump + encrypt + upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Instalar PostgreSQL client 17 (PGDG)
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          pg_dump --version
+
+      - name: Dump, comprimir e cifrar
+        env:
+          # Nunca impressos: usados apenas como entrada de processos.
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          : "${DATABASE_URL:?secret DATABASE_URL ausente}"
+          : "${BACKUP_PASSPHRASE:?secret BACKUP_PASSPHRASE ausente}"
+
+          # pg_dump não funciona pelo pooler de transação (6543/pgbouncer). Derivamos a
+          # conexão de SESSÃO (5432, mesmo host/credenciais) e descartamos a query original.
+          # A URL NUNCA é impressa.
+          CONN="${DATABASE_URL%%\?*}"
+          CONN="${CONN//:6543/:5432}"
+          CONN="${CONN}?sslmode=require"
+
+          STAMP="$(date -u +%Y-%m-%d-%H-%M)"
+          OUT="metalab-backup-${STAMP}.sql.gz.gpg"
+          echo "OUT=$OUT" >> "$GITHUB_ENV"
+
+          # pg_dump → gzip → gpg(AES256). pipefail garante que falha em qualquer etapa aborta.
+          pg_dump "$CONN" --no-owner --no-privileges \
+            | gzip -9 \
+            | gpg --batch --yes --symmetric --cipher-algo AES256 \
+                  --passphrase-fd 3 -o "$OUT" 3<<<"$BACKUP_PASSPHRASE"
+
+          BYTES=$(stat -c%s "$OUT")
+          echo "Backup cifrado gerado: $OUT (${BYTES} bytes)"
+          # Sanidade: um dump real do banco atual é > 10KB cifrado.
+          test "$BYTES" -gt 10000 || { echo "ERRO: backup pequeno demais ($BYTES B) — abortando."; exit 1; }
+
+      - name: Upload artifact (cifrado)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.OUT }}
+          path: ${{ env.OUT }}
+          retention-days: 30
+          if-no-files-found: error
