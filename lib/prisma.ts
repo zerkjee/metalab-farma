@@ -35,10 +35,14 @@ function createPrismaClient() {
 // nunca no mero import do módulo. Isso evita que `next build` → "Collecting page data"
 // — que importa todos os route handlers — dispare createPrismaClient() (e o throw de
 // DATABASE_URL) em ambientes sem a env var (ex.: Preview da Vercel).
+//
+// O client é memoizado em `global._prisma` em TODOS os ambientes (singleton por
+// processo). Memoizar só fora de produção fazia cada acesso de propriedade do Proxy
+// recriar um Pool pg novo (jamais fechado) → vazamento de conexões que esgotava o
+// pooler do Supabase (EMAXCONN, limite 200) sob carga, p.ex. na Full Suite E2E.
 function getClient(): PrismaClient {
-  const client = global._prisma ?? createPrismaClient()
-  if (process.env.NODE_ENV !== "production") global._prisma = client
-  return client
+  global._prisma ??= createPrismaClient()
+  return global._prisma
 }
 
 export const prisma = new Proxy({} as PrismaClient, {
