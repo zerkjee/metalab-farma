@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import BannerImage from './BannerImage'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,19 +83,7 @@ export default async function CampaignBanners() {
                       </div>
                     )}
                   </div>
-                  {b.imagemUrl && (
-                    <div className="flex items-center justify-center pl-1">
-                      <div className="relative h-24 w-24 overflow-hidden rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur transition-transform duration-300 group-hover:scale-105">
-                        <Image
-                          src={b.imagemUrl}
-                          alt={b.titulo ?? ''}
-                          fill
-                          sizes="96px"
-                          className="object-contain rounded-xl p-1"
-                        />
-                      </div>
-                    </div>
-                  )}
+                  {b.imagemUrl && <BannerImage src={b.imagemUrl} alt={b.titulo ?? ''} />}
                 </div>
               </div>
             )
