@@ -17,13 +17,16 @@ const { mockPrisma } = vi.hoisted(() => {
   return { mockPrisma }
 })
 
-const { mockEnqueue } = vi.hoisted(() => ({ mockEnqueue: vi.fn() }))
+const { mockEnqueue, mockEnqueueTiny } = vi.hoisted(() => ({
+  mockEnqueue: vi.fn(),
+  mockEnqueueTiny: vi.fn().mockResolvedValue(undefined),
+}))
 const { mockPaymentGet } = vi.hoisted(() => ({ mockPaymentGet: vi.fn() }))
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }))
-vi.mock('@/lib/qstash', () => ({ enqueueOrderEmail: mockEnqueue }))
+vi.mock('@/lib/qstash', () => ({ enqueueOrderEmail: mockEnqueue, enqueueTinySync: mockEnqueueTiny }))
 vi.mock('@/lib/logger', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }))
