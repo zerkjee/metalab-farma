@@ -19,8 +19,10 @@ const { mockPrisma, mockTx } = vi.hoisted(() => {
 const { mockPaymentCreate } = vi.hoisted(() => ({ mockPaymentCreate: vi.fn() }))
 const { mockEnqueueJob } = vi.hoisted(() => ({ mockEnqueueJob: vi.fn() }))
 const { mockRateLimit } = vi.hoisted(() => ({ mockRateLimit: vi.fn() }))
+const { mockAuth } = vi.hoisted(() => ({ mockAuth: vi.fn().mockResolvedValue(null) }))
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }))
+vi.mock('@/lib/auth', () => ({ auth: mockAuth }))
 vi.mock('@/lib/rateLimit', () => ({ pagamentoRatelimit: { limit: mockRateLimit } }))
 vi.mock('@/lib/qstash', () => ({ enqueueJob: mockEnqueueJob }))
 vi.mock('@/lib/logger', () => ({
