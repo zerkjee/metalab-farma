@@ -4,9 +4,11 @@ import {
   ArrowLeft,
   Ban,
   Copy,
+  ExternalLink,
   FileText,
   PackageCheck,
   Printer,
+  RefreshCw,
   Save,
   Send,
   Truck,
@@ -76,6 +78,15 @@ const statusToApi: Record<AdminOrderStatus, string> = {
   cancelado: 'CANCELADO',
 };
 
+function tinyBadgeMeta(status: string | null): { cls: string; label: string; spinner: boolean } {
+  if (status === 'PENDENTE') return { cls: 'bg-yellow-500/15 text-yellow-300', label: 'Pendente', spinner: false };
+  if (status === 'PROCESSANDO') return { cls: 'bg-blue-500/15 text-blue-300', label: 'Processando', spinner: true };
+  if (status === 'ENVIADO') return { cls: 'bg-emerald-500/15 text-emerald-300', label: 'Sincronizado', spinner: false };
+  if (status === 'ERRO') return { cls: 'bg-red-500/15 text-red-300', label: 'Erro no sync', spinner: false };
+  if (status !== null) return { cls: 'bg-slate-700/50 text-slate-400', label: status, spinner: false };
+  return { cls: 'bg-slate-700/50 text-slate-400', label: 'Não iniciado', spinner: false };
+}
+
 export default function AdminPedidoDetalhe() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -85,6 +96,8 @@ export default function AdminPedidoDetalhe() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [resyncing, setResyncing] = useState(false);
+  const [resyncMsg, setResyncMsg] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -182,6 +195,27 @@ export default function AdminPedidoDetalhe() {
 
   function printOrder() {
     window.print();
+  }
+
+  async function handleResync() {
+    if (!order || resyncing) return;
+    setResyncing(true);
+    setResyncMsg(null);
+    try {
+      const res = await fetch(`/api/admin/pedidos/${order.id}/resync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        setOrder({ ...order, tinySyncStatus: 'PENDENTE' });
+        setResyncMsg('Re-sincronização iniciada com sucesso.');
+      } else {
+        setResyncMsg('Erro ao iniciar sincronização. Tente novamente.');
+      }
+    } catch {
+      setResyncMsg('Erro de conexão. Tente novamente.');
+    }
+    setResyncing(false);
   }
 
   return (
@@ -373,24 +407,66 @@ export default function AdminPedidoDetalhe() {
                 </p>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2 border-t border-slate-800 pt-3">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Tiny ERP</p>
                 <div className="rounded-xl bg-slate-950/60 p-3">
-                  <p className="text-xs text-slate-500">Tiny</p>
-                  <p className="mt-1 text-xs font-bold text-slate-200">{order.tinyStatus}</p>
+                  <p className="text-xs text-slate-500">Sincronização</p>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    {(() => {
+                      const b = tinyBadgeMeta(order.tinySyncStatus);
+                      return (
+                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-bold ${b.cls}`}>
+                          {b.spinner && <span className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />}
+                          {b.label}
+                        </span>
+                      );
+                    })()}
+                    {order.tinyPedidoId != null && (
+                      <span className="text-xs text-slate-500">Pedido #{order.tinyPedidoId}</span>
+                    )}
+                  </div>
                 </div>
                 <div className="rounded-xl bg-slate-950/60 p-3">
                   <p className="text-xs text-slate-500">Nota fiscal</p>
-                  <p className="mt-1 text-xs font-bold text-slate-200">{order.invoiceStatus.replace('_', ' ')}</p>
+                  {order.nfNumero ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <p className="text-xs font-bold text-slate-200">NF-e #{order.nfNumero}</p>
+                      {order.nfUrl && (
+                        <a
+                          href={order.nfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-400 transition-colors hover:text-purple-300"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-xs text-slate-500">Não emitida</p>
+                  )}
                 </div>
+                {(order.tinySyncStatus === 'ERRO' || order.tinySyncStatus === null) && order.status !== 'aguardando_pagamento' && (
+                  <div>
+                    <button
+                      onClick={() => void handleResync()}
+                      disabled={resyncing}
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-purple-600/15 px-3 py-2.5 text-xs font-semibold text-purple-300 transition-all hover:bg-purple-600/25 disabled:opacity-50"
+                    >
+                      <RefreshCw className={`h-3.5 w-3.5 ${resyncing ? 'animate-spin' : ''}`} strokeWidth={1.8} />
+                      {resyncing ? 'Sincronizando...' : 'Re-sincronizar'}
+                    </button>
+                    {resyncMsg && (
+                      <p className={`mt-2 rounded-xl px-3 py-2 text-xs font-semibold ${
+                        resyncMsg.startsWith('Erro') ? 'border border-red-500/30 bg-red-500/10 text-red-400' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                      }`}>
+                        {resyncMsg}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-purple-700/30 bg-purple-600/10 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-purple-300">Estrutura futura</p>
-            <p className="mt-2 text-xs leading-5 text-slate-400">
-              Preparado para backend real, Tiny, Mercado Livre, logística, rastreamento, notas fiscais e automações.
-            </p>
           </div>
         </aside>
       </div>
