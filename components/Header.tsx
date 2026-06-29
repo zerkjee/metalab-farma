@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Settings, User, LogOut, Package } from 'lucide-react';
+import { User, LogOut, Package } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/context/CartContext';
 import SearchBar from '@/components/SearchBar';
@@ -17,12 +16,6 @@ const navItems = [
   { label: 'Contato', href: '/#contato' },
 ];
 
-const adminAccess = {
-  label: 'Admin',
-  href: '/admin',
-  title: 'Painel administrativo',
-};
-
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -32,8 +25,6 @@ export default function Header() {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [menuOpen]);
-  const pathname = usePathname();
-  const isAdminActive = pathname?.startsWith(adminAccess.href);
   const { hydrated, totals, toggleCart } = useCart();
   const cartCount = hydrated ? totals.itemCount : 0;
   const { data: session } = useSession();
@@ -102,23 +93,6 @@ export default function Header() {
 
           {/* Carrinho + hamburger */}
           <div className="flex items-center gap-4">
-            <Link
-              href={adminAccess.href}
-              title={adminAccess.title}
-              aria-label={adminAccess.title}
-              aria-current={isAdminActive ? 'page' : undefined}
-              className={`group relative hidden md:inline-flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-300 active:scale-95 ${
-                isAdminActive
-                  ? 'border-[#0f2756]/30 bg-[#0f2756]/10 text-[#0f2756] shadow-sm'
-                  : 'border-gray-200 bg-white/80 text-gray-500 hover:border-[#0f2756]/30 hover:bg-[#0f2756]/5 hover:text-[#0f2756] hover:shadow-sm'
-              }`}
-            >
-              <Settings className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45" strokeWidth={1.8} />
-              <span className="pointer-events-none absolute right-0 top-12 whitespace-nowrap rounded-md bg-gray-950 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-all duration-200 group-hover:translate-y-0.5 group-hover:opacity-100">
-                {adminAccess.label}
-              </span>
-            </Link>
-
             {isLoggedIn ? (
               <div className="relative group hidden md:block">
                 <button className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-[#0f2756]/10 text-[#0f2756] text-sm font-black hover:bg-[#0f2756]/20 transition-all">
@@ -204,19 +178,6 @@ export default function Header() {
                 {item.label}{item.highlight ? ' ✦' : ''}
               </Link>
             ))}
-            <Link
-              href={adminAccess.href}
-              onClick={() => setMenuOpen(false)}
-              aria-current={isAdminActive ? 'page' : undefined}
-              className={`flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
-                isAdminActive
-                  ? 'bg-[#0f2756]/10 text-[#0f2756]'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-[#0f2756]'
-              }`}
-            >
-              <Settings className="h-4 w-4" strokeWidth={1.8} />
-              {adminAccess.label}
-            </Link>
             {isLoggedIn ? (
               <>
                 <Link href="/pedidos" onClick={() => setMenuOpen(false)}
