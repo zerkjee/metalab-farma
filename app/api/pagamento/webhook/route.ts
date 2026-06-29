@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { enqueueOrderEmail } from "@/lib/qstash"
+import { enqueueOrderEmail, enqueueTinySync } from "@/lib/qstash"
 import { logger } from "@/lib/logger"
 import { verifyMPSignature } from "@/lib/webhookUtils"
 
@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
             precoUnit: Number(item.precoUnit),
           })),
         })
+        void enqueueTinySync(pedido.id)
       }
     }
 
