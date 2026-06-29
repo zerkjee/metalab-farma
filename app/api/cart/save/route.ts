@@ -13,7 +13,6 @@ const cartSchema = z.object({
     quantidade: z.number().int().min(1).max(99),
     precoUnit: z.number().min(0),
   })).min(1).max(50),
-  total: z.number().min(0),
   cupomCodigo: z.string().max(20).optional(),
 })
 
@@ -25,6 +24,9 @@ export async function POST(request: NextRequest) {
     const parsed = cartSchema.safeParse(await request.json().catch(() => null))
     if (!parsed.success) return NextResponse.json({ ok: true })
     const body = parsed.data
+
+    // Calcular total no servidor — não confiar no valor enviado pelo cliente
+    const serverTotal = body.itens.reduce((acc, item) => acc + item.precoUnit * item.quantidade, 0)
 
     const existing = await prisma.cartSession.findFirst({
       where: { email: body.email, convertido: false },
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
         data: {
           nome: body.nome,
           itens: body.itens,
-          total: body.total,
+          total: serverTotal,
           cupomCodigo: body.cupomCodigo,
         },
       })
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
           email: body.email,
           nome: body.nome,
           itens: body.itens,
-          total: body.total,
+          total: serverTotal,
           cupomCodigo: body.cupomCodigo,
         },
       })
