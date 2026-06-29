@@ -54,8 +54,10 @@ export interface AdminOrderDetail {
   notes: string;
   trackingCode: string;
   channel: 'Loja Online' | 'Mercado Livre' | 'Admin';
-  tinyStatus: 'pendente' | 'pronto' | 'sincronizado';
-  invoiceStatus: 'nao_emitida' | 'emitida' | 'cancelada';
+  tinySyncStatus: string | null;
+  tinyPedidoId: number | null;
+  nfNumero: string | null;
+  nfUrl: string | null;
 }
 
 export const orderStatusMeta: Record<AdminOrderStatus, { label: string; bg: string; text: string; tone: string }> = {
@@ -166,7 +168,9 @@ export function mapApiOrder(p: Record<string, unknown>): AdminOrderDetail {
     notes: '',
     trackingCode: String(p.codigoRastreio ?? ''),
     channel: 'Loja Online',
-    tinyStatus: 'pendente',
-    invoiceStatus: 'nao_emitida',
+    tinySyncStatus: p.tinySyncStatus != null ? String(p.tinySyncStatus) : null,
+    tinyPedidoId: p.tinyPedidoId != null ? Number(p.tinyPedidoId) : null,
+    nfNumero: p.nfNumero != null ? String(p.nfNumero) : null,
+    nfUrl: p.nfUrl != null ? String(p.nfUrl) : null,
   } as AdminOrderDetail;
 }

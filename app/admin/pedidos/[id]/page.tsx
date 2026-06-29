@@ -376,11 +376,17 @@ export default function AdminPedidoDetalhe() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-slate-950/60 p-3">
                   <p className="text-xs text-slate-500">Tiny</p>
-                  <p className="mt-1 text-xs font-bold text-slate-200">{order.tinyStatus}</p>
+                  <p className="mt-1 text-xs font-bold text-slate-200">{order.tinySyncStatus ?? '—'}</p>
                 </div>
                 <div className="rounded-xl bg-slate-950/60 p-3">
                   <p className="text-xs text-slate-500">Nota fiscal</p>
-                  <p className="mt-1 text-xs font-bold text-slate-200">{order.invoiceStatus.replace('_', ' ')}</p>
+                  <p className="mt-1 text-xs font-bold text-slate-200">
+                    {order.nfNumero
+                      ? order.nfUrl
+                        ? <a href={order.nfUrl} target="_blank" rel="noreferrer" className="underline">{order.nfNumero}</a>
+                        : order.nfNumero
+                      : '—'}
+                  </p>
                 </div>
               </div>
             </div>
