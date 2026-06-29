@@ -24,6 +24,9 @@ const CRITICAS: EnvRequirement[] = [
   'MP_WEBHOOK_SECRET',
   'RESEND_API_KEY',
   'EMAIL_FROM',
+  // Tiny ERP ativo: sem estas, o job endpoint fica sem autenticação
+  'QSTASH_CURRENT_SIGNING_KEY',
+  'QSTASH_TOKEN',
 ]
 
 const OPERACIONAIS: EnvRequirement[] = [
@@ -31,8 +34,6 @@ const OPERACIONAIS: EnvRequirement[] = [
   'MELHOR_ENVIO_ORIGIN_CEP',
   'UPSTASH_REDIS_REST_URL',
   'UPSTASH_REDIS_REST_TOKEN',
-  'QSTASH_CURRENT_SIGNING_KEY',
-  'QSTASH_TOKEN',
 ]
 
 function presente(nome: string): boolean {
