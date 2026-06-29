@@ -29,6 +29,17 @@ vi.mock('@/lib/rateLimit', () => ({
 vi.mock('bcryptjs', () => ({
   default: { hash: mockBcryptHash },
 }))
+vi.mock('@prisma/client', () => ({
+  Prisma: {
+    PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error {
+      code: string
+      constructor(message: string, { code }: { code: string }) {
+        super(message)
+        this.code = code
+      }
+    },
+  },
+}))
 
 import { POST as registroPost } from '@/app/api/auth/registro/route'
 import { POST as avaliacoesPost } from '@/app/api/avaliacoes/route'
