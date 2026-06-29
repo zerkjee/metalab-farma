@@ -26,6 +26,10 @@ async function checkRoute(path: string, baseUrl: string): Promise<{ path: string
 }
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ erro: 'Not Found' }, { status: 404 })
+  }
+
   try {
     const session = await auth();
     if (session?.user?.role !== 'SUPER_ADMIN') {

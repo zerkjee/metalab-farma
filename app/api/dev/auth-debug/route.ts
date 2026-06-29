@@ -2,13 +2,11 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-// Only accessible in development or by SUPER_ADMIN — never exposes secrets
+// Only accessible by SUPER_ADMIN — never exposes secrets
 export async function GET() {
-  const isDev = process.env.NODE_ENV === "development"
-
   const session = await auth().catch(() => null)
 
-  if (!isDev && session?.user?.role !== "SUPER_ADMIN") {
+  if (session?.user?.role !== "SUPER_ADMIN") {
     return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
   }
 
