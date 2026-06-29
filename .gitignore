@@ -67,3 +67,4 @@ data/imports/
 *.dump
 /backups/
 metalab-backup-*
+.env*
