@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { pagamentoRatelimit } from "@/lib/rateLimit"
 import { enqueueJob } from "@/lib/qstash"
@@ -29,6 +30,13 @@ export async function POST(request: NextRequest) {
 
     if (pedido.pago) {
       return NextResponse.json({ erro: "Pedido já pago" }, { status: 400 })
+    }
+
+    // Ownership: pedidos de convidado (usuarioId null) são livres; pedidos de usuário exigem match
+    const session = await auth()
+    const isOwner = !pedido.usuarioId || pedido.usuarioId === session?.user?.id
+    if (!isOwner) {
+      return NextResponse.json({ erro: 'Não autorizado' }, { status: 403 })
     }
 
     // Importar SDK do Mercado Pago dinamicamente
