@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import {
-  Activity, Award, Brain, Droplets, Eye, Flame, FlaskConical,
-  Heart, Layers, Leaf, Moon, Package, Shield, Sparkles,
+  Activity, Award, Brain, Clock, Droplets, Eye, Flame, FlaskConical,
+  Heart, Layers, Leaf, Moon, Package, Quote, Shield, Sparkles,
   Star, Sun, TrendingUp, Wind, Zap,
   type LucideIcon,
 } from 'lucide-react'
@@ -103,19 +103,50 @@ export default function InovitannProductPage({
         </div>
 
         {/* Lado direito — fundo branco para o copy */}
-        <div className="flex flex-col justify-center py-14 px-8 sm:px-12 lg:px-16 bg-white border-l border-gray-100">
-          <p
-            className="text-xs font-black uppercase tracking-[0.2em] mb-3"
-            style={{ color: theme.cor }}
+        <div className="flex flex-col justify-center py-12 px-8 sm:px-12 lg:px-16 bg-white border-l border-gray-100 gap-6">
+
+          {/* Label + tagline */}
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] mb-3" style={{ color: theme.cor }}>
+              {theme.nome}
+            </p>
+            <h2 className="text-3xl sm:text-4xl xl:text-5xl font-black leading-tight text-gray-900 mb-4">
+              {theme.tagline}
+            </h2>
+            <p className="text-gray-500 text-base sm:text-lg leading-relaxed">
+              {theme.copyAbertura}
+            </p>
+          </div>
+
+          {/* Estatísticas-chave */}
+          <div className="grid grid-cols-3 gap-3">
+            {theme.estatisticas.map((e) => (
+              <div
+                key={e.rotulo}
+                className="flex flex-col items-center text-center p-3 rounded-2xl border"
+                style={{ backgroundColor: `${theme.cor}08`, borderColor: `${theme.cor}22` }}
+              >
+                <span className="text-lg sm:text-xl font-black leading-tight" style={{ color: theme.cor }}>
+                  {e.valor}
+                </span>
+                <span className="text-[10px] sm:text-xs text-gray-500 leading-tight mt-1">{e.rotulo}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Destaque de pesquisa */}
+          <div
+            className="rounded-2xl p-5 relative overflow-hidden border"
+            style={{ backgroundColor: `${theme.cor}07`, borderColor: `${theme.cor}20` }}
           >
-            {theme.nome}
-          </p>
-          <h2 className="text-3xl sm:text-4xl xl:text-5xl font-black leading-tight text-gray-900 mb-5">
-            {theme.tagline}
-          </h2>
-          <p className="text-gray-500 text-base sm:text-lg leading-relaxed mb-8">
-            {theme.copyAbertura}
-          </p>
+            <Quote size={40} className="absolute -top-1 -right-1 opacity-[0.07]" style={{ color: theme.cor }} />
+            <p className="text-sm sm:text-base text-gray-700 leading-relaxed italic pr-4">
+              "{theme.pesquisa.destaque}"
+            </p>
+            <p className="text-[11px] text-gray-400 font-semibold mt-3 not-italic">
+              — {theme.pesquisa.fonte}
+            </p>
+          </div>
 
           {/* Sistemas do corpo */}
           <div className="flex flex-wrap gap-2">
@@ -123,16 +154,27 @@ export default function InovitannProductPage({
               <span
                 key={s}
                 className="px-3 py-1.5 rounded-full text-xs font-semibold border"
-                style={{
-                  backgroundColor: `${theme.cor}0d`,
-                  color: theme.cor,
-                  borderColor: `${theme.cor}35`,
-                }}
+                style={{ backgroundColor: `${theme.cor}0d`, color: theme.cor, borderColor: `${theme.cor}35` }}
               >
                 {s}
               </span>
             ))}
           </div>
+
+          {/* Modo de uso */}
+          <div className="flex items-start gap-3 pt-1 border-t border-gray-100">
+            <span
+              className="flex items-center justify-center w-8 h-8 rounded-xl shrink-0 mt-0.5"
+              style={{ backgroundColor: `${theme.cor}15` }}
+            >
+              <Clock size={15} style={{ color: theme.cor }} />
+            </span>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Como tomar</p>
+              <p className="text-sm text-gray-600 leading-relaxed">{theme.modoDeUso}</p>
+            </div>
+          </div>
+
         </div>
       </section>
 
