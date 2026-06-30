@@ -13,6 +13,8 @@ import type { Ingrediente } from '@/utils/productDetails';
 import { Product } from '@/types/product';
 import { prisma } from '@/lib/prisma';
 import { publicStock } from '@/lib/publicProduct';
+import { getInovitannTheme } from '@/lib/inovitann-themes';
+import InovitannProductPage from '@/components/inovitann/InovitannProductPage';
 
 // Converte o texto de composição do banco em Ingrediente[] para o ComposicaoSection
 function composicaoFromText(text: string): Ingrediente[] {
@@ -152,6 +154,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const detail = getProductDetail(numericId)
   const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#0f2756'
 
+  // Inovitann: tema exclusivo por produto
+  const inovitannTheme = getInovitannTheme(produto.slug)
+
   // Composição: preferir dado do banco, fallback para dado estático legado
   const composicaoIngredientes: Ingrediente[] | null =
     produto.composicao
@@ -200,82 +205,92 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <ProductDetailHero product={produto} corPrincipal={corPrincipal} />
 
-      <section className="py-16 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
-              Por que escolher este produto?
-            </h2>
-            <p className="text-gray-600">Qualidade, segurança e confiança em cada detalhe</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { title: 'Qualidade Garantida', desc: 'Produto lacrado com procedência certificada' },
-              { title: 'Fórmula Pensada', desc: 'Desenvolvimento técnico rigoroso e cuidadoso' },
-              { title: 'Produto Lacrado', desc: 'Segurança e integridade da embalagem garantidas' },
-              { title: 'Compra Segura', desc: 'Processo de compra protegido e confiável' },
-            ].map((card) => (
-              <div key={card.title} className="p-6 bg-gray-50 rounded-xl">
-                <div className="w-8 h-8 rounded-full mb-4" style={{ background: corPrincipal }} />
-                <h3 className="font-bold text-gray-900 mb-2">{card.title}</h3>
-                <p className="text-sm text-gray-600">{card.desc}</p>
+      {inovitannTheme ? (
+        <InovitannProductPage
+          theme={inovitannTheme}
+          productName={produto.nome}
+          imagemUrl={produto.imagemUrl}
+        />
+      ) : (
+        <>
+          <section className="py-16 bg-white border-b border-gray-100">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
+                  Por que escolher este produto?
+                </h2>
+                <p className="text-gray-600">Qualidade, segurança e confiança em cada detalhe</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {composicaoIngredientes && composicaoIngredientes.length > 0 && (
-        <div id="descricao">
-          <ComposicaoSection composicao={composicaoIngredientes} corPrincipal={corPrincipal} />
-        </div>
-      )}
-
-      <section id={composicaoIngredientes && composicaoIngredientes.length > 0 ? undefined : 'descricao'} className="py-16 bg-white border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Como incluir na rotina</h2>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
-            <p className="text-gray-700 text-lg leading-relaxed mb-6">
-              {modoDeUsoText}
-            </p>
-            <div className="space-y-4 text-sm text-gray-600">
-              <p>✓ Consulte o rótulo do produto para orientações específicas</p>
-              <p>✓ Se preferir, consulte um profissional de saúde habilitado</p>
-              <p>✓ Mantenha consistência no uso conforme recomendado</p>
-              <p>✓ Este produto não é medicamento e não trata doenças</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { title: 'Qualidade Garantida', desc: 'Produto lacrado com procedência certificada' },
+                  { title: 'Fórmula Pensada', desc: 'Desenvolvimento técnico rigoroso e cuidadoso' },
+                  { title: 'Produto Lacrado', desc: 'Segurança e integridade da embalagem garantidas' },
+                  { title: 'Compra Segura', desc: 'Processo de compra protegido e confiável' },
+                ].map((card) => (
+                  <div key={card.title} className="p-6 bg-gray-50 rounded-xl">
+                    <div className="w-8 h-8 rounded-full mb-4" style={{ background: corPrincipal }} />
+                    <h3 className="font-bold text-gray-900 mb-2">{card.title}</h3>
+                    <p className="text-sm text-gray-600">{card.desc}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <section className="py-16 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Informações Importantes</h2>
-          </div>
-          <div className="bg-white rounded-xl p-8 border border-gray-200 space-y-4">
-            {[
-              'Este produto não é medicamento. Não possui indicação terapêutica. Leia o rótulo antes de consumir.',
-              'Sem indicação terapêutica. Suplemento alimentar para complementar a rotina alimentar.',
-              'Consulte um profissional habilitado em caso de dúvidas sobre o uso deste produto.',
-              'Manter fora do alcance de crianças. Armazenar em local fresco e seco.',
-              'Verificar embalagem antes do consumo. Não consumir se a embalagem estiver danificada.',
-            ].map((text, i) => (
-              <div key={i} className="flex gap-4">
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
-                  style={{ backgroundColor: corPrincipal }}
-                >
-                  ⓘ
-                </div>
-                <p className="text-gray-700">{text}</p>
+          {composicaoIngredientes && composicaoIngredientes.length > 0 && (
+            <div id="descricao">
+              <ComposicaoSection composicao={composicaoIngredientes} corPrincipal={corPrincipal} />
+            </div>
+          )}
+
+          <section id={composicaoIngredientes && composicaoIngredientes.length > 0 ? undefined : 'descricao'} className="py-16 bg-white border-b border-gray-100">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Como incluir na rotina</h2>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
+                <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                  {modoDeUsoText}
+                </p>
+                <div className="space-y-4 text-sm text-gray-600">
+                  <p>✓ Consulte o rótulo do produto para orientações específicas</p>
+                  <p>✓ Se preferir, consulte um profissional de saúde habilitado</p>
+                  <p>✓ Mantenha consistência no uso conforme recomendado</p>
+                  <p>✓ Este produto não é medicamento e não trata doenças</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="py-16 bg-gray-50 border-b border-gray-100">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Informações Importantes</h2>
+              </div>
+              <div className="bg-white rounded-xl p-8 border border-gray-200 space-y-4">
+                {[
+                  'Este produto não é medicamento. Não possui indicação terapêutica. Leia o rótulo antes de consumir.',
+                  'Sem indicação terapêutica. Suplemento alimentar para complementar a rotina alimentar.',
+                  'Consulte um profissional habilitado em caso de dúvidas sobre o uso deste produto.',
+                  'Manter fora do alcance de crianças. Armazenar em local fresco e seco.',
+                  'Verificar embalagem antes do consumo. Não consumir se a embalagem estiver danificada.',
+                ].map((text, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
+                      style={{ backgroundColor: corPrincipal }}
+                    >
+                      ⓘ
+                    </div>
+                    <p className="text-gray-700">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       {relacionados.length > 0 && (
         <ProductSection
