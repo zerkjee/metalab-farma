@@ -64,7 +64,7 @@ export default function InovitannProductPage({
 
         {/* Lado esquerdo — fundo escuro APENAS atrás do produto */}
         <div
-          className="relative flex flex-col items-center justify-center py-16 px-8 sm:px-12 min-h-[420px] sm:min-h-[500px]"
+          className="relative flex flex-col items-center justify-center py-10 px-6 sm:px-10 min-h-[500px] sm:min-h-[580px] lg:min-h-[620px]"
           style={{
             background: `linear-gradient(150deg, ${theme.cor} 0%, ${theme.cor}cc 55%, #080c1a 100%)`,
           }}
@@ -72,7 +72,7 @@ export default function InovitannProductPage({
           <ThematicBackground tema={theme.temaVisual} cor={theme.corSecundaria} />
 
           {/* Badge */}
-          <div className="relative z-10 mb-8 self-start lg:self-auto">
+          <div className="relative z-10 mb-6 self-start lg:self-auto">
             <span
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
               style={{ backgroundColor: `${theme.corSecundaria}25`, color: theme.corSecundaria, border: `1px solid ${theme.corSecundaria}50` }}
@@ -85,18 +85,18 @@ export default function InovitannProductPage({
           {/* Produto */}
           <div className="relative z-10">
             <div
-              className="absolute inset-0 rounded-full blur-3xl opacity-50 scale-75"
+              className="absolute inset-0 rounded-full blur-3xl opacity-50 scale-90"
               style={{ backgroundColor: theme.corSecundaria }}
             />
-            <div className="relative w-64 h-64 sm:w-80 sm:h-80">
+            <div className="relative w-80 h-80 sm:w-[26rem] sm:h-[26rem] lg:w-[30rem] lg:h-[30rem]">
               <Image
                 src={imgSrc}
                 alt={productName}
                 fill
-                sizes="(max-width: 640px) 256px, 320px"
+                sizes="(max-width: 640px) 320px, (max-width: 1024px) 416px, 480px"
                 className="object-contain"
                 priority
-                style={{ filter: `drop-shadow(0 12px 40px ${theme.cor}90)` }}
+                style={{ filter: `drop-shadow(0 16px 48px ${theme.cor}a0)` }}
               />
             </div>
           </div>
