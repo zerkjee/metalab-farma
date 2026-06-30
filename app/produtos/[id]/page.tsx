@@ -1,9 +1,9 @@
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductDetailHero from '@/components/ProductDetailHero';
 import ProductSection from '@/components/ProductSection';
-import ComposicaoSection from '@/components/ComposicaoSection';
 import ProductReviews from '@/components/reviews/ProductReviews';
 import PurchaseNotification from '@/components/social-proof/PurchaseNotification';
 import TrackViewItem from '@/components/analytics/TrackViewItem';
@@ -213,79 +213,102 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
       ) : (
         <>
-          <section className="py-16 bg-white border-b border-gray-100">
+          {/* ── SPLIT: descrição + ingredientes | imagem ─── */}
+          <section id="descricao" className="py-14 bg-white border-b border-gray-100">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
-                  Por que escolher este produto?
-                </h2>
-                <p className="text-gray-600">Qualidade, segurança e confiança em cada detalhe</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { title: 'Qualidade Garantida', desc: 'Produto lacrado com procedência certificada' },
-                  { title: 'Fórmula Pensada', desc: 'Desenvolvimento técnico rigoroso e cuidadoso' },
-                  { title: 'Produto Lacrado', desc: 'Segurança e integridade da embalagem garantidas' },
-                  { title: 'Compra Segura', desc: 'Processo de compra protegido e confiável' },
-                ].map((card) => (
-                  <div key={card.title} className="p-6 bg-gray-50 rounded-xl">
-                    <div className="w-8 h-8 rounded-full mb-4" style={{ background: corPrincipal }} />
-                    <h3 className="font-bold text-gray-900 mb-2">{card.title}</h3>
-                    <p className="text-sm text-gray-600">{card.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {composicaoIngredientes && composicaoIngredientes.length > 0 && (
-            <div id="descricao">
-              <ComposicaoSection composicao={composicaoIngredientes} corPrincipal={corPrincipal} />
-            </div>
-          )}
+                {/* Esquerda: texto + chips */}
+                <div>
+                  <p
+                    className="text-xs font-black uppercase tracking-[0.2em] mb-2"
+                    style={{ color: corPrincipal }}
+                  >
+                    {produto.marca}
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-5 leading-tight">
+                    {produto.nome}
+                  </h2>
+                  <p className="text-gray-500 text-base sm:text-lg leading-relaxed mb-7">
+                    {(() => {
+                      const raw = produto.descricaoCurta ?? ''
+                      const isTableData = /tabela nutricional|vd não|porção \d|mg =|ins \d/i.test(raw)
+                      return !isTableData && raw.length > 20
+                        ? raw
+                        : `${produto.nome} é um suplemento alimentar desenvolvido para complementar sua rotina nutricional com qualidade, segurança e procedência garantidas.`
+                    })()}
+                  </p>
 
-          <section id={composicaoIngredientes && composicaoIngredientes.length > 0 ? undefined : 'descricao'} className="py-16 bg-white border-b border-gray-100">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Como incluir na rotina</h2>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
-                <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                  {modoDeUsoText}
-                </p>
-                <div className="space-y-4 text-sm text-gray-600">
-                  <p>✓ Consulte o rótulo do produto para orientações específicas</p>
-                  <p>✓ Se preferir, consulte um profissional de saúde habilitado</p>
-                  <p>✓ Mantenha consistência no uso conforme recomendado</p>
-                  <p>✓ Este produto não é medicamento e não trata doenças</p>
+                  {/* Chips de ingredientes — só os limpos (nome curto) */}
+                  {(() => {
+                    const chips = (composicaoIngredientes ?? []).filter(i => i.nome.length <= 80)
+                    if (chips.length === 0) return null
+                    return (
+                      <div>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                          Ingredientes
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {chips.map(ing => (
+                            <span
+                              key={ing.nome}
+                              className="px-3 py-1.5 rounded-full text-xs font-semibold border"
+                              style={{
+                                backgroundColor: `${corPrincipal}08`,
+                                color: corPrincipal,
+                                borderColor: `${corPrincipal}30`,
+                              }}
+                            >
+                              {ing.nome}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </div>
+
+                {/* Direita: imagem flutuante */}
+                {produto.imagemUrl && (
+                  <div className="flex items-center justify-center">
+                    <div className="relative w-72 h-72 sm:w-96 sm:h-96">
+                      <Image
+                        src={produto.imagemUrl}
+                        alt={produto.nome}
+                        fill
+                        sizes="(max-width: 640px) 288px, 384px"
+                        className="object-contain"
+                        style={{ filter: `drop-shadow(0 16px 48px ${corPrincipal}35)` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </section>
 
-          <section className="py-16 bg-gray-50 border-b border-gray-100">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">Informações Importantes</h2>
+          {/* ── COMO USAR + AVISO LEGAL ─── */}
+          <section className="py-12 bg-gray-50 border-b border-gray-100">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div>
+                <p
+                  className="text-[11px] font-black uppercase tracking-widest mb-3"
+                  style={{ color: corPrincipal }}
+                >
+                  Como tomar
+                </p>
+                <p className="text-gray-700 text-sm leading-relaxed">{modoDeUsoText}</p>
               </div>
-              <div className="bg-white rounded-xl p-8 border border-gray-200 space-y-4">
-                {[
-                  'Este produto não é medicamento. Não possui indicação terapêutica. Leia o rótulo antes de consumir.',
-                  'Sem indicação terapêutica. Suplemento alimentar para complementar a rotina alimentar.',
-                  'Consulte um profissional habilitado em caso de dúvidas sobre o uso deste produto.',
-                  'Manter fora do alcance de crianças. Armazenar em local fresco e seco.',
-                  'Verificar embalagem antes do consumo. Não consumir se a embalagem estiver danificada.',
-                ].map((text, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
-                      style={{ backgroundColor: corPrincipal }}
-                    >
-                      ⓘ
-                    </div>
-                    <p className="text-gray-700">{text}</p>
-                  </div>
-                ))}
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                  Informações importantes
+                </p>
+                <ul className="space-y-1.5 text-sm text-gray-500">
+                  <li>Não é medicamento. Sem indicação terapêutica.</li>
+                  <li>Leia o rótulo antes de consumir.</li>
+                  <li>Manter fora do alcance de crianças.</li>
+                  <li>Consulte um profissional de saúde se necessário.</li>
+                </ul>
               </div>
             </div>
           </section>
