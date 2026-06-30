@@ -63,17 +63,17 @@ const slides = [
   },
   {
     id: 5,
-    badge: 'Showroom Metalab — Experiência Premium',
-    title: 'Onde a Ciência\nEncontra o Design',
-    subtitle: 'Um ambiente criado para elevar a experiência da saúde. Suplementos de alta tecnologia apresentados com o padrão visual da excelência farmacêutica.',
-    cta: { label: 'Explorar Produtos', href: '#produtos' },
-    ctaSecondary: { label: 'Conheça a Empresa', href: '#qualidade' },
-    bg: 'linear-gradient(135deg, rgba(4,13,30,0.80) 0%, rgba(15,39,86,0.70) 50%, rgba(10,28,65,0.65) 100%)',
-    bgImage: '/backgrounds/studio.jpg',
-    accent: '#38bdf8',
-    dot: '#0ea5e9',
-    badges: ['✓ Tecnologia Avançada', '✓ Design Exclusivo', '✓ Padrão Internacional'],
-    decoration: { circle1: '#38bdf8', circle2: '#0ea5e9' },
+    badge: 'Linha Premium — Inovitann Clinical',
+    title: 'A Linha Premium\nda Metalab',
+    subtitle: '11 formulações exclusivas com alta biodisponibilidade, desenvolvidas para quem não abre mão do melhor em suplementação alimentar.',
+    cta: { label: 'Ver Linha Inovitann', href: '#produtos' },
+    ctaSecondary: { label: 'Conheça a Metalab', href: '#qualidade' },
+    bg: 'linear-gradient(135deg, #08041a 0%, #130826 50%, #0d1a35 100%)',
+    bgImage: undefined as string | undefined,
+    accent: '#a78bfa',
+    dot: '#7c3aed',
+    badges: ['✓ 11 Produtos Exclusivos', '✓ Alta Biodisponibilidade', '✓ Sem Indicação Terapêutica'],
+    decoration: { circle1: '#7c3aed', circle2: '#db2777' },
   },
 ];
 
@@ -201,40 +201,45 @@ function RightPanel({ id, accent }: { id: number; accent: string }) {
     </div>
   );
 
-  if (id === 5) return (
-    <div className="flex flex-col gap-4">
-      <Card className="flex flex-col gap-2">
-        <p className="text-white/50 text-xs font-semibold uppercase tracking-widest">Laboratório Próprio</p>
-        <h3 className="text-white font-black text-xl leading-tight">Metalab Farma</h3>
-        <p className="text-white/65 text-xs leading-relaxed">
-          Indústria farmacêutica com capacidade produtiva própria e rigoroso controle de qualidade em cada etapa.
-        </p>
-      </Card>
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { v: '81+', l: 'Produtos' },
-          { v: '15+', l: 'Anos' },
-          { v: 'BPF', l: 'Certificado' },
-        ].map(({ v, l }) => (
-          <Card key={l} className="text-center !p-4">
-            <p className="text-xl font-black text-white">{v}</p>
-            <p className="text-white/50 text-[10px] mt-0.5">{l}</p>
-          </Card>
-        ))}
+  if (id === 5) {
+    const inovProducts = [
+      { src: '/products/inovitann/1.png',  color: '#7c3aed' },
+      { src: '/products/inovitann/2.png',  color: '#1d6fa8' },
+      { src: '/products/inovitann/3.png',  color: '#3d7a38' },
+      { src: '/products/inovitann/4.png',  color: '#8c1f2e' },
+      { src: '/products/inovitann/5.png',  color: '#9c2779' },
+      { src: '/products/inovitann/6.png',  color: '#2d7d6a' },
+      { src: '/products/inovitann/7.png',  color: '#1e3a8a' },
+      { src: '/products/inovitann/8.png',  color: '#c2540a' },
+      { src: '/products/inovitann/9.png',  color: '#db2777' },
+      { src: '/products/inovitann/10.png', color: '#16a34a' },
+      { src: '/products/inovitann/11.png', color: '#d97706' },
+    ];
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">11 produtos · Inovitann Clinical</p>
+        <div className="grid grid-cols-4 gap-2">
+          {inovProducts.map((p, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <div
+              key={i}
+              className="rounded-xl bg-white p-1.5 aspect-square flex items-center justify-center overflow-hidden"
+              style={{ boxShadow: `0 0 0 1px ${p.color}50, 0 4px 16px ${p.color}25` }}
+            >
+              <img src={p.src} alt="" aria-hidden className="w-full h-full object-contain" />
+            </div>
+          ))}
+          <div
+            className="rounded-xl aspect-square flex flex-col items-center justify-center gap-1 border"
+            style={{ borderColor: `${accent}40`, background: `${accent}12` }}
+          >
+            <span className="text-lg font-black" style={{ color: accent }}>11</span>
+            <span className="text-white/50 text-[9px] font-semibold uppercase tracking-wide leading-tight text-center">produtos<br/>premium</span>
+          </div>
+        </div>
       </div>
-      <Card className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0" style={{ color: accent }}>
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-white font-bold text-sm">Controle de Qualidade</p>
-          <p className="text-white/50 text-xs mt-0.5">Testes em cada lote produzido</p>
-        </div>
-      </Card>
-    </div>
-  );
+    );
+  }
 
   // id === 4
   const trustItems = [
