@@ -59,74 +59,79 @@ export default function InovitannProductPage({
 
   return (
     <>
-      {/* ── HERO PREMIUM ─────────────────────────────────────────────────── */}
-      <section
-        className="relative overflow-hidden py-20 sm:py-28"
-        style={{
-          background: `linear-gradient(135deg, ${theme.cor}ee 0%, ${theme.cor}99 50%, #0a0a0a 100%)`,
-        }}
-      >
-        <ThematicBackground tema={theme.temaVisual} cor={theme.corSecundaria} />
+      {/* ── HERO PREMIUM — split: produto escuro | copy branco ────────── */}
+      <section className="overflow-hidden grid grid-cols-1 lg:grid-cols-2">
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Lado esquerdo — fundo escuro APENAS atrás do produto */}
+        <div
+          className="relative flex flex-col items-center justify-center py-16 px-8 sm:px-12 min-h-[420px] sm:min-h-[500px]"
+          style={{
+            background: `linear-gradient(150deg, ${theme.cor} 0%, ${theme.cor}cc 55%, #080c1a 100%)`,
+          }}
+        >
+          <ThematicBackground tema={theme.temaVisual} cor={theme.corSecundaria} />
+
           {/* Badge */}
-          <div className="flex justify-center mb-8">
+          <div className="relative z-10 mb-8 self-start lg:self-auto">
             <span
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
-              style={{ backgroundColor: `${theme.corSecundaria}22`, color: theme.corSecundaria, border: `1px solid ${theme.corSecundaria}40` }}
+              style={{ backgroundColor: `${theme.corSecundaria}25`, color: theme.corSecundaria, border: `1px solid ${theme.corSecundaria}50` }}
             >
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: theme.corSecundaria }} />
               Linha Premium · Inovitann Clinical
             </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
-            {/* Imagem */}
-            <div className="flex-shrink-0 relative">
-              <div
-                className="absolute inset-0 rounded-3xl blur-3xl opacity-40"
-                style={{ backgroundColor: theme.corSecundaria }}
+          {/* Produto */}
+          <div className="relative z-10">
+            <div
+              className="absolute inset-0 rounded-full blur-3xl opacity-50 scale-75"
+              style={{ backgroundColor: theme.corSecundaria }}
+            />
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80">
+              <Image
+                src={imgSrc}
+                alt={productName}
+                fill
+                sizes="(max-width: 640px) 256px, 320px"
+                className="object-contain"
+                priority
+                style={{ filter: `drop-shadow(0 12px 40px ${theme.cor}90)` }}
               />
-              <div className="relative w-56 h-56 sm:w-72 sm:h-72">
-                <Image
-                  src={imgSrc}
-                  alt={productName}
-                  fill
-                  sizes="(max-width: 640px) 224px, 288px"
-                  className="object-contain drop-shadow-2xl"
-                  priority
-                />
-              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Texto */}
-            <div className="text-center lg:text-left max-w-xl">
-              <p className="text-sm font-medium mb-2" style={{ color: theme.corSecundaria }}>
-                {theme.nome}
-              </p>
-              <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-white mb-5"
-                style={{ textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}
+        {/* Lado direito — fundo branco para o copy */}
+        <div className="flex flex-col justify-center py-14 px-8 sm:px-12 lg:px-16 bg-white border-l border-gray-100">
+          <p
+            className="text-xs font-black uppercase tracking-[0.2em] mb-3"
+            style={{ color: theme.cor }}
+          >
+            {theme.nome}
+          </p>
+          <h2 className="text-3xl sm:text-4xl xl:text-5xl font-black leading-tight text-gray-900 mb-5">
+            {theme.tagline}
+          </h2>
+          <p className="text-gray-500 text-base sm:text-lg leading-relaxed mb-8">
+            {theme.copyAbertura}
+          </p>
+
+          {/* Sistemas do corpo */}
+          <div className="flex flex-wrap gap-2">
+            {theme.sistemas.map((s) => (
+              <span
+                key={s}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold border"
+                style={{
+                  backgroundColor: `${theme.cor}0d`,
+                  color: theme.cor,
+                  borderColor: `${theme.cor}35`,
+                }}
               >
-                {theme.tagline}
-              </h2>
-              <p className="text-white/70 text-base sm:text-lg leading-relaxed mb-8">
-                {theme.copyAbertura}
-              </p>
-
-              {/* sistemas pills */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-                {theme.sistemas.map((s) => (
-                  <span
-                    key={s}
-                    className="px-3 py-1 rounded-full text-xs font-medium"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.9)' }}
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
+                {s}
+              </span>
+            ))}
           </div>
         </div>
       </section>
