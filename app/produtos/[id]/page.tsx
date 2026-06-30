@@ -15,6 +15,8 @@ import { prisma } from '@/lib/prisma';
 import { publicStock } from '@/lib/publicProduct';
 import { getInovitannTheme } from '@/lib/inovitann-themes';
 import InovitannProductPage from '@/components/inovitann/InovitannProductPage';
+import IngredientResearchCards from '@/components/IngredientResearchCards';
+import { matchResearch } from '@/lib/ingredient-research';
 
 // Converte o texto de composição do banco em Ingrediente[] para o ComposicaoSection
 function composicaoFromText(text: string): Ingrediente[] {
@@ -169,6 +171,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     detail?.modo_uso ??
     'Conforme orientação do fabricante ou de um profissional habilitado. Não auto-medicar.'
 
+  const researchCards = matchResearch(
+    (composicaoIngredientes ?? []).filter(i => i.nome.length <= 80).map(i => i.nome),
+    6,
+  )
+
   const productJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -286,6 +293,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
             </div>
           </section>
+
+          {/* ── CARDS DE PESQUISA CIENTÍFICA ─── */}
+          <IngredientResearchCards cards={researchCards} />
 
           {/* ── COMO USAR + AVISO LEGAL ─── */}
           <section className="py-12 bg-gray-50 border-b border-gray-100">
