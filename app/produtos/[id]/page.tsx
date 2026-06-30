@@ -236,7 +236,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-5 leading-tight">
                     {produto.nome}
                   </h2>
-                  <p className="text-gray-500 text-base sm:text-lg leading-relaxed mb-7">
+                  <p className="text-gray-500 text-base sm:text-lg leading-relaxed mb-5">
                     {(() => {
                       const raw = produto.descricaoCurta ?? ''
                       const isTableData = /tabela nutricional|vd não|porção \d|mg =|ins \d/i.test(raw)
@@ -245,6 +245,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         : `${produto.nome} é um suplemento alimentar desenvolvido para complementar sua rotina nutricional com qualidade, segurança e procedência garantidas.`
                     })()}
                   </p>
+
+                  {/* Benefícios / descrição rica em HTML */}
+                  {produto.descricaoHtml && (() => {
+                    const isTableData = /tabela nutricional|vd não|porção \d|mg =|ins \d/i.test(produto.descricaoHtml!)
+                    if (isTableData) return null
+                    return (
+                      <div
+                        className="mb-7 text-sm text-gray-600 leading-relaxed
+                          [&_ul]:pl-4 [&_ul]:space-y-2
+                          [&_li]:list-none [&_li]:flex [&_li]:items-start [&_li]:gap-2
+                          [&_li]:before:content-['▸'] [&_li]:before:shrink-0 [&_li]:before:mt-0.5 [&_li]:before:font-bold
+                          [&_p]:mb-2 [&_strong]:text-gray-800 [&_strong]:font-semibold"
+                        style={{ '--li-color': corPrincipal } as React.CSSProperties}
+                        dangerouslySetInnerHTML={{ __html: produto.descricaoHtml }}
+                      />
+                    )
+                  })()}
 
                   {/* Chips de ingredientes — só os limpos (nome curto) */}
                   {(() => {

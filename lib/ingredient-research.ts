@@ -305,6 +305,66 @@ export const researchDB: IngredientResearch[] = [
     fato: 'O colostro bovino contém IgG, lactoferrina e fatores de crescimento (IGF-1). Estudos mostram melhora da função imunológica e integridade da mucosa intestinal.',
     fonte: 'Nutrients, 2018 · Rathe et al.',
   },
+  // ── Fosfatidilserina ──────────────────────────────────────────────────
+  {
+    chaves: ['fosfatidilserina', 'phosphatidylserine', 'ps'],
+    fato: 'A fosfatidilserina é o principal fosfolipídio das membranas neuronais. Ensaio clínico duplo-cego mostrou melhora de memória e funções cognitivas em adultos mais velhos.',
+    fonte: 'Journal of Nutrition, Health & Aging, 2010 · Kato-Kataoka et al.',
+  },
+  // ── Bacopa Monnieri ───────────────────────────────────────────────────
+  {
+    chaves: ['bacopa monnieri', 'bacopa', 'brahmi', 'bacosídeo'],
+    fato: 'Os bacosídeos da Bacopa monnieri aumentam a densidade de espinhos dendríticos e o comprimento de axônios em neurônios hipocampais, com melhora de memória em 12 semanas.',
+    fonte: 'Neuropsychopharmacology, 2002 · Stough et al.',
+  },
+  // ── MSM ───────────────────────────────────────────────────────────────
+  {
+    chaves: ['msm', 'metilsulfonilmetano', 'methylsulfonylmethane', 'dimetilsulfona'],
+    fato: 'O MSM é fonte orgânica de enxofre, essencial para síntese de colágeno e glicosaminoglicanos. Estudo clínico de 12 semanas reduziu dor articular em 25% em pacientes com osteoartrite.',
+    fonte: 'Osteoarthritis and Cartilage, 2006 · Kim et al.',
+  },
+  // ── L-Teanina ─────────────────────────────────────────────────────────
+  {
+    chaves: ['teanina', 'l-teanina', 'theanine', 'l-theanine'],
+    fato: 'A L-teanina aumenta ondas alfa no EEG (estado de alerta tranquilo) em 40 minutos. Em combinação com cafeína, melhora foco e reduz os picos de ansiedade induzidos pela cafeína.',
+    fonte: 'Nutritional Neuroscience, 2008 · Haskell et al.',
+  },
+  // ── Inositol ──────────────────────────────────────────────────────────
+  {
+    chaves: ['inositol', 'mio-inositol', 'mioinositol', 'd-chiro-inositol'],
+    fato: 'O mio-inositol melhora a sensibilidade à insulina nos ovários e restaura a ciclicidade menstrual em mulheres com SOP. Meta-análise de 13 estudos mostrou redução de androgênios circulantes.',
+    fonte: 'Gynecological Endocrinology, 2017 · Unfer et al.',
+  },
+  // ── Saccharomyces cerevisiae ──────────────────────────────────────────
+  {
+    chaves: ['saccharomyces', 'saccharomyces cerevisiae', 'saccharomyces boulardii'],
+    fato: 'Saccharomyces cerevisiae/boulardii é a levedura probiótica mais estudada para diarreia associada a antibióticos. Meta-análise de 63 ensaios mostrou redução de 58% do risco.',
+    fonte: 'Alimentary Pharmacology & Therapeutics, 2012 · Szajewska & Kolodziej.',
+  },
+  // ── Pancreatina / Enzimas digestivas ─────────────────────────────────
+  {
+    chaves: ['pancreatina', 'amilase', 'lipase', 'protease digestiva', 'enzimas digestivas'],
+    fato: 'Suplementação de enzimas pancreáticas (pancreatina) melhora a digestão de gorduras, proteínas e carboidratos. Reduz flatulência e desconforto pós-prandial em insuficiência pancreática exócrina.',
+    fonte: 'World Journal of Gastroenterology, 2014 · Forsmark CE.',
+  },
+  // ── Ora-Pro-Nóbis ──────────────────────────────────────────────────
+  {
+    chaves: ['ora-pro-nóbis', 'pereskia aculeata', 'orapronobis'],
+    fato: 'Ora-Pro-Nóbis (Pereskia aculeata) contém 25% de proteína na matéria seca — superior a carnes. Rica em aminoácidos essenciais, ferro, vitamina C e mucilagens com ação prebiótica.',
+    fonte: 'Food Chemistry, 2012 · Souza et al. · UFLA.',
+  },
+  // ── Catuaba / Marapuama ───────────────────────────────────────────────
+  {
+    chaves: ['catuaba', 'trichilia catigua', 'marapuama', 'ptychopetalum'],
+    fato: 'A Catuaba (Trichilia catigua) apresenta atividade adaptogênica e neuroprotetora. Alcaloides yohimbina-like na casca demonstraram efeito estimulante sobre o SNC sem toxicidade aguda.',
+    fonte: 'Journal of Ethnopharmacology, 2007 · Campos et al.',
+  },
+  // ── Boldo ─────────────────────────────────────────────────────────────
+  {
+    chaves: ['boldo', 'peumus boldus', 'boldina', 'extrato de boldo'],
+    fato: 'A boldina, alcaloide do Boldo chileno, apresenta atividade hepatoprotetora e colerética (estimula produção de bile), facilitando a digestão de gorduras e a eliminação de toxinas hepáticas.',
+    fonte: 'Phytomedicine, 2010 · Gotteland et al.',
+  },
 ]
 
 // Fuzzy-match: retorna até maxResults entradas para uma lista de nomes de ingredientes
