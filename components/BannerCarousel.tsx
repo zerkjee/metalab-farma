@@ -13,6 +13,7 @@ const slides = [
     cta: { label: 'Ver Produtos', href: '#produtos' },
     ctaSecondary: { label: 'Conheça a Metalab', href: '#qualidade' },
     bg: 'linear-gradient(135deg, #040d1e 0%, #0f2756 50%, #1a3a72 100%)',
+    bgImage: undefined as string | undefined,
     accent: '#60a5fa',
     dot: '#3b82f6',
     badges: ['✓ Embalagem Lacrada', '✓ Formulação Exclusiva', '✓ Sem Indicação Terapêutica'],
@@ -26,6 +27,7 @@ const slides = [
     cta: { label: 'Ver Kits', href: '#produtos' },
     ctaSecondary: { label: 'Comparar Preços', href: '#produtos' },
     bg: 'linear-gradient(135deg, #050c1b 0%, #0d1f45 50%, #0f2756 100%)',
+    bgImage: undefined as string | undefined,
     accent: '#93c5fd',
     dot: '#60a5fa',
     badges: ['✓ Kit 2 = 10% OFF', '✓ Kit 3 = 30% OFF', '✓ Frete Econômico'],
@@ -39,6 +41,7 @@ const slides = [
     cta: { label: 'Ver Avaliações', href: '/avaliacoes' },
     ctaSecondary: { label: 'Explorar Produtos', href: '#produtos' },
     bg: 'linear-gradient(135deg, #0c1a35 0%, #1e3a5f 50%, #1a2744 100%)',
+    bgImage: undefined as string | undefined,
     accent: '#7dd3fc',
     dot: '#38bdf8',
     badges: ['✓ 4.9 / 5 média', '✓ 51.000+ pedidos', '✓ 97% positivas'],
@@ -52,10 +55,25 @@ const slides = [
     cta: { label: 'Ver Catálogo', href: '#produtos' },
     ctaSecondary: { label: 'Saiba Mais', href: '#qualidade' },
     bg: 'linear-gradient(135deg, #030a17 0%, #0f2756 50%, #1a3a72 100%)',
+    bgImage: undefined as string | undefined,
     accent: '#bfdbfe',
     dot: '#60a5fa',
     badges: ['✓ Lacre Original', '✓ BPF Certificado', '✓ Nota Fiscal'],
     decoration: { circle1: '#60a5fa', circle2: '#0ea5e9' },
+  },
+  {
+    id: 5,
+    badge: 'Showroom Metalab — Experiência Premium',
+    title: 'Onde a Ciência\nEncontra o Design',
+    subtitle: 'Um ambiente criado para elevar a experiência da saúde. Suplementos de alta tecnologia apresentados com o padrão visual da excelência farmacêutica.',
+    cta: { label: 'Explorar Produtos', href: '#produtos' },
+    ctaSecondary: { label: 'Conheça a Empresa', href: '#qualidade' },
+    bg: 'linear-gradient(135deg, rgba(4,13,30,0.80) 0%, rgba(15,39,86,0.70) 50%, rgba(10,28,65,0.65) 100%)',
+    bgImage: '/backgrounds/studio.jpg',
+    accent: '#38bdf8',
+    dot: '#0ea5e9',
+    badges: ['✓ Tecnologia Avançada', '✓ Design Exclusivo', '✓ Padrão Internacional'],
+    decoration: { circle1: '#38bdf8', circle2: '#0ea5e9' },
   },
 ];
 
@@ -183,6 +201,41 @@ function RightPanel({ id, accent }: { id: number; accent: string }) {
     </div>
   );
 
+  if (id === 5) return (
+    <div className="flex flex-col gap-4">
+      <Card className="flex flex-col gap-2">
+        <p className="text-white/50 text-xs font-semibold uppercase tracking-widest">Laboratório Próprio</p>
+        <h3 className="text-white font-black text-xl leading-tight">Metalab Farma</h3>
+        <p className="text-white/65 text-xs leading-relaxed">
+          Indústria farmacêutica com capacidade produtiva própria e rigoroso controle de qualidade em cada etapa.
+        </p>
+      </Card>
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { v: '81+', l: 'Produtos' },
+          { v: '15+', l: 'Anos' },
+          { v: 'BPF', l: 'Certificado' },
+        ].map(({ v, l }) => (
+          <Card key={l} className="text-center !p-4">
+            <p className="text-xl font-black text-white">{v}</p>
+            <p className="text-white/50 text-[10px] mt-0.5">{l}</p>
+          </Card>
+        ))}
+      </div>
+      <Card className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0" style={{ color: accent }}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-white font-bold text-sm">Controle de Qualidade</p>
+          <p className="text-white/50 text-xs mt-0.5">Testes em cada lote produzido</p>
+        </div>
+      </Card>
+    </div>
+  );
+
   // id === 4
   const trustItems = [
     {
@@ -256,12 +309,26 @@ export default function BannerCarousel() {
   return (
     <section
       className="relative overflow-hidden transition-[background] duration-700 h-[62vh] min-h-[380px] sm:h-[75vh] sm:min-h-[500px] lg:h-[88vh] lg:min-h-[600px]"
-      style={{ background: slide.bg }}
+      style={{ background: slide.bgImage ? '#040d1e' : slide.bg }}
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') setPaused(true); }}
       onPointerLeave={(e) => { if (e.pointerType === 'mouse') setPaused(false); }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
+      {/* Imagem de fundo (apenas em slides com bgImage) */}
+      {slide.bgImage && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={slide.bgImage}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0" style={{ background: slide.bg }} />
+        </>
+      )}
+
       {/* Grid decorativo */}
       <div className="absolute inset-0 opacity-[0.06]"
         style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}

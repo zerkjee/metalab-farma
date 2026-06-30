@@ -16,12 +16,12 @@ const metrics = [
 
 export default function QualitySection() {
   return (
-    <section id="qualidade" className="py-24 bg-white border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+    <section id="qualidade" className="border-t border-gray-100 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]">
 
-          {/* Texto */}
-          <div>
+        {/* Painel de texto */}
+        <div className="py-20 px-6 sm:px-10 lg:px-16 xl:px-20 bg-white">
+          <div className="max-w-xl">
             <p className="text-xs font-bold text-[#0f2756] uppercase tracking-[0.2em] mb-4">
               Qualidade e Tecnologia
             </p>
@@ -34,7 +34,7 @@ export default function QualitySection() {
               desde a fabricação até a entrega. Este produto não é medicamento.
             </p>
 
-            <ul className="space-y-3.5">
+            <ul className="space-y-3.5 mb-10">
               {bullets.map((b) => (
                 <li key={b} className="flex items-start gap-3 text-sm text-gray-600">
                   <svg className="w-4 h-4 text-[#0f2756] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,23 +44,21 @@ export default function QualitySection() {
                 </li>
               ))}
             </ul>
-          </div>
 
-          {/* Métricas */}
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            {/* Métricas */}
+            <div className="grid grid-cols-2 gap-3 mb-5">
               {metrics.map(({ value, label }) => (
                 <div
                   key={label}
-                  className="flex flex-col items-center justify-center p-7 rounded-xl bg-gray-50 border border-gray-200 text-center hover:border-[#0f2756]/30 hover:shadow-sm transition-all duration-300"
+                  className="flex flex-col items-center justify-center p-5 rounded-xl bg-gray-50 border border-gray-200 text-center hover:border-[#0f2756]/30 hover:shadow-sm transition-all duration-300"
                 >
-                  <span className="text-3xl font-bold text-[#0f2756] mb-2 tracking-tight">{value}</span>
+                  <span className="text-2xl font-bold text-[#0f2756] mb-1.5 tracking-tight">{value}</span>
                   <span className="text-xs text-gray-500 font-medium leading-tight">{label}</span>
                 </div>
               ))}
             </div>
 
-            {/* Aviso regulatório — sem emoji, estilo formal */}
+            {/* Aviso regulatório */}
             <div className="p-5 rounded-xl bg-gray-900 text-white border border-gray-800">
               <div className="flex items-start gap-3">
                 <svg className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,6 +74,19 @@ export default function QualitySection() {
             </div>
           </div>
         </div>
+
+        {/* Painel fotográfico — cápsulas em blister */}
+        <div className="relative hidden lg:block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/backgrounds/capsulas-blister.jpg"
+            alt="Cápsulas farmacêuticas em embalagem blister — padrão de qualidade Metalab"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          {/* Gradiente de transição na borda esquerda */}
+          <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent pointer-events-none" />
+        </div>
+
       </div>
     </section>
   );
