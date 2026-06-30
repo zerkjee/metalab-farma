@@ -4,17 +4,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronDown, ArrowRight, X } from 'lucide-react';
-import { fmtCurrency } from '@/utils/formatters';
 
 interface Categoria { id: string; nome: string; slug: string; totalProdutos: number }
 interface PreviewProduto { id: string; nome: string; slug: string; preco: number; imagemUrl?: string | null; estoque: number }
 interface Preview { produtos: PreviewProduto[]; total: number }
 
+type PopoverAlign = 'left' | 'center' | 'right';
+
 export default function CategoryMenu() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [active, setActive] = useState<string | null>(null);   // slug em hover (desktop)
-  const [alignRight, setAlignRight] = useState(false);         // popover alinhado à direita quando próximo da borda
-  const [drawer, setDrawer] = useState<Categoria | null>(null); // mobile
+  const [active, setActive] = useState<string | null>(null);
+  const [popoverAlign, setPopoverAlign] = useState<PopoverAlign>('center');
+  const [drawer, setDrawer] = useState<Categoria | null>(null);
   const [cache, setCache] = useState<Record<string, Preview>>({});
   const loadedRef = useRef<Set<string>>(new Set());
 
@@ -40,9 +41,27 @@ export default function CategoryMenu() {
 
   if (categorias.length === 0) return null;
 
+  // Largura do popover de fotos: 220px (w-[220px])
+  const POPOVER_HALF = 110;
+  const MARGIN = 16;
+
+  function computeAlign(e: React.MouseEvent<HTMLDivElement>): PopoverAlign {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const mid = rect.left + rect.width / 2;
+    if (mid + POPOVER_HALF > window.innerWidth - MARGIN) return 'right';
+    if (mid - POPOVER_HALF < MARGIN) return 'left';
+    return 'center';
+  }
+
+  const popoverPositionClass: Record<PopoverAlign, string> = {
+    left:   'left-0',
+    center: 'left-1/2 -translate-x-1/2',
+    right:  'right-0',
+  };
+
   return (
     <>
-      {/* ─── Desktop: nav com mini-janela ─── */}
+      {/* ─── Desktop: nav com mini-janela de fotos ─── */}
       <nav className="hidden lg:flex items-center justify-center gap-7 border-t border-gray-100 py-2.5">
         {categorias.map((cat) => {
           const preview = cache[cat.slug];
@@ -50,12 +69,7 @@ export default function CategoryMenu() {
             <div
               key={cat.id}
               className="relative"
-              onMouseEnter={(e) => {
-                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                setAlignRight(rect.left + 160 > window.innerWidth - 24);
-                setActive(cat.slug);
-                loadPreview(cat.slug);
-              }}
+              onMouseEnter={(e) => { setPopoverAlign(computeAlign(e)); setActive(cat.slug); loadPreview(cat.slug); }}
               onMouseLeave={() => setActive(null)}
             >
               <Link
@@ -67,40 +81,37 @@ export default function CategoryMenu() {
               </Link>
 
               {active === cat.slug && (
-                <div className={`absolute top-full z-[70] w-80 pt-2 ${alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
+                <div className={`absolute top-full z-[70] w-[220px] pt-2 ${popoverPositionClass[popoverAlign]}`}>
                   <div className="rounded-2xl border border-gray-100 bg-white p-3 shadow-2xl">
-                    <p className="px-1 pb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">{cat.nome}</p>
                     {!preview ? (
-                      <p className="px-1 py-4 text-sm text-gray-400">Carregando…</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[0,1,2,3].map((i) => (
+                          <div key={i} className="aspect-square rounded-xl bg-gray-100 animate-pulse" />
+                        ))}
+                      </div>
                     ) : (
-                      <ul className="flex flex-col gap-1">
-                        {preview.produtos.map((p) => {
-                          const semEstoque = !(p.estoque > 0);
-                          return (
-                            <li key={p.id}>
-                              <Link
-                                href={`/produtos/${p.slug}`}
-                                className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors ${semEstoque ? 'bg-gray-100 hover:bg-gray-200/70' : 'hover:bg-gray-50'}`}
-                              >
-                                <div className={`relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50 ${semEstoque ? 'opacity-50 grayscale' : ''}`}>
-                                  {p.imagemUrl
-                                    ? <Image src={p.imagemUrl} alt={p.nome} fill sizes="40px" className="object-contain p-0.5" />
-                                    : <span className="flex h-full items-center justify-center text-[8px] text-gray-300">—</span>}
-                                </div>
-                                <span className={`min-w-0 flex-1 truncate text-xs font-semibold ${semEstoque ? 'text-gray-400' : 'text-gray-800'}`}>{p.nome}</span>
-                                <span className={`text-xs font-black ${semEstoque ? 'text-gray-400' : 'text-[#0f2756]'}`}>{fmtCurrency(p.preco)}</span>
-                              </Link>
-                            </li>
-                          );
-                        })}
-                      </ul>
+                      <div className="grid grid-cols-2 gap-2">
+                        {preview.produtos.map((p) => (
+                          <Link
+                            key={p.id}
+                            href={`/produtos/${p.slug}`}
+                            className={`relative aspect-square rounded-xl overflow-hidden border transition-all duration-150 hover:scale-[1.03] hover:shadow-md ${
+                              p.estoque > 0 ? 'border-gray-100 bg-gray-50' : 'border-gray-200 bg-gray-100 opacity-60 grayscale'
+                            }`}
+                          >
+                            {p.imagemUrl
+                              ? <Image src={p.imagemUrl} alt={p.nome} fill sizes="96px" className="object-contain p-2" />
+                              : <span className="flex h-full items-center justify-center text-[8px] text-gray-300">—</span>}
+                          </Link>
+                        ))}
+                      </div>
                     )}
                     <Link
                       href={`/categoria/${cat.slug}`}
-                      className="mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-[#0f2756] px-3 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90"
+                      className="mt-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-[#0f2756] px-3 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90"
                     >
-                      Ver categoria completa{preview ? ` (${preview.total})` : ''}
-                      <ArrowRight size={14} />
+                      Ver todos{preview ? ` (${preview.total})` : ''}
+                      <ArrowRight size={13} />
                     </Link>
                   </div>
                 </div>
@@ -131,42 +142,40 @@ export default function CategoryMenu() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setDrawer(null)} />
           <div className="absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto rounded-t-3xl bg-white p-4 pb-8 shadow-2xl">
             <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-gray-200" />
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-black text-gray-900">{drawer.nome}</h3>
               <button onClick={() => setDrawer(null)} aria-label="Fechar" className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100">
                 <X size={18} />
               </button>
             </div>
             {!cache[drawer.slug] ? (
-              <p className="py-6 text-center text-sm text-gray-400">Carregando…</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[0,1,2,3,4,5].map((i) => (
+                  <div key={i} className="aspect-square rounded-xl bg-gray-100 animate-pulse" />
+                ))}
+              </div>
             ) : (
-              <ul className="flex flex-col gap-1.5">
-                {cache[drawer.slug].produtos.map((p) => {
-                  const semEstoque = !(p.estoque > 0);
-                  return (
-                    <li key={p.id}>
-                      <Link
-                        href={`/produtos/${p.slug}`}
-                        onClick={() => setDrawer(null)}
-                        className={`flex items-center gap-3 rounded-xl px-2 py-2 ${semEstoque ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                      >
-                        <div className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50 ${semEstoque ? 'opacity-50 grayscale' : ''}`}>
-                          {p.imagemUrl
-                            ? <Image src={p.imagemUrl} alt={p.nome} fill sizes="48px" className="object-contain p-1" />
-                            : <span className="flex h-full items-center justify-center text-[9px] text-gray-300">sem foto</span>}
-                        </div>
-                        <span className={`min-w-0 flex-1 text-sm font-semibold ${semEstoque ? 'text-gray-400' : 'text-gray-900'}`}>{p.nome}</span>
-                        <span className={`text-sm font-black ${semEstoque ? 'text-gray-400' : 'text-[#0f2756]'}`}>{fmtCurrency(p.preco)}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+              <div className="grid grid-cols-3 gap-3">
+                {cache[drawer.slug].produtos.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/produtos/${p.slug}`}
+                    onClick={() => setDrawer(null)}
+                    className={`relative aspect-square rounded-xl overflow-hidden border ${
+                      p.estoque > 0 ? 'border-gray-100 bg-gray-50' : 'border-gray-200 bg-gray-100 opacity-60 grayscale'
+                    }`}
+                  >
+                    {p.imagemUrl
+                      ? <Image src={p.imagemUrl} alt={p.nome} fill sizes="120px" className="object-contain p-2" />
+                      : <span className="flex h-full items-center justify-center text-[9px] text-gray-300">—</span>}
+                  </Link>
+                ))}
+              </div>
             )}
             <Link
               href={`/categoria/${drawer.slug}`}
               onClick={() => setDrawer(null)}
-              className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-[#0f2756] px-3 py-3 text-sm font-bold text-white"
+              className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-[#0f2756] px-3 py-3 text-sm font-bold text-white"
             >
               Ver categoria completa
               <ArrowRight size={16} />
