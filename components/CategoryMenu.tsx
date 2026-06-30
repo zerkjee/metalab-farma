@@ -39,6 +39,15 @@ export default function CategoryMenu() {
     } catch { loadedRef.current.delete(slug); }
   }, []);
 
+  // Preload all category previews after categories load (staggered to avoid hammering the API)
+  useEffect(() => {
+    if (categorias.length === 0) return;
+    const timers = categorias.map((cat, i) =>
+      setTimeout(() => loadPreview(cat.slug), i * 80)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [categorias, loadPreview]);
+
   if (categorias.length === 0) return null;
 
   // Largura do popover de fotos: 220px (w-[220px])
