@@ -83,17 +83,17 @@ export default function ProductDetailHero({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-start">
 
           {/* Imagem */}
-          <div className="relative flex items-center justify-center rounded-2xl overflow-hidden"
-            style={{ background: `linear-gradient(145deg, ${corPrincipal}08, ${corPrincipal}04, #f8f8fb)`, minHeight: 380 }}>
+          <div className="relative flex items-center justify-center" style={{ minHeight: 380 }}>
             {product.imagemUrl ? (
               <Image
                 src={product.imagemUrl}
                 alt={product.nome}
                 width={480}
                 height={480}
-                className="w-full object-contain max-h-[420px] p-8"
+                className="w-full object-contain max-h-[420px] p-6"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
+                style={{ filter: `drop-shadow(0 12px 36px ${corPrincipal}30)` }}
               />
             ) : (
               <div className="flex flex-col items-center gap-4 py-16">
