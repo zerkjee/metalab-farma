@@ -13,6 +13,7 @@ interface Preview { produtos: PreviewProduto[]; total: number }
 export default function CategoryMenu() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [active, setActive] = useState<string | null>(null);   // slug em hover (desktop)
+  const [alignRight, setAlignRight] = useState(false);         // popover alinhado à direita quando próximo da borda
   const [drawer, setDrawer] = useState<Categoria | null>(null); // mobile
   const [cache, setCache] = useState<Record<string, Preview>>({});
   const loadedRef = useRef<Set<string>>(new Set());
@@ -49,7 +50,12 @@ export default function CategoryMenu() {
             <div
               key={cat.id}
               className="relative"
-              onMouseEnter={() => { setActive(cat.slug); loadPreview(cat.slug); }}
+              onMouseEnter={(e) => {
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                setAlignRight(rect.left + 160 > window.innerWidth - 24);
+                setActive(cat.slug);
+                loadPreview(cat.slug);
+              }}
               onMouseLeave={() => setActive(null)}
             >
               <Link
@@ -61,7 +67,7 @@ export default function CategoryMenu() {
               </Link>
 
               {active === cat.slug && (
-                <div className="absolute left-1/2 top-full z-[70] w-80 -translate-x-1/2 pt-2">
+                <div className={`absolute top-full z-[70] w-80 pt-2 ${alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
                   <div className="rounded-2xl border border-gray-100 bg-white p-3 shadow-2xl">
                     <p className="px-1 pb-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">{cat.nome}</p>
                     {!preview ? (
