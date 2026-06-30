@@ -7,8 +7,6 @@ import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
 import { fmtCurrency } from '@/utils/formatters';
 
-type KitOpcao = NonNullable<Product['kitsDisponiveis']>[number];
-
 interface ProductDetailHeroProps {
   product: Product;
   corPrincipal: string;
@@ -24,35 +22,20 @@ export default function ProductDetailHero({
   const precoOriginal = product.precoOriginal ? Number(product.precoOriginal) : null;
   const descontoBase = precoOriginal ? Math.round((1 - preco / precoOriginal) * 100) : 0;
 
-  const kits = product.kitsDisponiveis ?? [];
-  const temKits = product.tipo === 'SIMPLES' && kits.length > 0;
+  const [selectedQty, setSelectedQty] = useState<1 | 2 | 3>(1);
 
-  const [selectedKit, setSelectedKit] = useState<KitOpcao | null>(null);
+  const descPct = selectedQty === 3 ? 15 : selectedQty === 2 ? 10 : 0;
+  const precoComDesconto = descPct > 0 ? Math.round(preco * (1 - descPct / 100) * 100) / 100 : preco;
 
-  const precoAtual = selectedKit ? selectedKit.preco : preco;
-  const precoOriginalAtual = selectedKit ? selectedKit.precoOriginal : precoOriginal;
-  const estoqueAtual = selectedKit ? selectedKit.estoque : product.estoque;
-  const temEstoqueAtual = estoqueAtual > 0;
+  const precoAtual = precoComDesconto;
+  const precoOriginalAtual = descPct > 0 ? preco : precoOriginal;
+  const temEstoqueAtual = product.estoque > 0;
 
   function handleAddToCart() {
-    if (selectedKit) {
-      addItem({
-        id:           selectedKit.id,
-        nome:         selectedKit.nome,
-        slug:         selectedKit.slug,
-        marca:        product.marca,
-        tipo:         'KIT',
-        preco:        selectedKit.preco,
-        precoOriginal: selectedKit.precoOriginal,
-        estoque:      selectedKit.estoque,
-        imagemUrl:    product.imagemUrl ?? null,
-        corPrincipal: product.corPrincipal ?? null,
-        tags:         [],
-        ativo:        true,
-      });
-    } else {
-      addItem(product);
-    }
+    const produtoParaCarrinho = descPct > 0
+      ? { ...product, preco: precoComDesconto }
+      : product;
+    addItem(produtoParaCarrinho, selectedQty);
   }
 
   function scrollToDescricao() {
@@ -109,7 +92,7 @@ export default function ProductDetailHero({
             )}
 
             {/* Badge desconto na imagem */}
-            {descontoBase > 0 && !selectedKit && (
+            {descontoBase > 0 && descPct === 0 && (
               <div className="absolute top-4 right-4">
                 <span className="inline-flex flex-col items-center px-3 py-1.5 rounded-xl text-white shadow-lg"
                   style={{ background: `linear-gradient(135deg, ${corPrincipal}, ${corPrincipal}cc)` }}>
@@ -162,9 +145,7 @@ export default function ProductDetailHero({
                     className="text-xs font-black text-white px-2 py-0.5 rounded-full text-center"
                     style={{ backgroundColor: '#16a34a' }}
                   >
-                    -{selectedKit
-                      ? Math.round((1 - selectedKit.preco / (selectedKit.precoOriginal ?? selectedKit.preco)) * 100)
-                      : descontoBase}% OFF
+                    -{descPct > 0 ? descPct : descontoBase}% OFF
                   </span>
                 </div>
               )}
@@ -176,69 +157,56 @@ export default function ProductDetailHero({
               {temEstoqueAtual ? 'Em estoque · pronta entrega' : 'Fora de estoque'}
             </div>
 
-            {/* Kit selector */}
-            {temKits && (
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
-                  Escolha a quantidade
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <button
-                    onClick={() => setSelectedKit(null)}
-                    className={`flex flex-col items-center py-3 px-2 rounded-xl border-2 transition-all duration-200 text-center ${
-                      selectedKit === null
-                        ? 'border-current bg-opacity-5'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
-                    style={selectedKit === null ? { borderColor: corPrincipal, color: corPrincipal, backgroundColor: `${corPrincipal}08` } : {}}
-                  >
-                    <span className="text-xs font-bold leading-tight">1 unidade</span>
-                    <span className="text-sm font-black mt-0.5">{fmtCurrency(preco)}</span>
-                    {precoOriginal && (
-                      <span className="text-[10px] text-gray-400 line-through">{fmtCurrency(precoOriginal)}</span>
-                    )}
-                  </button>
-
-                  {kits.map((kit) => {
-                    const isSelected = selectedKit?.id === kit.id;
-                    const pct = kit.precoOriginal
-                      ? Math.round((1 - kit.preco / kit.precoOriginal) * 100)
-                      : null;
-                    return (
-                      <button
-                        key={kit.id}
-                        onClick={() => setSelectedKit(kit)}
-                        className={`relative flex flex-col items-center py-3 px-2 rounded-xl border-2 transition-all duration-200 text-center ${
-                          isSelected ? '' : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                        }`}
-                        style={isSelected ? { borderColor: corPrincipal, color: corPrincipal, backgroundColor: `${corPrincipal}08` } : {}}
-                      >
-                        {pct && (
-                          <span
-                            className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-black text-white whitespace-nowrap"
-                            style={{ backgroundColor: '#16a34a' }}
-                          >
-                            -{pct}%
-                          </span>
-                        )}
-                        <span className="text-xs font-bold leading-tight">Kit {kit.quantidade}</span>
-                        <span className="text-sm font-black mt-0.5">{fmtCurrency(kit.preco)}</span>
-                        {kit.precoOriginal && (
-                          <span className="text-[10px] text-gray-400 line-through">{fmtCurrency(kit.precoOriginal)}</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedKit?.precoOriginal && (
-                  <p className="mt-2 text-xs font-bold text-emerald-600 flex items-center gap-1">
-                    <span className="text-emerald-500">✓</span>
-                    Você economiza {fmtCurrency(selectedKit.precoOriginal - selectedKit.preco)} neste kit
-                  </p>
-                )}
+            {/* ── Seletor de quantidade ── */}
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
+                Quantidade
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {([1, 2, 3] as const).map((qty) => {
+                  const pct = qty === 2 ? 10 : qty === 3 ? 15 : 0;
+                  const unitPrice = pct > 0 ? Math.round(preco * (1 - pct / 100) * 100) / 100 : preco;
+                  const isSelected = selectedQty === qty;
+                  return (
+                    <button
+                      key={qty}
+                      onClick={() => setSelectedQty(qty)}
+                      className={`relative flex flex-col items-center py-3 px-2 rounded-xl border-2 transition-all duration-200 text-center ${
+                        isSelected ? '' : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                      style={
+                        isSelected
+                          ? { borderColor: corPrincipal, color: corPrincipal, backgroundColor: `${corPrincipal}08` }
+                          : {}
+                      }
+                    >
+                      {pct > 0 && (
+                        <span
+                          className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-black text-white whitespace-nowrap"
+                          style={{ backgroundColor: '#16a34a' }}
+                        >
+                          -{pct}% OFF
+                        </span>
+                      )}
+                      <span className="text-xs font-bold leading-tight">
+                        {qty === 1 ? '1 unidade' : `${qty} unidades`}
+                      </span>
+                      <span className="text-sm font-black mt-0.5">{fmtCurrency(unitPrice)}</span>
+                      <span className="text-[10px] text-gray-400 leading-none">/un</span>
+                    </button>
+                  );
+                })}
               </div>
-            )}
+
+              {descPct > 0 && (
+                <p className="mt-2 text-xs font-bold text-emerald-600 flex items-center gap-1">
+                  <span className="text-emerald-500">✓</span>
+                  Você economiza{' '}
+                  {fmtCurrency(Math.round((preco - precoComDesconto) * selectedQty * 100) / 100)} levando{' '}
+                  {selectedQty} unidades
+                </p>
+              )}
+            </div>
 
             {/* Trust seals — ACIMA dos botões */}
             <div className="grid grid-cols-3 gap-2 py-1">
@@ -299,7 +267,7 @@ export default function ProductDetailHero({
       <div className="flex-1 min-w-0">
         <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 truncate">{product.marca}</p>
         <p className="text-sm font-black text-gray-900 truncate leading-tight">
-          {selectedKit ? selectedKit.nome : product.nome}
+          {product.nome}
         </p>
       </div>
       <div className="flex items-center gap-2.5 shrink-0">
