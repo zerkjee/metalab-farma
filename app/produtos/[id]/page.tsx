@@ -15,6 +15,8 @@ import { prisma } from '@/lib/prisma';
 import { publicStock } from '@/lib/publicProduct';
 import { getInovitannTheme } from '@/lib/inovitann-themes';
 import InovitannProductPage from '@/components/inovitann/InovitannProductPage';
+import DermatroxProductPage from '@/components/maxma/DermatroxProductPage';
+import MelasunProductPage from '@/components/maxma/MelasunProductPage';
 import IngredientResearchCards from '@/components/IngredientResearchCards';
 import { matchResearch } from '@/lib/ingredient-research';
 
@@ -212,7 +214,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <ProductDetailHero product={produto} corPrincipal={corPrincipal} />
 
-      {inovitannTheme ? (
+      {produto.slug === 'dermatrox' ? (
+        <DermatroxProductPage imagemUrl={produto.imagemUrl} />
+      ) : produto.slug === 'melasun' ? (
+        <MelasunProductPage imagemUrl={produto.imagemUrl} />
+      ) : inovitannTheme ? (
         <InovitannProductPage
           theme={inovitannTheme}
           productName={produto.nome}
