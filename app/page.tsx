@@ -6,6 +6,7 @@ import TrustSection from "@/components/TrustSection";
 import QualitySection from "@/components/QualitySection";
 import WhyMetalab from "@/components/WhyMetalab";
 import ProductSection from "@/components/ProductSection";
+import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import StatsSection from "@/components/social-proof/StatsSection";
 import TestimonialsSection from "@/components/social-proof/TestimonialsSection";
@@ -65,6 +66,8 @@ async function getProducts(): Promise<Product[]> {
 
 export default async function Home() {
   const produtos = await getProducts();
+  const inovitannProdutos = produtos.filter((p) => p.slug.startsWith("inovitann-"));
+  const outrosProdutos = produtos.filter((p) => !p.slug.startsWith("inovitann-"));
 
   return (
     <>
@@ -78,41 +81,46 @@ export default async function Home() {
       <TestimonialsSection />
       <VipBanner />
 
-      {/* Seção de Produtos por Categoria */}
-      <section id="produtos" className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
-            <div>
-              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-2">Catálogo Completo</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
-                Nossos Produtos
-              </h2>
-              <p className="mt-2 text-gray-500">
-                {produtos.length} suplementos alimentares com qualidade e procedência garantida
-              </p>
+      {/* ── LINHA INOVITANN ── */}
+      {inovitannProdutos.length > 0 && (
+        <section id="inovitann" className="py-20 bg-gradient-to-b from-[#f5f3ff] to-white border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-start gap-5 mb-12">
+              <div className="w-1.5 h-16 rounded-full flex-shrink-0 bg-gradient-to-b from-[#7c3aed] to-[#4f46e5]" />
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#7c3aed] mb-1">
+                  Linha Exclusiva
+                </p>
+                <h2 className="text-3xl sm:text-4xl font-black text-gray-900">Linha Inovitann</h2>
+                <p className="text-gray-500 mt-2 max-w-xl">
+                  Formulações de alta concentração com ingredientes premium — máxima eficácia e biodisponibilidade.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-gray-400 max-w-xs text-right hidden sm:block">
-              Suplementos alimentares. Este produto não é medicamento.
-              Sem indicação terapêutica. Leia o rótulo.
-            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {inovitannProdutos.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
+      )}
 
-        {produtos.length > 0 ? (
-          <ProductSection
-            title="Todos os Produtos"
-            subtitle="Nosso catálogo completo de suplementos de qualidade"
-            products={produtos}
-            color="#0f2756"
-          />
-        ) : (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div className="text-center">
-              <p className="text-gray-400 text-lg">Nenhum produto disponível no momento</p>
-            </div>
+      {/* ── CATÁLOGO GERAL ── */}
+      {outrosProdutos.length > 0 ? (
+        <ProductSection
+          title="Nossos Produtos"
+          subtitle={`${outrosProdutos.length} suplementos com qualidade e procedência garantida`}
+          products={outrosProdutos}
+          color="#0f2756"
+        />
+      ) : (
+        <section className="py-20 border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <p className="text-gray-400 text-lg">Nenhum produto disponível no momento</p>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <Footer />
       <PurchaseNotification />

@@ -32,14 +32,14 @@ function ProductCard({ product }: ProductCardProps) {
       }}
     >
       {/* Imagem */}
-      <Link href={`/produtos/${product.slug}`} className="block relative w-full h-60 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+      <Link href={`/produtos/${product.slug}`} className="block relative w-full h-72 bg-white overflow-hidden">
         {product.imagemUrl ? (
           <Image
             src={product.imagemUrl}
             alt={product.nome}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+            className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-3">
