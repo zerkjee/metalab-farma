@@ -39,7 +39,7 @@ function ProductCard({ product }: ProductCardProps) {
             alt={product.nome}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-0 transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-3">
