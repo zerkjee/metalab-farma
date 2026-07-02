@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
+import { CUSTOMER_ORDER_SELECT } from "@/lib/orderSelect"
 
 const patchSchema = z.object({
   status: z.enum(['AGUARDANDO_PAGAMENTO', 'PAGAMENTO_APROVADO', 'EM_SEPARACAO', 'ENVIADO', 'ENTREGUE', 'CANCELADO', 'REEMBOLSADO']).optional(),
@@ -19,12 +20,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     const pedido = await prisma.pedido.findUnique({
       where: { id },
-      include: {
-        itens: {
-          include: { produto: { select: { nome: true, imagemUrl: true, slug: true } } },
-        },
-        cupom: true,
-      },
+      select: CUSTOMER_ORDER_SELECT,
     })
 
     if (!pedido) {

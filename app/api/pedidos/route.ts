@@ -9,6 +9,7 @@ import { pedidoRatelimit, getIp } from "@/lib/rateLimit"
 import { gerarNumeroPedido, cupomValido, calcularDesconto, calcularTotal } from "@/lib/orderUtils"
 import type { CupomLike } from "@/lib/orderUtils"
 import { cotarFrete, selecionarOpcaoFrete } from "@/lib/frete"
+import { CUSTOMER_ORDER_SELECT } from "@/lib/orderSelect"
 
 const pedidoSchema = z.object({
   itens: z.array(z.object({
@@ -287,10 +288,7 @@ export async function GET() {
           ...(email ? [{ usuarioId: null, compradorEmail: email }] : []),
         ],
       },
-      include: {
-        itens: { include: { produto: { select: { nome: true, imagemUrl: true } } } },
-        cupom: { select: { codigo: true } },
-      },
+      select: CUSTOMER_ORDER_SELECT,
       orderBy: { criadoEm: "desc" },
       take: 20,
     })
