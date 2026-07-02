@@ -28,26 +28,35 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // All other /admin/* routes require ADMIN or SUPER_ADMIN
+  // Rotas /api/admin/* já checam requireAdmin() individualmente (defesa primária).
+  // Isto aqui é uma segunda camada: se alguma rota nova esquecer a checagem,
+  // o middleware ainda barra antes de chegar no handler.
+  const isApiRoute = pathname.startsWith('/api/admin')
+  const deny = (status: 401 | 403, erro: string) =>
+    isApiRoute
+      ? NextResponse.json({ erro }, { status })
+      : NextResponse.redirect(new URL(status === 401 ? '/admin/login' : '/', request.url))
+
+  // All other /admin/* and /api/admin/* routes require ADMIN or SUPER_ADMIN
   let token
   try {
     token = await getToken(opts)
   } catch {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
+    return deny(401, 'Não autorizado')
   }
 
   if (!token) {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
+    return deny(401, 'Não autorizado')
   }
 
   const role = token.role as string | undefined
   if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
-    return NextResponse.redirect(new URL('/', request.url))
+    return deny(403, 'Acesso negado')
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 }
