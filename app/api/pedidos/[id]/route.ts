@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
 import { CUSTOMER_ORDER_SELECT } from "@/lib/orderSelect"
+import { isAdminRole, requireAdmin } from "@/lib/adminGuard"
 
 const patchSchema = z.object({
   status: z.enum(['AGUARDANDO_PAGAMENTO', 'PAGAMENTO_APROVADO', 'EM_SEPARACAO', 'ENVIADO', 'ENTREGUE', 'CANCELADO', 'REEMBOLSADO']).optional(),
@@ -28,7 +29,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 
     // Cliente só vê o próprio pedido
-    const isAdmin = session?.user?.role?.includes("ADMIN")
+    const isAdmin = isAdminRole(session?.user?.role)
     if (!isAdmin && pedido.usuarioId !== session?.user?.id) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
@@ -49,8 +50,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
 // PATCH /api/pedidos/:id — atualizar status (apenas admin)
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes("ADMIN")) {
+    const session = await requireAdmin()
+    if (!session) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 

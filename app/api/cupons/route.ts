@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { cupomRatelimit } from "@/lib/rateLimit"
 import { logger } from "@/lib/logger"
 
@@ -81,8 +81,7 @@ export async function POST(request: NextRequest) {
 // GET /api/cupons — listar todos (apenas admin)
 export async function GET() {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes("ADMIN")) {
+    if (!(await requireAdmin())) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 

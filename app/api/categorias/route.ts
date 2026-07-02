@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { logger } from "@/lib/logger"
 import { z } from "zod"
 
@@ -37,8 +37,7 @@ export async function GET() {
 // POST /api/categorias — apenas admin
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes("ADMIN")) {
+    if (!(await requireAdmin())) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 

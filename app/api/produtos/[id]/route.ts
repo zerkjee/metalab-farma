@@ -3,7 +3,7 @@ import { z } from "zod"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { publicStock } from "@/lib/publicProduct"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
 
@@ -139,8 +139,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
 // PUT /api/produtos/:id — apenas admin
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes("ADMIN")) {
+    const session = await requireAdmin()
+    if (!session) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 
@@ -212,8 +212,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
 // DELETE /api/produtos/:id — apenas admin (soft delete)
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes("ADMIN")) {
+    const session = await requireAdmin()
+    if (!session) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 

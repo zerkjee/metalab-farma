@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { publicStock } from "@/lib/publicProduct"
-import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/adminGuard"
 import { produtoSchema } from "@/lib/validations"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
@@ -94,8 +94,8 @@ export async function GET(request: NextRequest) {
 // POST /api/produtos — apenas admin
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.role?.includes("ADMIN")) {
+    const session = await requireAdmin()
+    if (!session) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }
 
