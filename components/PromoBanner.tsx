@@ -23,7 +23,7 @@ export default function PromoBanner() {
 
   return (
     <section
-      className="relative w-full aspect-[1717/916] max-h-[70vh] overflow-hidden bg-white"
+      className="relative w-full aspect-[1717/916] max-h-[60vh] overflow-hidden bg-white"
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') setPaused(true); }}
       onPointerLeave={(e) => { if (e.pointerType === 'mouse') setPaused(false); }}
     >
@@ -36,7 +36,7 @@ export default function PromoBanner() {
             fill
             priority={i === 0}
             sizes="100vw"
-            className="object-cover transition-opacity duration-1000 ease-in-out"
+            className="object-contain transition-opacity duration-1000 ease-in-out"
             style={{ opacity: i === current ? 1 : 0 }}
           />
         ))}
