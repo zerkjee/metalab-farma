@@ -1,33 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Receiver } from '@upstash/qstash'
 import { sendOrderConfirmationEmail } from '@/lib/resend'
 import { logger } from '@/lib/logger'
-
-const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
-
-const receiver =
-  process.env.QSTASH_CURRENT_SIGNING_KEY
-    ? new Receiver({
-        currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY,
-        nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY ?? '',
-      })
-    : null
+import { verifyQStashRequest } from '@/lib/qstashAuth'
 
 export async function POST(request: NextRequest) {
   const bodyText = await request.text()
+  const route = 'POST /api/jobs/email-pedido'
 
-  if (receiver) {
-    const signature = request.headers.get('Upstash-Signature') ?? ''
-    const isValid = await receiver.verify({
-      signature,
-      body: bodyText,
-      url: `${BASE}/api/jobs/email-pedido`,
-    }).catch(() => false)
-
-    if (!isValid) {
-      logger.warn('Assinatura QStash inválida', { route: 'POST /api/jobs/email-pedido' })
-      return NextResponse.json({ erro: 'Assinatura inválida' }, { status: 401 })
-    }
+  const verify = await verifyQStashRequest('/api/jobs/email-pedido', bodyText, request.headers.get('Upstash-Signature'))
+  if (!verify.valid) {
+    logger.warn(verify.reason, { route })
+    return NextResponse.json({ erro: verify.reason }, { status: verify.httpStatus })
   }
 
   try {

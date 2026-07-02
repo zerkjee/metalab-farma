@@ -17,41 +17,26 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Receiver } from '@upstash/qstash'
 import { prisma } from '@/lib/prisma'
 import { criarOuLocalizarPedidoTiny, tinyConfigurado, TINY_DISABLED, type TinyPedidoInput } from '@/lib/tiny'
 import { logAudit } from '@/lib/audit'
 import { logger } from '@/lib/logger'
 import type { TinySyncJobPayload } from '@/lib/qstash'
+import { verifyQStashRequest } from '@/lib/qstashAuth'
 
-const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
 const ROUTE = 'POST /api/jobs/tiny-sync-pedido'
 
 // Identidade de sistema para o audit trail (jobs não têm sessão de admin).
 const SYSTEM_ACTOR = { adminId: 'system', adminEmail: 'tiny-sync@sistema' }
 
-const receiver =
-  process.env.QSTASH_CURRENT_SIGNING_KEY
-    ? new Receiver({
-        currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY,
-        nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY ?? '',
-      })
-    : null
-
 export async function POST(request: NextRequest) {
   const bodyText = await request.text()
 
   // ── Autenticação: assinatura QStash ──────────────────────────────────────────
-  if (receiver) {
-    const signature = request.headers.get('Upstash-Signature') ?? ''
-    const isValid = await receiver
-      .verify({ signature, body: bodyText, url: `${BASE}/api/jobs/tiny-sync-pedido` })
-      .catch(() => false)
-
-    if (!isValid) {
-      logger.warn('Assinatura QStash inválida', { route: ROUTE })
-      return NextResponse.json({ erro: 'Assinatura inválida' }, { status: 401 })
-    }
+  const verify = await verifyQStashRequest('/api/jobs/tiny-sync-pedido', bodyText, request.headers.get('Upstash-Signature'))
+  if (!verify.valid) {
+    logger.warn(verify.reason, { route: ROUTE })
+    return NextResponse.json({ erro: verify.reason }, { status: verify.httpStatus })
   }
 
   // ── Validação do payload ─────────────────────────────────────────────────────
