@@ -101,6 +101,10 @@ export default function CheckoutPage() {
   const cartSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Snapshot do pedido para o trackPurchase, preenchido só quando confirmado
   const pendingTrackRef = useRef<{ orderId: string; total: number } | null>(null);
+  // Gerada uma vez por carregamento da página de checkout; reenviada em todo
+  // retry de finishOrder() pra que o servidor detecte duplo-submit/retry de rede
+  // e devolva o pedido já criado em vez de criar outro (ver /api/pedidos).
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     if (!session?.user) return;
@@ -308,6 +312,7 @@ export default function CheckoutPage() {
         cupomCodigo: coupons.discount?.code ?? undefined,
         cupomFreteCodigo: coupons.freeShipping?.code ?? undefined,
         metodoPagamento: selectedPaymentId,
+        idempotencyKey: idempotencyKeyRef.current,
       };
 
       // 1. Cria o pedido

@@ -221,6 +221,12 @@ model Pedido {
   numero String       @unique
   status StatusPedido @default(AGUARDANDO_PAGAMENTO)
 
+  // Chave de idempotência: cliente gera um UUID uma vez por tentativa de checkout.
+  // Retry de rede / duplo-submit com a mesma chave devolve o pedido já criado em
+  // vez de criar um segundo. Nullable pra não quebrar pedidos antigos; unique só
+  // quando presente (Postgres permite múltiplos NULL num índice unique).
+  idempotencyKey String? @unique
+
   subtotal Decimal @db.Decimal(10, 2)
   desconto Decimal @default(0) @db.Decimal(10, 2)
   frete    Decimal @default(0) @db.Decimal(10, 2)

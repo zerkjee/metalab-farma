@@ -29,6 +29,10 @@ const pedidoSchema = z.object({
   cupomCodigo: z.string().regex(/^[A-Za-z0-9_-]{3,20}$/).optional(),
   cupomFreteCodigo: z.string().regex(/^[A-Za-z0-9_-]{3,20}$/).optional(),
   metodoPagamento: z.enum(["PIX", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO"]).default("PIX"),
+  // Gerado uma vez pelo cliente por tentativa de checkout (crypto.randomUUID()).
+  // Retry de rede ou duplo-submit com a mesma chave devolve o pedido já criado
+  // em vez de criar (e cobrar/decrementar estoque) duas vezes.
+  idempotencyKey: z.string().uuid().optional(),
 })
 
 type PedidoInput = z.infer<typeof pedidoSchema>
@@ -50,7 +54,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erro: "Dados inválidos", detalhes: parsed.error.issues }, { status: 400 })
     }
 
-    const { itens, cliente, endereco, frete, cupomCodigo, cupomFreteCodigo, metodoPagamento }: PedidoInput = parsed.data
+    const { itens, cliente, endereco, frete, cupomCodigo, cupomFreteCodigo, metodoPagamento, idempotencyKey }: PedidoInput = parsed.data
+
+    // Idempotência: se já existe um pedido com essa chave, devolve ele em vez de
+    // criar outro — cobre retry de rede e duplo-submit (a proteção do botão no
+    // cliente é só a primeira camada, não uma garantia).
+    if (idempotencyKey) {
+      const existente = await prisma.pedido.findUnique({ where: { idempotencyKey } })
+      if (existente) {
+        logger.info("Pedido idempotente — devolvendo existente", { route: "POST /api/pedidos", pedidoNumero: existente.numero })
+        return NextResponse.json(
+          {
+            pedidoId: existente.id,
+            pedidoNumero: existente.numero,
+            total: Number(existente.total),
+            metodoPagamento: existente.metodoPagamento,
+          },
+          { status: 200 }
+        )
+      }
+    }
 
     // Buscar produtos por id ou slug
     const ids = itens.map((i) => i.produtoId).filter(Boolean) as string[]
@@ -179,6 +202,7 @@ export async function POST(request: NextRequest) {
           return tx.pedido.create({
             data: {
               numero: gerarNumeroPedido(),
+              idempotencyKey: idempotencyKey ?? null,
               status: "AGUARDANDO_PAGAMENTO",
               subtotal,
               desconto: descontoTotal,
@@ -219,9 +243,31 @@ export async function POST(request: NextRequest) {
         if (msg === 'COUPON_INVALID') {
           return NextResponse.json({ erro: "Cupom esgotou enquanto processava o pedido" }, { status: 400 })
         }
-        // P2002 = unique constraint violation (provavelmente no numero) → retry
-        const isUniqueViolation = (e as { code?: string })?.code === 'P2002'
-        if (isUniqueViolation && tentativa < 3) {
+        // P2002 = unique constraint violation. Pode ser em `numero` (colisão de
+        // geração aleatória — retry com numero novo resolve) ou em `idempotencyKey`
+        // (uma requisição concorrente com a MESMA chave venceu a corrida — não é
+        // erro, é o caso de idempotência: devolve o pedido que já foi criado).
+        const prismaError = e as { code?: string; meta?: { target?: string[] } }
+        const isUniqueViolation = prismaError?.code === 'P2002'
+        const violatedIdempotencyKey = isUniqueViolation && prismaError.meta?.target?.includes('idempotencyKey')
+
+        if (violatedIdempotencyKey && idempotencyKey) {
+          const existente = await prisma.pedido.findUnique({ where: { idempotencyKey } })
+          if (existente) {
+            logger.info("Pedido idempotente — corrida concorrente, devolvendo existente", { route: "POST /api/pedidos", pedidoNumero: existente.numero })
+            return NextResponse.json(
+              {
+                pedidoId: existente.id,
+                pedidoNumero: existente.numero,
+                total: Number(existente.total),
+                metodoPagamento: existente.metodoPagamento,
+              },
+              { status: 200 }
+            )
+          }
+        }
+
+        if (isUniqueViolation && !violatedIdempotencyKey && tentativa < 3) {
           logger.warn("Colisão de numero pedido — retry", { tentativa })
           continue
         }

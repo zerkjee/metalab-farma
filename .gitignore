@@ -67,4 +67,6 @@ data/imports/
 *.dump
 /backups/
 metalab-backup-*
+# ...mas migrations do Prisma SÃO .sql legítimos e precisam ser versionados
+!prisma/migrations/**/*.sql
 .env*
