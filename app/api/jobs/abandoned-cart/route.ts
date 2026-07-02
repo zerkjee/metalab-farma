@@ -60,7 +60,17 @@ export async function POST(request: NextRequest) {
       })
       logger.info('E-mail carrinho abandonado (1h) enviado', { cartSessionId, emailMasked: maskEmail(cart.email) })
     } else {
-      // 24h: gerar cupom de 10% e enviar — retry até 3x em colisão de código
+      // Idempotência: trava atômica via cupomCodigo (guard updateMany, mesmo padrão do
+      // webhook de pagamento). Se já tiver um código gravado — seja um cupom que o cliente
+      // digitou no checkout, seja um VOLTA já emitido por uma execução anterior/reentrega
+      // do QStash — não emite outro. Evita cupom duplicado em retry ou reprocessamento.
+      const codigoPrevio = cart.cupomCodigo
+      if (codigoPrevio) {
+        logger.info('Abandoned cart (24h): já existe cupomCodigo, pulando geração de novo cupom', { cartSessionId, jaTinha: codigoPrevio })
+        return NextResponse.json({ ok: true, skipped: true })
+      }
+
+      // Gerar cupom de 10% e enviar — retry até 3x em colisão de código
       const expira = new Date(Date.now() + 48 * 60 * 60 * 1000)
       let codigo = ''
       let tentativa = 0
@@ -79,6 +89,17 @@ export async function POST(request: NextRequest) {
           }
           throw e
         }
+      }
+
+      // Trava atômica: só grava (e só envia o e-mail) se ninguém gravou cupomCodigo
+      // entretanto — fecha a janela de corrida entre a checagem acima e este ponto.
+      const lock = await prisma.cartSession.updateMany({
+        where: { id: cartSessionId, cupomCodigo: null },
+        data: { cupomCodigo: codigo },
+      })
+      if (lock.count === 0) {
+        logger.info('Abandoned cart (24h): corrida perdida, outra execução já emitiu cupom', { cartSessionId })
+        return NextResponse.json({ ok: true, skipped: true })
       }
 
       await sendAbandonedCartEmail({
