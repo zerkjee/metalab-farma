@@ -40,7 +40,7 @@ test.describe('Homepage — Estrutura básica', () => {
   })
 })
 
-test.describe('Homepage — BannerCarousel', () => {
+test.describe('Homepage — PromoBanner', () => {
   test('deve exibir pelo menos um banner', async ({ page }) => {
     // O carousel ocupa o topo da página após o header
     const banner = page.locator('section').first()

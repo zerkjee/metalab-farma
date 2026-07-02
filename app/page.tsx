@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import BannerCarousel from "@/components/BannerCarousel";
+import PromoBanner from "@/components/PromoBanner";
 import CampaignBanners from "@/components/CampaignBanners";
 import TrustSection from "@/components/TrustSection";
 import QualitySection from "@/components/QualitySection";
@@ -72,14 +72,7 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <BannerCarousel />
-      <CampaignBanners />
-      <TrustSection />
-      <QualitySection />
-      <WhyMetalab />
-      <StatsSection />
-      <TestimonialsSection />
-      <VipBanner />
+      <PromoBanner />
 
       {/* ── LINHA INOVITANN ── */}
       {inovitannProdutos.length > 0 && (
@@ -121,6 +114,14 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      <CampaignBanners />
+      <TrustSection />
+      <QualitySection />
+      <WhyMetalab />
+      <StatsSection />
+      <TestimonialsSection />
+      <VipBanner />
 
       <Footer />
       <PurchaseNotification />
