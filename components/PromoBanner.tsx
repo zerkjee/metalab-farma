@@ -23,7 +23,7 @@ export default function PromoBanner() {
 
   return (
     <section
-      className="relative w-full aspect-[1717/916] max-h-[60vh] overflow-hidden bg-white"
+      className="relative w-full aspect-[1718/916] max-h-[60vh] overflow-hidden bg-white"
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') setPaused(true); }}
       onPointerLeave={(e) => { if (e.pointerType === 'mouse') setPaused(false); }}
     >
