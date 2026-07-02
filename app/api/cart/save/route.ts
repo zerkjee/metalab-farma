@@ -58,9 +58,23 @@ export async function POST(request: NextRequest) {
         },
       })
       sessionId = created.id
-      // Only schedule jobs on first cart save (new session)
-      void enqueueJob('/api/jobs/abandoned-cart', { cartSessionId: sessionId, stage: '1h' }, 60 * 60)
-      void enqueueJob('/api/jobs/abandoned-cart', { cartSessionId: sessionId, stage: '24h' }, 24 * 60 * 60)
+
+      // Anti-abuse: só agenda os jobs (e-mail + cupom de 10%) se este e-mail não
+      // recebeu um fluxo de abandono nas últimas 24h — independe de `convertido`,
+      // pra impedir gerar cupom repetido ou mandar spam pro mesmo destinatário
+      // criando sessões novas em sequência. Endpoint é público e sem CAPTCHA
+      // (roda em background enquanto o cliente digita o e-mail no checkout).
+      const desde24h = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      const recente = await prisma.cartSession.count({
+        where: { email: body.email, criadoEm: { gte: desde24h }, id: { not: sessionId } },
+      })
+
+      if (recente === 0) {
+        void enqueueJob('/api/jobs/abandoned-cart', { cartSessionId: sessionId, stage: '1h' }, 60 * 60)
+        void enqueueJob('/api/jobs/abandoned-cart', { cartSessionId: sessionId, stage: '24h' }, 24 * 60 * 60)
+      } else {
+        logger.info('Abandoned-cart jobs pulados — e-mail já recebeu fluxo nas últimas 24h', { route: 'POST /api/cart/save' })
+      }
     }
 
     return NextResponse.json({ ok: true })
