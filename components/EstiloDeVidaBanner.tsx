@@ -3,14 +3,14 @@ import Image from 'next/image';
 
 export default function EstiloDeVidaBanner() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#eeeeee] pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-28">
+    <section className="relative w-full overflow-hidden bg-[#eeeeee] pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pt-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative">
 
-          {/* Marca d'água — logo Metalab gigante, atrás do card */}
+          {/* Marca d'água — logo Metalab, acima do card com um respiro pequeno */}
           <div
             aria-hidden
-            className="pointer-events-none select-none opacity-[0.12] flex justify-center lg:justify-start mb-[-32px] sm:mb-[-56px] lg:mb-[-72px]"
+            className="pointer-events-none select-none opacity-[0.12] flex justify-center lg:justify-start mb-2 sm:mb-3 lg:mb-4"
           >
             <Image
               src="/banners/metalab-logo-watermark.png"
@@ -28,12 +28,12 @@ export default function EstiloDeVidaBanner() {
               alt="Cientista da Metalab analisando fórmula em laboratório"
               width={740}
               height={740}
-              className="w-40 sm:w-56 h-auto object-contain drop-shadow-xl"
+              className="w-56 sm:w-72 h-auto object-contain drop-shadow-xl"
             />
           </div>
 
           {/* Card branco */}
-          <div className="relative bg-white rounded-[2rem] shadow-sm px-6 pt-16 pb-10 sm:px-10 sm:pt-20 sm:pb-14 lg:pt-14 lg:pb-14 lg:pr-[340px]">
+          <div className="relative bg-white rounded-[2rem] shadow-sm px-6 pt-16 pb-10 sm:px-10 sm:pt-20 sm:pb-14 lg:pt-14 lg:pb-14 lg:pr-[400px]">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f2756] uppercase leading-[1.1] max-w-lg">
               A Metalab cuida de você
             </h2>
@@ -52,7 +52,7 @@ export default function EstiloDeVidaBanner() {
             </Link>
 
             {/* Cientista no desktop — vazando por cima da borda do card, alinhado à direita */}
-            <div className="hidden lg:block absolute -top-6 right-6 w-64 xl:w-72">
+            <div className="hidden lg:block absolute -top-6 right-6 w-80 xl:w-96">
               <Image
                 src="/banners/estilo-vida-cientista.png"
                 alt="Cientista da Metalab analisando fórmula em laboratório"
