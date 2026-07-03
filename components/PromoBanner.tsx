@@ -18,7 +18,7 @@ const slides = [
     // Botão de verdade (não faz parte da imagem), ancorado por % no ponto
     // central da faixa branca abaixo dos selinhos "Fórmulas de qualidade" etc.,
     // pra acompanhar a imagem em qualquer tamanho de banner/dispositivo.
-    cta: { text: 'Venha conhecer', anchor: { left: '50%', top: '93%' } },
+    cta: { text: 'Venha conhecer', anchor: { left: '50%', top: '95.5%' } },
     buttonRect: null as { left: string; top: string; width: string; height: string } | null,
   },
   {
@@ -85,16 +85,30 @@ export default function PromoBanner() {
               <Link
                 href={slide.href}
                 aria-label={slide.label}
-                className="absolute -translate-x-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full text-white font-black shadow-lg transition-transform duration-200 hover:scale-105 px-5 py-2.5 text-sm sm:px-8 sm:py-3.5 sm:text-lg md:px-10 md:py-4 md:text-xl"
+                className="absolute -translate-x-1/2 -translate-y-1/2 inline-flex items-center whitespace-nowrap rounded-full text-white font-black shadow-lg transition-transform duration-200 hover:scale-105"
                 style={{
                   left: slide.cta.anchor.left,
                   top: slide.cta.anchor.top,
                   background: 'linear-gradient(135deg, #0f2756, #1e50a8)',
                   boxShadow: '0 8px 24px rgba(15,39,86,0.35)',
+                  // Tamanho em vw/clamp (não em breakpoints fixos) pra manter a mesma
+                  // proporção em relação à imagem (que preenche 100% da largura da
+                  // viewport) em qualquer tamanho de tela — em telas pequenas um botão
+                  // dimensionado só por breakpoint Tailwind ficava alto demais e invadia
+                  // a fileira de selos (Padrão Farmacêutico etc.) desenhada na imagem.
+                  fontSize: 'clamp(9px, 1.6vw, 24px)',
+                  padding: 'clamp(4px, 1vw, 16px) clamp(14px, 2.6vw, 40px)',
+                  gap: 'clamp(3px, 0.6vw, 10px)',
+                  lineHeight: 1.15,
                 }}
               >
                 {slide.cta.text}
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  style={{ width: 'clamp(10px, 1.5vw, 24px)', height: 'clamp(10px, 1.5vw, 24px)' }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
