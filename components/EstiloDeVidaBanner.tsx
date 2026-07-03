@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function EstiloDeVidaBanner() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#eeeeee] py-16 sm:py-24">
+    <section className="relative w-full overflow-hidden bg-[#eeeeee] pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative">
 
@@ -52,7 +52,7 @@ export default function EstiloDeVidaBanner() {
             </Link>
 
             {/* Cientista no desktop — vazando por cima da borda do card, alinhado à direita */}
-            <div className="hidden lg:block absolute -top-16 right-6 w-72 xl:w-80">
+            <div className="hidden lg:block absolute -top-6 right-6 w-64 xl:w-72">
               <Image
                 src="/banners/estilo-vida-cientista.png"
                 alt="Cientista da Metalab analisando fórmula em laboratório"

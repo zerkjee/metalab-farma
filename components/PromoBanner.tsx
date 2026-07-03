@@ -11,12 +11,20 @@ const slides = [
     alt: 'Linha Inovitann Clinical — fórmulas de qualidade, padrão farmacêutico',
     href: '#inovitann',
     label: 'Ver linha Inovitann Clinical',
+    // Sem botão desenhado na própria imagem — a imagem inteira é clicável.
+    nativeAspect: null as string | null,
+    buttonRect: null as { left: string; top: string; width: string; height: string } | null,
   },
   {
     src: '/banners/flebogenol.jpg',
     alt: 'Flebogenol — suplemento alimentar em comprimido, disponível em 30 e 60 comprimidos',
     href: '/produtos/flebogenol-30-comprimidos',
     label: 'Conheça o Flebogenol',
+    // A imagem já tem um botão "Conheça o produto" desenhado nela — só essa área
+    // fica clicável, não o banner inteiro. Retângulo em % da imagem original
+    // (1600×685), pra ficar alinhado em qualquer tamanho de tela.
+    nativeAspect: '1600/685',
+    buttonRect: { left: '3.5%', top: '70%', width: '25%', height: '18%' },
   },
 ];
 
@@ -38,22 +46,54 @@ export default function PromoBanner() {
       onPointerLeave={(e) => { if (e.pointerType === 'mouse') setPaused(false); }}
     >
       {slides.map((slide, i) => (
-        <Link
+        <div
           key={slide.src}
-          href={slide.href}
-          aria-label={slide.label}
-          className="block absolute inset-0 transition-opacity duration-1000 ease-in-out"
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
           style={{ opacity: i === current ? 1 : 0, pointerEvents: i === current ? 'auto' : 'none' }}
         >
-          <Image
-            src={slide.src}
-            alt={slide.alt}
-            fill
-            priority={i === 0}
-            sizes="100vw"
-            className="object-contain"
-          />
-        </Link>
+          {slide.buttonRect ? (
+            <>
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                className="object-contain"
+              />
+              {/* Caixa invisível do mesmo tamanho/posição que a imagem renderizada
+                  (equivalente ao object-contain, mas como elemento de verdade) —
+                  o botão é posicionado em % dentro dela, então acompanha a imagem
+                  em qualquer tamanho de banner/dispositivo. */}
+              <div
+                className="absolute inset-0 m-auto"
+                style={{
+                  aspectRatio: slide.nativeAspect ?? undefined,
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                }}
+              >
+                <Link
+                  href={slide.href}
+                  aria-label={slide.label}
+                  className="absolute"
+                  style={slide.buttonRect}
+                />
+              </div>
+            </>
+          ) : (
+            <Link href={slide.href} aria-label={slide.label} className="block absolute inset-0">
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                className="object-contain"
+              />
+            </Link>
+          )}
+        </div>
       ))}
 
       {slides.length > 1 && (
