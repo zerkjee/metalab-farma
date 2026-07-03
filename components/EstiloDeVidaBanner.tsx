@@ -10,7 +10,7 @@ export default function EstiloDeVidaBanner() {
           {/* Marca d'água — logo Metalab, acima do card com um respiro pequeno */}
           <div
             aria-hidden
-            className="pointer-events-none select-none opacity-[0.12] flex justify-center lg:justify-start mb-2 sm:mb-3 lg:mb-4"
+            className="pointer-events-none select-none opacity-30 flex justify-center lg:justify-start mb-2 sm:mb-3 lg:mb-4"
           >
             <Image
               src="/banners/metalab-logo-watermark.png"
