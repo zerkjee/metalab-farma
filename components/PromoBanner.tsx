@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { nextIndex } from '@/lib/carousel';
+import { nextIndex, prevIndex } from '@/lib/carousel';
 
 const slides = [
   {
@@ -11,8 +11,14 @@ const slides = [
     alt: 'Linha Inovitann Clinical — fórmulas de qualidade, padrão farmacêutico',
     href: '#inovitann',
     label: 'Ver linha Inovitann Clinical',
-    // Sem botão desenhado na própria imagem — a imagem inteira é clicável.
-    nativeAspect: null as string | null,
+    // Imagem tem exatamente o mesmo aspect ratio da section (1718×916), então
+    // sempre preenche 100% do banner — mas mantemos a caixa por consistência
+    // e pra continuar funcionando caso a imagem seja trocada por outra proporção.
+    nativeAspect: '1718/916',
+    // Botão de verdade (não faz parte da imagem), ancorado por % no ponto
+    // central da faixa branca abaixo dos selinhos "Fórmulas de qualidade" etc.,
+    // pra acompanhar a imagem em qualquer tamanho de banner/dispositivo.
+    cta: { text: 'Venha conhecer', anchor: { left: '50%', top: '93%' } },
     buttonRect: null as { left: string; top: string; width: string; height: string } | null,
   },
   {
@@ -24,6 +30,7 @@ const slides = [
     // fica clicável, não o banner inteiro. Retângulo em % da imagem original
     // (1600×685), pra ficar alinhado em qualquer tamanho de tela.
     nativeAspect: '1600/685',
+    cta: null as { text: string; anchor: { left: string; top: string } } | null,
     buttonRect: { left: '3.5%', top: '70%', width: '25%', height: '18%' },
   },
 ];
@@ -39,6 +46,9 @@ export default function PromoBanner() {
     return () => clearTimeout(timer);
   }, [current, paused]);
 
+  const goPrev = () => setCurrent((c) => prevIndex(c, slides.length));
+  const goNext = () => setCurrent((c) => nextIndex(c, slides.length));
+
   return (
     <section
       className="relative w-full aspect-[1718/916] overflow-hidden bg-white"
@@ -51,50 +61,77 @@ export default function PromoBanner() {
           className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
           style={{ opacity: i === current ? 1 : 0, pointerEvents: i === current ? 'auto' : 'none' }}
         >
-          {slide.buttonRect ? (
-            <>
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                priority={i === 0}
-                sizes="100vw"
-                className="object-contain"
-              />
-              {/* Caixa invisível do mesmo tamanho/posição que a imagem renderizada
-                  (equivalente ao object-contain, mas como elemento de verdade) —
-                  o botão é posicionado em % dentro dela, então acompanha a imagem
-                  em qualquer tamanho de banner/dispositivo. */}
-              <div
-                className="absolute inset-0 m-auto"
+          <Image
+            src={slide.src}
+            alt={slide.alt}
+            fill
+            priority={i === 0}
+            sizes="100vw"
+            className="object-contain"
+          />
+          {/* Caixa invisível do mesmo tamanho/posição que a imagem renderizada
+              (equivalente ao object-contain, mas como elemento de verdade) —
+              o CTA é posicionado em % dentro dela, então acompanha a imagem
+              em qualquer tamanho de banner/dispositivo. */}
+          <div
+            className="absolute inset-0 m-auto"
+            style={{
+              aspectRatio: slide.nativeAspect ?? undefined,
+              maxWidth: '100%',
+              maxHeight: '100%',
+            }}
+          >
+            {slide.cta ? (
+              <Link
+                href={slide.href}
+                aria-label={slide.label}
+                className="absolute -translate-x-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full text-white font-black shadow-lg transition-transform duration-200 hover:scale-105 px-5 py-2.5 text-sm sm:px-8 sm:py-3.5 sm:text-lg md:px-10 md:py-4 md:text-xl"
                 style={{
-                  aspectRatio: slide.nativeAspect ?? undefined,
-                  maxWidth: '100%',
-                  maxHeight: '100%',
+                  left: slide.cta.anchor.left,
+                  top: slide.cta.anchor.top,
+                  background: 'linear-gradient(135deg, #0f2756, #1e50a8)',
+                  boxShadow: '0 8px 24px rgba(15,39,86,0.35)',
                 }}
               >
-                <Link
-                  href={slide.href}
-                  aria-label={slide.label}
-                  className="absolute"
-                  style={slide.buttonRect}
-                />
-              </div>
-            </>
-          ) : (
-            <Link href={slide.href} aria-label={slide.label} className="block absolute inset-0">
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                priority={i === 0}
-                sizes="100vw"
-                className="object-contain"
+                {slide.cta.text}
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ) : slide.buttonRect ? (
+              <Link
+                href={slide.href}
+                aria-label={slide.label}
+                className="absolute"
+                style={slide.buttonRect}
               />
-            </Link>
-          )}
+            ) : null}
+          </div>
         </div>
       ))}
+
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={goPrev}
+            aria-label="Slide anterior"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 border border-[#0f2756]/15 shadow-md flex items-center justify-center text-[#0f2756] hover:bg-white hover:scale-110 transition-all duration-200 z-10"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={goNext}
+            aria-label="Próximo slide"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 border border-[#0f2756]/15 shadow-md flex items-center justify-center text-[#0f2756] hover:bg-white hover:scale-110 transition-all duration-200 z-10"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
 
       {slides.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-10">
