@@ -17,11 +17,11 @@ const metrics = [
 export default function QualitySection() {
   return (
     <section id="qualidade" className="border-t border-gray-100 overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_480px]">
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr]">
 
         {/* Painel de texto */}
         <div className="py-20 px-6 sm:px-10 lg:px-16 xl:px-20 bg-white">
-          <div className="max-w-xl">
+          <div className="max-w-xl lg:max-w-none">
             <p className="text-xs font-bold text-[#0f2756] uppercase tracking-[0.2em] mb-4">
               Qualidade e Tecnologia
             </p>
