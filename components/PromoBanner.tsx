@@ -146,24 +146,6 @@ export default function PromoBanner() {
           </button>
         </>
       )}
-
-      {slides.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-10">
-          {slides.map((s, i) => (
-            <button
-              key={s.src}
-              onClick={() => setCurrent(i)}
-              aria-label={`Ir para banner ${i + 1}`}
-              className="rounded-full transition-all duration-300"
-              style={{
-                width: i === current ? '24px' : '8px',
-                height: '8px',
-                backgroundColor: i === current ? '#0f2756' : 'rgba(15,39,86,0.3)',
-              }}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 }
