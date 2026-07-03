@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import PromoBanner from "@/components/PromoBanner";
-import FlebogenolBanner from "@/components/FlebogenolBanner";
+import EstiloDeVidaBanner from "@/components/EstiloDeVidaBanner";
 import TrustSection from "@/components/TrustSection";
 import QualitySection from "@/components/QualitySection";
 import WhyMetalab from "@/components/WhyMetalab";
@@ -115,7 +115,7 @@ export default async function Home() {
         </section>
       )}
 
-      <FlebogenolBanner />
+      <EstiloDeVidaBanner />
       <TrustSection />
       <QualitySection />
       <WhyMetalab />
