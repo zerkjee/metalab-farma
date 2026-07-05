@@ -1,48 +1,110 @@
 'use client';
 
-import { ButtonHTMLAttributes, forwardRef } from 'react';
+import React from 'react';
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
-type Size = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'navy' | 'secondary' | 'ghost' | 'outline';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
-  loading?: boolean;
+export interface ButtonProps {
+  children: React.ReactNode;
+  /** Visual treatment. Primary = brand blue solid CTA. */
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  disabled?: boolean;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+  style?: React.CSSProperties;
 }
 
-const variantClasses: Record<Variant, string> = {
-  primary: 'text-white shadow-lg shadow-purple-950/30 hover:brightness-110',
-  secondary: 'border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700',
-  danger: 'border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20',
-  ghost: 'text-slate-400 hover:text-slate-200 hover:bg-slate-800',
+const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
+  sm: { padding: '8px 16px', font: 'var(--text-label-md)', height: 36 },
+  md: { padding: '11px 22px', font: 'var(--text-label-md)', height: 44 },
+  lg: { padding: '15px 28px', font: 'var(--text-heading-sm)', height: 52 },
 };
 
-const sizeClasses: Record<Size, string> = {
-  sm: 'h-8 px-3 text-xs rounded-lg',
-  md: 'h-10 px-4 text-sm rounded-xl',
-  lg: 'h-12 px-6 text-sm rounded-2xl',
+const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
+  primary: {
+    background: 'var(--brand-solid)',
+    color: 'var(--text-on-brand)',
+    border: '1px solid transparent',
+  },
+  navy: {
+    background: 'var(--navy-solid)',
+    color: 'var(--text-on-navy)',
+    border: '1px solid transparent',
+  },
+  secondary: {
+    background: 'var(--brand-subtle)',
+    color: 'var(--blue-700)',
+    border: '1px solid transparent',
+  },
+  ghost: {
+    background: 'transparent',
+    color: 'var(--text-primary)',
+    border: '1px solid transparent',
+  },
+  outline: {
+    background: 'transparent',
+    color: 'var(--text-primary)',
+    border: '1px solid var(--border-default)',
+  },
 };
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', loading = false, children, disabled, className = '', style, ...props }, ref) => (
+export function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  onClick,
+  type = 'button',
+  style,
+}: ButtonProps) {
+  const v = variantStyles[variant] || variantStyles.primary;
+  const s = sizeStyles[size] || sizeStyles.md;
+  const [hover, setHover] = React.useState(false);
+  const [active, setActive] = React.useState(false);
+
+  let background = v.background;
+  if (!disabled && hover) {
+    if (variant === 'primary') background = 'var(--brand-solid-hover)';
+    else if (variant === 'navy') background = 'var(--navy-solid-hover)';
+    else if (variant === 'secondary') background = 'var(--brand-subtle-hover)';
+    else if (variant === 'ghost') background = 'var(--neutral-50)';
+    else if (variant === 'outline') background = 'var(--neutral-50)';
+  }
+
+  return (
     <button
-      ref={ref}
-      disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 font-bold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      style={variant === 'primary' ? { background: 'linear-gradient(135deg, #0f2756, #1e50a8)', ...style } : style}
-      {...props}
+      type={type}
+      disabled={disabled}
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => {
+        setHover(false);
+        setActive(false);
+      }}
+      onMouseDown={() => setActive(true)}
+      onMouseUp={() => setActive(false)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        borderRadius: 'var(--radius-full)',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'var(--transition-fast)',
+        transform: active && !disabled ? 'scale(0.97)' : 'scale(1)',
+        opacity: disabled ? 0.45 : 1,
+        whiteSpace: 'nowrap',
+        ...s,
+        ...v,
+        background,
+        ...style,
+      }}
     >
-      {loading && (
-        <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      )}
       {children}
     </button>
-  ),
-);
-Button.displayName = 'Button';
+  );
+}
 
 export default Button;

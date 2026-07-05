@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Fredoka, Nunito_Sans } from "next/font/google";
 import CartDrawer from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
@@ -9,10 +9,19 @@ import Analytics from "@/components/analytics/Analytics";
 import CookieBanner from "@/components/cookies/CookieBanner";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Display (headings, nomes de produto, números de destaque)
+const fredoka = Fredoka({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+// Body / UI (resto do texto)
+const nunitoSans = Nunito_Sans({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
   display: "swap",
 });
 
@@ -76,7 +85,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} h-full antialiased`}
+      className={`${fredoka.variable} ${nunitoSans.variable} h-full antialiased`}
     >
       <head>
         <script

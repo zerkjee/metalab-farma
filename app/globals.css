@@ -1,25 +1,266 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f8f9fb;
-  --foreground: #0f1f3d;
-  --primary: #0f2756;
-  --primary-dark: #081a42;
-  --accent: #1e50a8;
+/* ============================================================
+   MetaLab Design System — Foundation tokens
+   Fase 1: tokens + fontes + biblioteca components/ui/
+   Ver DESIGN-MIGRATION.md para o mapa de migração (Fase 2).
+   Fontes (Fredoka / Nunito Sans) são injetadas por next/font
+   via --font-display e --font-body (app/layout.tsx).
+   ============================================================ */
 
-  /* Tokens institucionais */
-  --surface: #ffffff;
-  --surface-muted: #f0f4fa;
-  --border: #dde3ef;
-  --border-subtle: #eef1f8;
-  --text-muted: #5a6a8a;
-  --text-label: #2d3f5f;
+:root {
+  /* ---- Base: Blue (cor principal / CTAs) ---- */
+  --blue-50:  #EFF8FD;
+  --blue-100: #DCEFFA;
+  --blue-200: #B7DFF3;
+  --blue-300: #93CEEC;
+  --blue-400: #79BDE3; /* azul da marca (amostra exata) */
+  --blue-500: #5CA8D1; /* hover/active */
+  --blue-600: #4693BE;
+  --blue-700: #35759A;
+  --blue-800: #295A78;
+  --blue-900: #1E4258;
+
+  /* ---- Base: Navy (secundária / texto / header / footer) ---- */
+  --navy-50:  #EEF0F5;
+  --navy-100: #D6DAE6;
+  --navy-200: #ADB4CB;
+  --navy-300: #838EAF;
+  --navy-400: #5A6690;
+  --navy-500: #323C64; /* navy da marca (amostra exata) */
+  --navy-600: #2A3355;
+  --navy-700: #222A46;
+  --navy-800: #1A2036;
+  --navy-900: #121628;
+
+  /* ---- Base: Gold (reservado a "premium/exclusivo") ---- */
+  --gold-50:  #FBF3E3;
+  --gold-100: #F6E3BE;
+  --gold-300: #EBC786;
+  --gold-400: #E0AC55;
+  --gold-500: #C9903A; /* usar com parcimônia */
+  --gold-600: #A5762E;
+
+  /* ---- Base: Neutral (quente, off-navy — nunca cinza puro) ---- */
+  --neutral-0:   #FFFFFF;
+  --neutral-25:  #FBFBFA;
+  --neutral-50:  #F6F6F5;
+  --neutral-100: #EEEEEC;
+  --neutral-200: #E1E1DE;
+  --neutral-300: #C9C9C7;
+  --neutral-400: #A6A7A9;
+  --neutral-500: #85868C;
+  --neutral-600: #63646C;
+  --neutral-700: #46474E;
+  --neutral-800: #2C2D33;
+  --neutral-900: #1B1C21;
+
+  /* ---- Semantic: feedback ---- */
+  --success-50:  #E9F6EE;
+  --success-500: #3B9B5D;
+  --success-600: #2F7D4B;
+  --warning-50:  #FBF3E3;
+  --warning-500: #C9903A;
+  --warning-600: #A5762E;
+  --danger-50:   #FBEAEA;
+  --danger-500:  #C64B4B;
+  --danger-600:  #A63B3B;
+  --info-50:     var(--blue-50);
+  --info-500:    var(--blue-500);
+
+  /* ---- Semantic: surfaces ---- */
+  --surface-page:    var(--neutral-25);
+  --surface-card:    var(--neutral-0);
+  --surface-sunken:  var(--neutral-50);
+  --surface-inverse: var(--navy-500);
+  --surface-brand:   var(--blue-400);
+  --surface-overlay: rgba(26, 32, 54, 0.48);
+
+  /* ---- Semantic: text ---- */
+  --text-primary:   var(--navy-500);
+  --text-secondary: var(--neutral-600);
+  --text-muted:     var(--neutral-500);
+  --text-on-brand:  var(--neutral-0);
+  --text-on-navy:   var(--neutral-0);
+  --text-link:      var(--blue-600);
+
+  /* ---- Semantic: borders ---- */
+  --border-subtle:  var(--neutral-200);
+  --border-default: var(--neutral-300);
+  --border-strong:  var(--navy-300);
+  --border-brand:   var(--blue-400);
+
+  /* ---- Semantic: interactive ---- */
+  --brand-solid:        var(--blue-400);
+  --brand-solid-hover:  var(--blue-500);
+  --brand-solid-active: var(--blue-600);
+  --brand-subtle:       var(--blue-50);
+  --brand-subtle-hover: var(--blue-100);
+
+  --navy-solid:        var(--navy-500);
+  --navy-solid-hover:  var(--navy-600);
+  --navy-solid-active: var(--navy-700);
+
+  --focus-ring: var(--blue-400);
+
+  /* ---- Type (Fredoka display / Nunito Sans body) ---- */
+  --text-display-xl: 600 56px/1.08 var(--font-display);
+  --text-display-lg: 600 40px/1.12 var(--font-display);
+  --text-display-md: 600 32px/1.16 var(--font-display);
+  --text-display-sm: 600 24px/1.2  var(--font-display);
+
+  --text-heading-lg: 700 22px/1.3  var(--font-body);
+  --text-heading-md: 700 18px/1.35 var(--font-body);
+  --text-heading-sm: 700 15px/1.4  var(--font-body);
+
+  --text-body-lg: 400 18px/1.6  var(--font-body);
+  --text-body-md: 400 16px/1.6  var(--font-body);
+  --text-body-sm: 400 14px/1.55 var(--font-body);
+
+  --text-label-md: 600 14px/1.3 var(--font-body);
+  --text-label-sm: 700 12px/1.3 var(--font-body);
+  --text-caption:  500 12px/1.4 var(--font-body);
+
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-wide:  0.04em;
+
+  /* ---- Spacing (base 4px) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  --container-max: 1200px;
+  --container-padding: var(--space-6);
+
+  /* ---- Radius (nomes coincidem com Tailwind → sobrescrevem rounded-*) ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* ---- Shadows (quentes / navy em baixa opacidade — nunca preto) ---- */
+  --shadow-xs: 0 1px 2px rgba(50, 60, 100, 0.06);
+  --shadow-sm: 0 2px 6px rgba(50, 60, 100, 0.08);
+  --shadow-md: 0 6px 16px rgba(50, 60, 100, 0.10);
+  --shadow-lg: 0 14px 32px rgba(50, 60, 100, 0.14);
+  --shadow-focus: 0 0 0 3px rgba(121, 189, 227, 0.45);
+
+  /* ---- Transitions ---- */
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Aliases app antigos (mantidos p/ compatibilidade do body) ---- */
+  --background: var(--surface-page);
+  --foreground: var(--text-primary);
 }
 
+/* ============================================================
+   Ponte Tailwind v4 — expõe tokens como utilitários.
+   Cores de marca não colidem com gray/slate/blue nativos.
+   ============================================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  /* Fontes */
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+
+  /* App base */
+  --color-background: var(--surface-page);
+  --color-foreground: var(--text-primary);
+
+  /* Marca — azul-claro (DEFAULT + escala) */
+  --color-brand: var(--blue-400);
+  --color-brand-hover: var(--blue-500);
+  --color-brand-active: var(--blue-600);
+  --color-brand-subtle: var(--blue-50);
+  --color-brand-50: var(--blue-50);
+  --color-brand-100: var(--blue-100);
+  --color-brand-200: var(--blue-200);
+  --color-brand-300: var(--blue-300);
+  --color-brand-400: var(--blue-400);
+  --color-brand-500: var(--blue-500);
+  --color-brand-600: var(--blue-600);
+  --color-brand-700: var(--blue-700);
+  --color-brand-800: var(--blue-800);
+  --color-brand-900: var(--blue-900);
+
+  /* Navy — texto/header/footer (DEFAULT + escala) */
+  --color-navy: var(--navy-500);
+  --color-navy-hover: var(--navy-600);
+  --color-navy-active: var(--navy-700);
+  --color-navy-50: var(--navy-50);
+  --color-navy-100: var(--navy-100);
+  --color-navy-200: var(--navy-200);
+  --color-navy-300: var(--navy-300);
+  --color-navy-400: var(--navy-400);
+  --color-navy-500: var(--navy-500);
+  --color-navy-600: var(--navy-600);
+  --color-navy-700: var(--navy-700);
+  --color-navy-800: var(--navy-800);
+  --color-navy-900: var(--navy-900);
+
+  /* Gold — somente premium (DEFAULT + escala) */
+  --color-gold: var(--gold-500);
+  --color-gold-50: var(--gold-50);
+  --color-gold-100: var(--gold-100);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+
+  /* Neutros quentes (substituem o neutral nativo) */
+  --color-neutral-0: var(--neutral-0);
+  --color-neutral-25: var(--neutral-25);
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-900: var(--neutral-900);
+
+  /* Semânticos de feedback */
+  --color-success: var(--success-500);
+  --color-success-subtle: var(--success-50);
+  --color-warning: var(--warning-500);
+  --color-warning-subtle: var(--warning-50);
+  --color-danger: var(--danger-500);
+  --color-danger-subtle: var(--danger-50);
+  --color-info: var(--info-500);
+  --color-info-subtle: var(--info-50);
+
+  /* Superfícies */
+  --color-surface-page: var(--surface-page);
+  --color-surface-card: var(--surface-card);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-inverse: var(--surface-inverse);
+
+  /* Texto (como cores → text-ink, text-ink-muted, text-link…) */
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-on-brand: var(--text-on-brand);
+  --color-on-navy: var(--text-on-navy);
+  --color-link: var(--text-link);
+
+  /* Bordas (como cores → border-line, border-line-strong, border-brand) */
+  --color-line: var(--border-subtle);
+  --color-line-default: var(--border-default);
+  --color-line-strong: var(--border-strong);
 }
 
 html {
@@ -29,7 +270,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter, "Inter", Arial, sans-serif);
+  font-family: var(--font-body, "Nunito Sans", system-ui, -apple-system, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
