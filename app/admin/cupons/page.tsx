@@ -110,7 +110,7 @@ function CouponTypeBadge({ kind }: { kind: AdminCouponKind }) {
 
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
-      isShipping ? 'bg-cyan-500/15 text-cyan-300' : 'bg-purple-500/15 text-purple-300'
+      isShipping ? 'bg-navy-50 text-navy-600' : 'bg-brand-50 text-brand-700'
     }`}>
       <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
       {couponKindLabels[kind]}
@@ -120,18 +120,18 @@ function CouponTypeBadge({ kind }: { kind: AdminCouponKind }) {
 
 function RulePanel() {
   return (
-    <div className="rounded-2xl border border-purple-700/30 bg-purple-600/10 p-4">
+    <div className="rounded-2xl border border-line bg-brand-50 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-purple-300">Regra de combinação</p>
-          <p className="mt-1 text-sm font-semibold text-white">O cliente pode usar 1 cupom de desconto + 1 cupom de frete grátis.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-700">Regra de combinação</p>
+          <p className="mt-1 text-sm font-semibold text-navy">O cliente pode usar 1 cupom de desconto + 1 cupom de frete grátis.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-2 rounded-xl bg-slate-950/40 px-3 py-2 text-xs font-semibold text-emerald-300">
+          <span className="inline-flex items-center gap-2 rounded-xl bg-surface-card px-3 py-2 text-xs font-semibold text-success">
             <CheckCircle2 className="h-4 w-4" strokeWidth={1.8} />
             Desconto + Frete
           </span>
-          <span className="inline-flex items-center gap-2 rounded-xl bg-slate-950/40 px-3 py-2 text-xs font-semibold text-red-300">
+          <span className="inline-flex items-center gap-2 rounded-xl bg-surface-card px-3 py-2 text-xs font-semibold text-danger">
             <Ban className="h-4 w-4" strokeWidth={1.8} />
             2 descontos bloqueado
           </span>
@@ -169,32 +169,32 @@ function CouponForm({
         if (canSubmit) onSubmit(values);
       }}
     >
-      <div className="rounded-2xl border border-slate-700/60 bg-slate-900/70 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-300">Regra visual</p>
-        <p className="mt-2 text-sm text-slate-300">Cadastre cupons separados: um de desconto e outro de frete grátis. Na loja, dois cupons de desconto não devem ser combinados.</p>
+      <div className="rounded-2xl border border-line bg-surface-sunken p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-700">Regra visual</p>
+        <p className="mt-2 text-sm text-ink-secondary">Cadastre cupons separados: um de desconto e outro de frete grátis. Na loja, dois cupons de desconto não devem ser combinados.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Código</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Código</label>
           <input
             value={values.code}
             onChange={(event) => setField('code', normalizeCode(event.target.value))}
             placeholder="PRIMEIRACOMPRA30"
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-slate-200 outline-none focus:border-purple-500"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-ink outline-none focus:border-brand"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Nome</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Nome</label>
           <input
             value={values.name}
             onChange={(event) => setField('name', event.target.value)}
             placeholder="Primeira compra 30% OFF"
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Tipo</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Tipo</label>
           <select
             value={values.kind}
             onChange={(event) => {
@@ -206,25 +206,25 @@ function CouponForm({
                 fixedValue: kind === 'free_shipping' ? 0 : current.fixedValue,
               }));
             }}
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
           >
             <option value="discount">Desconto</option>
             <option value="free_shipping">Frete grátis</option>
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Status</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Status</label>
           <select
             value={values.status}
             onChange={(event) => setField('status', event.target.value as AdminCouponStatus)}
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
           >
             <option value="active">Ativo</option>
             <option value="inactive">Inativo</option>
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Porcentagem</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Porcentagem</label>
           <input
             type="number"
             min="0"
@@ -232,11 +232,11 @@ function CouponForm({
             disabled={isShipping}
             value={values.percentage}
             onChange={(event) => setField('percentage', Number(event.target.value))}
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand disabled:cursor-not-allowed disabled:opacity-40"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Valor fixo</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Valor fixo</label>
           <input
             type="number"
             min="0"
@@ -244,43 +244,43 @@ function CouponForm({
             disabled={isShipping}
             value={values.fixedValue}
             onChange={(event) => setField('fixedValue', Number(event.target.value))}
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand disabled:cursor-not-allowed disabled:opacity-40"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Validade</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Validade</label>
           <input
             type="date"
             value={values.validUntil}
             onChange={(event) => setField('validUntil', event.target.value)}
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-400">Limite de uso</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Limite de uso</label>
           <input
             type="number"
             min="0"
             value={values.usageLimit}
             onChange={(event) => setField('usageLimit', Number(event.target.value))}
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
           />
         </div>
         <div className="md:col-span-2">
-          <label className="mb-1 block text-xs text-slate-400">Valor mínimo de compra</label>
+          <label className="mb-1 block text-xs text-ink-secondary">Valor mínimo de compra</label>
           <input
             type="number"
             min="0"
             step="0.01"
             value={values.minimumOrderValue}
             onChange={(event) => setField('minimumOrderValue', Number(event.target.value))}
-            className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500"
+            className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand"
           />
         </div>
       </div>
 
       {discountConflict && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300">
+        <div className="rounded-xl border border-danger/30 bg-danger-subtle px-4 py-3 text-sm font-semibold text-danger">
           Use porcentagem ou valor fixo para o desconto. Não combine os dois no mesmo cupom.
         </div>
       )}
@@ -289,15 +289,14 @@ function CouponForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl px-4 py-2 text-sm text-slate-400 transition-all hover:bg-slate-700 hover:text-slate-200"
+          className="rounded-full px-4 py-2 text-sm text-ink-muted transition-all hover:bg-surface-sunken hover:text-navy"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={!canSubmit}
-          className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+          className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-all hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitLabel}
         </button>
@@ -441,14 +440,13 @@ export default function AdminCupons() {
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400">Promoções e retenção</p>
-          <h2 className="mt-1 text-xl font-black text-white">Cupons</h2>
-          <p className="mt-1 text-xs text-slate-500">{loading ? 'Carregando...' : `${coupons.length} cupons no banco de dados`}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-700">Promoções e retenção</p>
+          <h2 className="mt-1 text-xl font-display text-navy">Cupons</h2>
+          <p className="mt-1 text-xs text-ink-muted">{loading ? 'Carregando...' : `${coupons.length} cupons no banco de dados`}</p>
         </div>
         <button
           onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-on-brand transition-all hover:bg-brand-hover"
         >
           <Plus className="h-4 w-4" strokeWidth={1.8} />
           Novo cupom
@@ -464,12 +462,12 @@ export default function AdminCupons() {
         ].map((metric) => {
           const Icon = metric.icon;
           return (
-            <div key={metric.label} className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-300">
+            <div key={metric.label} className="rounded-2xl border border-line bg-surface-card shadow-sm p-4">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
                 <Icon className="h-4 w-4" strokeWidth={1.8} />
               </div>
-              <p className="text-xs text-slate-500">{metric.label}</p>
-              <p className="mt-1 text-2xl font-black text-white">{metric.value}</p>
+              <p className="text-xs text-ink-muted">{metric.label}</p>
+              <p className="mt-1 font-display text-2xl text-navy">{metric.value}</p>
             </div>
           );
         })}
@@ -478,13 +476,13 @@ export default function AdminCupons() {
       <RulePanel />
 
       <div className="flex flex-wrap gap-3">
-        <div className="flex min-w-64 flex-1 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2">
-          <Search className="h-4 w-4 flex-shrink-0 text-slate-500" strokeWidth={1.8} />
+        <div className="flex min-w-64 flex-1 items-center gap-2 rounded-full border border-line bg-surface-card px-3 py-2">
+          <Search className="h-4 w-4 flex-shrink-0 text-ink-muted" strokeWidth={1.8} />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar por código, nome, tipo ou status..."
-            className="w-full bg-transparent text-sm text-slate-300 outline-none placeholder:text-slate-600"
+            className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-muted"
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -492,10 +490,10 @@ export default function AdminCupons() {
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+              className={`rounded-full px-3 py-2 text-xs font-semibold transition-all ${
                 statusFilter === status
-                  ? 'bg-purple-600 text-white'
-                  : 'border border-slate-700 bg-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-brand text-on-brand'
+                  : 'border border-line bg-surface-card text-ink-muted hover:text-navy'
               }`}
             >
               {status === 'all' ? 'Todos' : couponStatusLabels[status]}
@@ -505,10 +503,10 @@ export default function AdminCupons() {
             <button
               key={kind}
               onClick={() => setKindFilter(kind)}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-all ${
                 kindFilter === kind
-                  ? 'bg-slate-200 text-slate-950'
-                  : 'border border-slate-700 bg-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-navy text-on-navy'
+                  : 'border border-line bg-surface-card text-ink-muted hover:text-navy'
               }`}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.8} />
@@ -518,19 +516,19 @@ export default function AdminCupons() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/70">
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface-card shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1040px]">
             <thead>
-              <tr className="border-b border-slate-700/50">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500">Cupom</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500">Tipo</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Valor</th>
-                <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">Uso total</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Compra mínima</th>
-                <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">Validade</th>
-                <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">Status</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500">Ações</th>
+              <tr className="border-b border-line">
+                <th className="px-5 py-3 text-left text-xs font-semibold text-ink-muted">Cupom</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-ink-muted">Tipo</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-ink-muted">Valor</th>
+                <th className="px-5 py-3 text-center text-xs font-semibold text-ink-muted">Uso total</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-ink-muted">Compra mínima</th>
+                <th className="px-5 py-3 text-center text-xs font-semibold text-ink-muted">Validade</th>
+                <th className="px-5 py-3 text-center text-xs font-semibold text-ink-muted">Status</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-ink-muted">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -540,67 +538,67 @@ export default function AdminCupons() {
                 return (
                   <tr
                     key={coupon.id}
-                    className={`transition-colors hover:bg-slate-700/30 ${index < filteredCoupons.length - 1 ? 'border-b border-slate-700/30' : ''}`}
+                    className={`transition-colors hover:bg-surface-sunken ${index < filteredCoupons.length - 1 ? 'border-b border-line' : ''}`}
                   >
                     <td className="px-5 py-4">
-                      <p className="text-sm font-black tracking-wide text-white">{coupon.code}</p>
-                      <p className="mt-1 text-xs text-slate-500">{coupon.name}</p>
+                      <p className="text-sm font-bold tracking-wide text-navy">{coupon.code}</p>
+                      <p className="mt-1 text-xs text-ink-muted">{coupon.name}</p>
                     </td>
                     <td className="px-5 py-4">
                       <CouponTypeBadge kind={coupon.kind} />
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <p className="text-sm font-black text-white">{couponValue(coupon)}</p>
+                      <p className="text-sm font-bold text-navy">{couponValue(coupon)}</p>
                     </td>
                     <td className="px-5 py-4">
                       <div className="mx-auto w-32">
                         <div className="mb-1 flex justify-between text-[10px]">
-                          <span className="text-slate-500">Usos</span>
-                          <span className="font-semibold text-slate-300">{coupon.usedTotal}/{coupon.usageLimit}</span>
+                          <span className="text-ink-muted">Usos</span>
+                          <span className="font-semibold text-ink-secondary">{coupon.usedTotal}/{coupon.usageLimit}</span>
                         </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-slate-700">
-                          <div className="h-full rounded-full bg-purple-600" style={{ width: `${usagePct}%` }} />
+                        <div className="h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+                          <div className="h-full rounded-full bg-brand" style={{ width: `${usagePct}%` }} />
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-right text-sm font-semibold text-slate-300">
+                    <td className="px-5 py-4 text-right text-sm font-semibold text-ink-secondary">
                       {coupon.minimumOrderValue > 0 ? fmtCurrency(coupon.minimumOrderValue) : 'Sem mínimo'}
                     </td>
-                    <td className="px-5 py-4 text-center text-sm text-slate-300">
+                    <td className="px-5 py-4 text-center text-sm text-ink-secondary">
                       {fmtDate(coupon.validUntil)}
                     </td>
                     <td className="px-5 py-4 text-center">
                       <StatusBadge
                         label={couponStatusLabels[coupon.status]}
-                        color={coupon.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-600/30 text-slate-400'}
+                        color={coupon.status === 'active' ? 'bg-success-subtle text-success' : 'bg-surface-sunken text-ink-muted'}
                       />
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => openEdit(coupon)}
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-purple-600/10 hover:text-purple-300"
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-all hover:bg-brand-50 hover:text-brand-700"
                           title="Editar"
                         >
                           <Edit3 className="h-4 w-4" strokeWidth={1.8} />
                         </button>
                         <button
                           onClick={() => duplicateCoupon(coupon)}
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-cyan-600/10 hover:text-cyan-300"
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-all hover:bg-navy-50 hover:text-navy-600"
                           title="Duplicar"
                         >
                           <Copy className="h-4 w-4" strokeWidth={1.8} />
                         </button>
                         <button
                           onClick={() => toggleStatus(coupon.id)}
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-amber-600/10 hover:text-amber-300"
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-all hover:bg-warning-subtle hover:text-warning"
                           title={coupon.status === 'active' ? 'Desativar' : 'Ativar'}
                         >
                           {coupon.status === 'active' ? <Ban className="h-4 w-4" strokeWidth={1.8} /> : <CheckCircle2 className="h-4 w-4" strokeWidth={1.8} />}
                         </button>
                         <button
                           onClick={() => deleteCoupon(coupon.id)}
-                          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-red-600/10 hover:text-red-300"
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-all hover:bg-danger-subtle hover:text-danger"
                           title="Excluir"
                         >
                           <Trash2 className="h-4 w-4" strokeWidth={1.8} />
@@ -616,8 +614,8 @@ export default function AdminCupons() {
 
         {filteredCoupons.length === 0 && (
           <div className="px-5 py-10 text-center">
-            <p className="text-sm font-semibold text-slate-300">Nenhum cupom encontrado</p>
-            <p className="mt-1 text-xs text-slate-500">Ajuste a busca ou os filtros para ver outros cupons.</p>
+            <p className="text-sm font-semibold text-ink-secondary">Nenhum cupom encontrado</p>
+            <p className="mt-1 text-xs text-ink-muted">Ajuste a busca ou os filtros para ver outros cupons.</p>
           </div>
         )}
       </div>

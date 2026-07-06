@@ -62,14 +62,19 @@ export default function AdminAvaliacoesPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex gap-2 border-b border-slate-800">
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-navy font-display text-lg">Moderação de avaliações</h2>
+        <p className="text-ink-muted text-xs">Aprove, despublique ou exclua avaliações enviadas pelos clientes</p>
+      </div>
+
+      <div className="flex gap-2 border-b border-line">
         {(['pendentes', 'aprovadas', 'todas'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2.5 text-sm font-bold capitalize border-b-2 transition-colors ${
-              tab === t ? 'border-purple-500 text-white' : 'border-transparent text-slate-400 hover:text-slate-200'
+            className={`px-4 py-2.5 text-sm font-semibold capitalize border-b-2 transition-colors ${
+              tab === t ? 'border-brand text-navy' : 'border-transparent text-ink-muted hover:text-navy'
             }`}
           >
             {t}
@@ -78,42 +83,42 @@ export default function AdminAvaliacoesPage() {
       </div>
 
       {loading ? (
-        <p className="text-slate-400">Carregando...</p>
+        <p className="text-ink-secondary">Carregando...</p>
       ) : avaliacoes.length === 0 ? (
-        <p className="text-slate-500 text-center py-12">Nenhuma avaliação nesta lista.</p>
+        <p className="text-ink-muted text-center py-12">Nenhuma avaliação nesta lista.</p>
       ) : (
         <div className="space-y-3">
           {avaliacoes.map((a) => (
-            <div key={a.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+            <div key={a.id} className="bg-surface-card border border-line shadow-sm rounded-2xl p-5">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-yellow-400 text-lg">{'★'.repeat(a.nota)}<span className="text-slate-700">{'★'.repeat(5 - a.nota)}</span></span>
+                    <span className="text-gold-500 text-lg">{'★'.repeat(a.nota)}<span className="text-neutral-200">{'★'.repeat(5 - a.nota)}</span></span>
                     {a.aprovada ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Aprovada</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-success-subtle text-success border border-success/20">Aprovada</span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pendente</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-warning-subtle text-warning border border-warning/20">Pendente</span>
                     )}
                   </div>
-                  {a.titulo && <p className="text-white font-bold text-sm mb-1">{a.titulo}</p>}
-                  {a.texto && <p className="text-slate-300 text-sm leading-relaxed">{a.texto}</p>}
+                  {a.titulo && <p className="text-navy font-bold text-sm mb-1">{a.titulo}</p>}
+                  {a.texto && <p className="text-ink-secondary text-sm leading-relaxed">{a.texto}</p>}
                 </div>
-                <div className="text-right text-xs text-slate-500 flex-shrink-0">
+                <div className="text-right text-xs text-ink-muted flex-shrink-0">
                   {new Date(a.criadoEm).toLocaleDateString('pt-BR')}
                 </div>
               </div>
-              <div className="flex items-center justify-between gap-4 pt-3 border-t border-slate-800">
-                <div className="text-xs text-slate-400">
-                  <span className="text-slate-300">{a.usuario.nome}</span> · {a.usuario.email}
+              <div className="flex items-center justify-between gap-4 pt-3 border-t border-line">
+                <div className="text-xs text-ink-secondary">
+                  <span className="text-ink">{a.usuario.nome}</span> · {a.usuario.email}
                   <br />
-                  <span className="text-purple-400">{a.produto.nome}</span>
+                  <span className="text-brand-700">{a.produto.nome}</span>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                   {!a.aprovada && (
                     <button
                       onClick={() => setAprovada(a.id, true)}
                       disabled={busy === a.id}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-full text-xs font-bold bg-success text-white hover:opacity-90 transition-opacity disabled:opacity-50"
                     >
                       Aprovar
                     </button>
@@ -122,7 +127,7 @@ export default function AdminAvaliacoesPage() {
                     <button
                       onClick={() => setAprovada(a.id, false)}
                       disabled={busy === a.id}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-full text-xs font-bold bg-warning text-white hover:opacity-90 transition-opacity disabled:opacity-50"
                     >
                       Despublicar
                     </button>
@@ -130,7 +135,7 @@ export default function AdminAvaliacoesPage() {
                   <button
                     onClick={() => deletar(a.id)}
                     disabled={busy === a.id}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-danger-subtle text-danger border border-danger/20 hover:bg-danger/15 transition-colors disabled:opacity-50"
                   >
                     Excluir
                   </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, Search, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -92,30 +92,25 @@ export default function AdminTopbar({ onMenuToggle }: Props) {
   }, [notifOpen]);
 
   return (
-    <header
-      className="h-16 border-b border-slate-800 flex items-center px-4 gap-3 flex-shrink-0"
-      style={{ background: '#0f172a' }}
-    >
+    <header className="h-16 bg-surface-card border-b border-line flex items-center px-4 gap-3 flex-shrink-0">
       {/* Hambúrguer — mobile */}
       <button
         onClick={onMenuToggle}
-        className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-all active:scale-95"
+        className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-surface-sunken border border-line text-ink-muted hover:text-navy hover:bg-brand-50 transition-all active:scale-95"
         aria-label="Abrir menu"
       >
         <Menu className="w-4 h-4" />
       </button>
 
       {/* Título da página */}
-      <h1 className="text-white font-bold text-base flex-1 truncate">{title}</h1>
+      <h1 className="text-navy font-display text-base flex-1 truncate">{title}</h1>
 
       {/* Busca — desktop */}
-      <div className="hidden md:flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 w-52">
-        <svg className="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+      <div className="hidden md:flex items-center gap-2 bg-surface-sunken border border-line rounded-full px-3 py-2 w-52">
+        <Search className="w-4 h-4 text-ink-muted flex-shrink-0" strokeWidth={2} />
         <input
           placeholder="Buscar..."
-          className="bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none w-full"
+          className="bg-transparent text-sm text-ink placeholder-ink-muted outline-none w-full font-sans"
         />
       </div>
 
@@ -123,50 +118,47 @@ export default function AdminTopbar({ onMenuToggle }: Props) {
       <div className="relative flex-shrink-0" ref={notifRef}>
         <button
           onClick={() => setNotifOpen((v) => !v)}
-          className="relative w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-all active:scale-95"
+          className="relative w-9 h-9 rounded-full bg-surface-sunken border border-line flex items-center justify-center text-ink-muted hover:text-navy hover:bg-brand-50 transition-all active:scale-95"
           aria-label="Notificações"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
+          <Bell className="w-4 h-4" strokeWidth={2} />
           {notifications.length > 0 && (
-            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-purple-500 rounded-full text-[9px] text-white font-black flex items-center justify-center px-0.5">
+            <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-brand rounded-full text-[9px] text-on-brand font-bold flex items-center justify-center px-0.5">
               {notifications.length > 9 ? '9+' : notifications.length}
             </span>
           )}
         </button>
 
         {notifOpen && (
-          <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-              <p className="text-white font-bold text-sm">Notificações</p>
-              <span className="text-slate-500 text-xs">{notifications.length} recentes</span>
+          <div className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-surface-card border border-line rounded-2xl shadow-md z-50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-line flex items-center justify-between">
+              <p className="text-navy font-display text-sm">Notificações</p>
+              <span className="text-ink-muted text-xs">{notifications.length} recentes</span>
             </div>
             <div className="max-h-72 overflow-y-auto">
               {notifications.length === 0 ? (
-                <p className="text-slate-500 text-xs text-center py-8">Nenhuma notificação recente</p>
+                <p className="text-ink-muted text-xs text-center py-8">Nenhuma notificação recente</p>
               ) : (
                 notifications.slice(0, 10).map((n) => (
                   <Link
                     key={n.id}
                     href={n.link}
                     onClick={() => setNotifOpen(false)}
-                    className="flex items-start gap-3 px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-800/50 block"
+                    className="flex items-start gap-3 px-4 py-3 hover:bg-surface-sunken transition-colors border-b border-line block"
                   >
                     <span className="text-base mt-0.5 flex-shrink-0">{tipoIcon[n.tipo] ?? '📋'}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-slate-200 text-xs leading-snug">{n.texto}</p>
-                      <p className="text-slate-500 text-[10px] mt-0.5">há {timeAgo(n.criadoEm)}</p>
+                      <p className="text-ink text-xs leading-snug">{n.texto}</p>
+                      <p className="text-ink-muted text-[10px] mt-0.5">há {timeAgo(n.criadoEm)}</p>
                     </div>
                   </Link>
                 ))
               )}
             </div>
-            <div className="px-4 py-2.5 border-t border-slate-800">
+            <div className="px-4 py-2.5 border-t border-line">
               <button
                 onClick={fetchNotifications}
-                className="text-purple-400 text-xs font-medium hover:text-purple-300 w-full text-center"
+                className="text-link text-xs font-medium hover:underline w-full text-center"
               >
                 Atualizar
               </button>
@@ -177,22 +169,19 @@ export default function AdminTopbar({ onMenuToggle }: Props) {
 
       {/* Perfil — desktop */}
       <div className="hidden md:flex items-center gap-2.5 flex-shrink-0">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold"
-          style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
-        >
+        <div className="w-9 h-9 rounded-full bg-brand flex items-center justify-center text-on-brand text-sm font-display">
           {userInitial}
         </div>
         <div>
-          <p className="text-white text-xs font-bold leading-none">{userName}</p>
-          <p className="text-slate-500 text-[10px]">Metalab Store</p>
+          <p className="text-navy text-xs font-semibold leading-none">{userName}</p>
+          <p className="text-ink-muted text-[10px]">Metalab Store</p>
         </div>
       </div>
 
       {/* Sair — desktop */}
       <button
         onClick={handleLogout}
-        className="hidden md:flex h-9 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-400 transition-all hover:border-purple-500/40 hover:bg-slate-700 hover:text-slate-100 active:scale-95 flex-shrink-0"
+        className="hidden md:flex h-9 items-center gap-2 rounded-full border border-line bg-surface-sunken px-3 text-xs font-semibold text-ink-muted transition-all hover:border-brand hover:bg-brand-50 hover:text-navy active:scale-95 flex-shrink-0"
         title="Sair do painel"
       >
         <LogOut className="h-3.5 w-3.5" strokeWidth={1.9} />

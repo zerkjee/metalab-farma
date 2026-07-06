@@ -28,36 +28,47 @@ import {
   orderStatusMeta,
 } from '@/utils/adminOrders';
 
+// Estilo visual (badge) por status — aplica as cores do design system sobre o
+// label/lógica reais definidos em utils/adminOrders (sem alterar a lógica de status).
+const statusPillClasses: Record<AdminOrderStatus, string> = {
+  aguardando_pagamento: 'bg-warning-subtle text-warning',
+  pagamento_aprovado: 'bg-brand-50 text-brand-700',
+  em_separacao: 'bg-navy-50 text-navy-600',
+  enviado: 'bg-brand-100 text-brand-700',
+  entregue: 'bg-success-subtle text-success',
+  cancelado: 'bg-danger-subtle text-danger',
+};
+
 function Timeline({ order }: { order: AdminOrderDetail }) {
   const steps = order.status === 'cancelado'
     ? order.timeline
     : orderStatusFlow.map((status) => order.timeline.find((step) => step.status === status)).filter(Boolean);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-      <h3 className="mb-5 text-sm font-black text-white">Timeline do pedido</h3>
+    <div className="rounded-2xl border border-line bg-surface-card shadow-sm p-5">
+      <h3 className="mb-5 text-sm font-display text-navy">Timeline do pedido</h3>
       <div className="flex flex-col gap-0">
         {steps.map((step, index) => step && (
           <div key={`${step.status}-${index}`} className="flex gap-3">
             <div className="flex flex-col items-center">
               <div
                 className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                  step.done ? 'border-purple-500 bg-purple-600 shadow-lg shadow-purple-950/30' : 'border-slate-600 bg-slate-950'
+                  step.done ? 'border-brand bg-brand' : 'border-line bg-surface-sunken'
                 }`}
               >
-                {step.done && <PackageCheck className="h-3.5 w-3.5 text-white" strokeWidth={2.2} />}
+                {step.done && <PackageCheck className="h-3.5 w-3.5 text-on-brand" strokeWidth={2.2} />}
               </div>
               {index < steps.length - 1 && (
-                <div className={`my-1 min-h-9 w-0.5 flex-1 ${step.done ? 'bg-purple-500/40' : 'bg-slate-700'}`} />
+                <div className={`my-1 min-h-9 w-0.5 flex-1 ${step.done ? 'bg-brand-200' : 'bg-line'}`} />
               )}
             </div>
             <div className="pb-5">
-              <p className={`text-sm font-semibold ${step.done ? 'text-slate-100' : 'text-slate-600'}`}>
+              <p className={`text-sm font-semibold ${step.done ? 'text-ink' : 'text-ink-muted'}`}>
                 {step.label}
               </p>
-              <p className="mt-0.5 text-xs text-slate-500">{step.date}</p>
+              <p className="mt-0.5 text-xs text-ink-muted">{step.date}</p>
               {step.current && (
-                <span className="mt-2 inline-flex rounded-full bg-purple-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-purple-300">
+                <span className="mt-2 inline-flex rounded-full bg-brand-50 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-700">
                   Status atual
                 </span>
               )}
@@ -79,12 +90,12 @@ const statusToApi: Record<AdminOrderStatus, string> = {
 };
 
 function tinyBadgeMeta(status: string | null): { cls: string; label: string; spinner: boolean } {
-  if (status === 'PENDENTE') return { cls: 'bg-yellow-500/15 text-yellow-300', label: 'Pendente', spinner: false };
-  if (status === 'PROCESSANDO') return { cls: 'bg-blue-500/15 text-blue-300', label: 'Processando', spinner: true };
-  if (status === 'ENVIADO') return { cls: 'bg-emerald-500/15 text-emerald-300', label: 'Sincronizado', spinner: false };
-  if (status === 'ERRO') return { cls: 'bg-red-500/15 text-red-300', label: 'Erro no sync', spinner: false };
-  if (status !== null) return { cls: 'bg-slate-700/50 text-slate-400', label: status, spinner: false };
-  return { cls: 'bg-slate-700/50 text-slate-400', label: 'Não iniciado', spinner: false };
+  if (status === 'PENDENTE') return { cls: 'bg-warning-subtle text-warning', label: 'Pendente', spinner: false };
+  if (status === 'PROCESSANDO') return { cls: 'bg-brand-50 text-brand-700', label: 'Processando', spinner: true };
+  if (status === 'ENVIADO') return { cls: 'bg-success-subtle text-success', label: 'Sincronizado', spinner: false };
+  if (status === 'ERRO') return { cls: 'bg-danger-subtle text-danger', label: 'Erro no sync', spinner: false };
+  if (status !== null) return { cls: 'bg-surface-sunken text-ink-muted', label: status, spinner: false };
+  return { cls: 'bg-surface-sunken text-ink-muted', label: 'Não iniciado', spinner: false };
 }
 
 export default function AdminPedidoDetalhe() {
@@ -120,17 +131,17 @@ export default function AdminPedidoDetalhe() {
   if (fetching) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
       </div>
     );
   }
 
   if (!order) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/70 p-8 text-center">
-        <p className="text-xl font-black text-white">Pedido não encontrado</p>
-        <p className="mt-2 text-sm text-slate-500">Verifique o ID e tente novamente.</p>
-        <Link href="/admin/pedidos" className="mt-5 rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl border border-line bg-surface-card shadow-sm p-8 text-center">
+        <p className="text-xl font-display text-navy">Pedido não encontrado</p>
+        <p className="mt-2 text-sm text-ink-muted">Verifique o ID e tente novamente.</p>
+        <Link href="/admin/pedidos" className="mt-5 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
           Voltar para pedidos
         </Link>
       </div>
@@ -224,15 +235,15 @@ export default function AdminPedidoDetalhe() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/admin/pedidos')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-slate-400 transition-all hover:bg-slate-700 hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface-card text-ink-muted transition-all hover:bg-surface-sunken hover:text-navy"
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={1.8} />
           </button>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400">Detalhe do pedido</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-700">Detalhe do pedido</p>
             <div className="mt-1 flex flex-wrap items-center gap-3">
-              <h2 className="text-xl font-black text-white">{order.id}</h2>
-              <StatusBadge label={status.label} color={`${status.bg} ${status.text}`} />
+              <h2 className="text-xl font-display text-navy">{order.id}</h2>
+              <StatusBadge label={status.label} color={statusPillClasses[order.status]} />
             </div>
           </div>
         </div>
@@ -240,14 +251,14 @@ export default function AdminPedidoDetalhe() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={printOrder}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:bg-slate-700"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-card px-4 py-2.5 text-sm font-semibold text-ink-secondary transition-all hover:bg-surface-sunken"
           >
             <Printer className="h-4 w-4" strokeWidth={1.8} />
             Imprimir
           </button>
           <button
             onClick={() => copyCode(order.paymentCode)}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:bg-slate-700"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-card px-4 py-2.5 text-sm font-semibold text-ink-secondary transition-all hover:bg-surface-sunken"
           >
             <Copy className="h-4 w-4" strokeWidth={1.8} />
             Copiar código
@@ -255,7 +266,7 @@ export default function AdminPedidoDetalhe() {
           <button
             onClick={() => void updateStatus('enviado')}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-cyan-500/10 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition-all hover:bg-cyan-500/15 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-navy-50 px-4 py-2.5 text-sm font-semibold text-navy-600 transition-all hover:bg-navy-100 disabled:opacity-50"
           >
             <Send className="h-4 w-4" strokeWidth={1.8} />
             Marcar enviado
@@ -263,7 +274,7 @@ export default function AdminPedidoDetalhe() {
           <button
             onClick={() => void updateStatus('cancelado')}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition-all hover:bg-red-500/15 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-danger-subtle px-4 py-2.5 text-sm font-semibold text-danger transition-all hover:bg-danger/15 disabled:opacity-50"
           >
             <Ban className="h-4 w-4" strokeWidth={1.8} />
             Cancelar
@@ -280,10 +291,10 @@ export default function AdminPedidoDetalhe() {
         ].map((item) => {
           const Icon = item.icon;
           return (
-            <div key={item.label} className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-              <Icon className="mb-3 h-4 w-4 text-purple-300" strokeWidth={1.8} />
-              <p className="text-xs text-slate-500">{item.label}</p>
-              <p className="mt-1 text-2xl font-black text-white">{item.value}</p>
+            <div key={item.label} className="rounded-2xl border border-line bg-surface-card shadow-sm p-4">
+              <Icon className="mb-3 h-4 w-4 text-brand-700" strokeWidth={1.8} />
+              <p className="text-xs text-ink-muted">{item.label}</p>
+              <p className="mt-1 font-display text-2xl text-navy">{item.value}</p>
             </div>
           );
         })}
@@ -291,61 +302,61 @@ export default function AdminPedidoDetalhe() {
 
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <main className="space-y-5">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+          <section className="rounded-2xl border border-line bg-surface-card shadow-sm p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h3 className="text-sm font-black text-white">Produtos do pedido</h3>
-              <p className="text-xs text-slate-500">{formatOrderDate(order.date)}</p>
+              <h3 className="text-sm font-display text-navy">Produtos do pedido</h3>
+              <p className="text-xs text-ink-muted">{formatOrderDate(order.date)}</p>
             </div>
             <div className="space-y-3">
               {order.items.map((item) => (
-                <div key={item.sku} className="grid gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:grid-cols-[56px_1fr_80px_120px] sm:items-center">
-                  <div className="h-14 w-14 rounded-xl bg-slate-800 bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${item.image})` }} />
+                <div key={item.sku} className="grid gap-3 rounded-2xl border border-line bg-surface-sunken p-4 sm:grid-cols-[56px_1fr_80px_120px] sm:items-center">
+                  <div className="h-14 w-14 rounded-xl bg-surface-card bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${item.image})` }} />
                   <div>
-                    <p className="text-sm font-bold text-white">{item.name}</p>
-                    <p className="text-xs text-slate-500">{item.sku}</p>
+                    <p className="text-sm font-bold text-navy">{item.name}</p>
+                    <p className="text-xs text-ink-muted">{item.sku}</p>
                   </div>
-                  <p className="text-sm font-semibold text-slate-300">{item.qty} un.</p>
-                  <p className="text-sm font-black text-white">{fmtCurrency(item.qty * item.unitPrice)}</p>
+                  <p className="text-sm font-semibold text-ink-secondary">{item.qty} un.</p>
+                  <p className="text-sm font-bold text-navy">{fmtCurrency(item.qty * item.unitPrice)}</p>
                 </div>
               ))}
             </div>
           </section>
 
           <section className="grid gap-5 lg:grid-cols-2">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-              <h3 className="mb-4 text-sm font-black text-white">Cliente</h3>
-              <p className="text-sm font-bold text-white">{order.customer.name}</p>
-              <p className="mt-1 text-xs text-slate-400">{order.customer.email}</p>
-              <p className="text-xs text-slate-400">{order.customer.phone}</p>
-              <p className="mt-3 text-xs text-slate-500">Documento: {order.customer.document}</p>
+            <div className="rounded-2xl border border-line bg-surface-card shadow-sm p-5">
+              <h3 className="mb-4 text-sm font-display text-navy">Cliente</h3>
+              <p className="text-sm font-bold text-navy">{order.customer.name}</p>
+              <p className="mt-1 text-xs text-ink-secondary">{order.customer.email}</p>
+              <p className="text-xs text-ink-secondary">{order.customer.phone}</p>
+              <p className="mt-3 text-xs text-ink-muted">Documento: {order.customer.document}</p>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-              <h3 className="mb-4 text-sm font-black text-white">Endereço</h3>
-              <p className="text-sm font-bold text-white">{order.address.street}, {order.address.number}</p>
-              <p className="mt-1 text-xs text-slate-400">{order.address.complement} · {order.address.district}</p>
-              <p className="text-xs text-slate-400">{order.address.city}/{order.address.state} · {order.address.zip}</p>
+            <div className="rounded-2xl border border-line bg-surface-card shadow-sm p-5">
+              <h3 className="mb-4 text-sm font-display text-navy">Endereço</h3>
+              <p className="text-sm font-bold text-navy">{order.address.street}, {order.address.number}</p>
+              <p className="mt-1 text-xs text-ink-secondary">{order.address.complement} · {order.address.district}</p>
+              <p className="text-xs text-ink-secondary">{order.address.city}/{order.address.state} · {order.address.zip}</p>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-            <h3 className="mb-4 text-sm font-black text-white">Histórico</h3>
+          <section className="rounded-2xl border border-line bg-surface-card shadow-sm p-5">
+            <h3 className="mb-4 text-sm font-display text-navy">Histórico</h3>
             <div className="space-y-3">
               {order.history.map((entry, index) => (
-                <div key={`${entry.event}-${index}`} className="rounded-xl border border-slate-800 bg-slate-950/50 p-3">
-                  <p className="text-sm font-semibold text-slate-200">{entry.event}</p>
-                  <p className="mt-1 text-xs text-slate-500">{entry.date} · {entry.actor}</p>
+                <div key={`${entry.event}-${index}`} className="rounded-xl border border-line bg-surface-sunken p-3">
+                  <p className="text-sm font-semibold text-ink">{entry.event}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{entry.date} · {entry.actor}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-            <h3 className="mb-4 text-sm font-black text-white">Observações internas</h3>
+          <section className="rounded-2xl border border-line bg-surface-card shadow-sm p-5">
+            <h3 className="mb-4 text-sm font-display text-navy">Observações internas</h3>
             <textarea
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              className="min-h-28 w-full resize-none rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-slate-200 outline-none transition-all focus:border-purple-500"
+              className="min-h-28 w-full resize-none rounded-xl border border-line-default bg-surface-sunken px-3 py-2.5 text-sm text-ink outline-none transition-all focus:border-brand"
             />
           </section>
         </main>
@@ -353,16 +364,16 @@ export default function AdminPedidoDetalhe() {
         <aside className="space-y-5 xl:sticky xl:top-20 xl:self-start">
           <Timeline order={order} />
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-            <h3 className="mb-4 text-sm font-black text-white">Operação</h3>
+          <div className="rounded-2xl border border-line bg-surface-card shadow-sm p-5">
+            <h3 className="mb-4 text-sm font-display text-navy">Operação</h3>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Atualizar status</label>
+                <label className="mb-1 block text-xs text-ink-secondary">Atualizar status</label>
                 <select
                   value={order.status}
                   onChange={(event) => void updateStatus(event.target.value as AdminOrderStatus)}
                   disabled={saving}
-                  className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500 disabled:opacity-50"
+                  className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand disabled:opacity-50"
                 >
                   {(['aguardando_pagamento', 'pagamento_aprovado', 'em_separacao', 'enviado', 'entregue', 'cancelado'] as AdminOrderStatus[]).map((item) => (
                     <option key={item} value={item}>{orderStatusMeta[item].label}</option>
@@ -370,30 +381,30 @@ export default function AdminPedidoDetalhe() {
                 </select>
               </div>
 
-              <div className="rounded-xl bg-slate-950/60 p-3">
-                <p className="text-xs text-slate-500">Pagamento</p>
-                <p className="mt-1 text-sm font-bold text-white">{order.payment}</p>
-                <p className="text-xs text-slate-500">{order.paymentCode}</p>
+              <div className="rounded-xl bg-surface-sunken p-3">
+                <p className="text-xs text-ink-muted">Pagamento</p>
+                <p className="mt-1 text-sm font-bold text-navy">{order.payment}</p>
+                <p className="text-xs text-ink-muted">{order.paymentCode}</p>
               </div>
 
-              <div className="rounded-xl bg-slate-950/60 p-3">
-                <p className="text-xs text-slate-500">Cupom</p>
-                <p className="mt-1 text-sm font-bold text-white">{order.coupon ?? 'Sem cupom'}</p>
+              <div className="rounded-xl bg-surface-sunken p-3">
+                <p className="text-xs text-ink-muted">Cupom</p>
+                <p className="mt-1 text-sm font-bold text-navy">{order.coupon ?? 'Sem cupom'}</p>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Código de rastreio</label>
+                <label className="mb-1 block text-xs text-ink-secondary">Código de rastreio</label>
                 <div className="flex gap-2">
                   <input
                     value={trackingCode}
                     onChange={(e) => setTrackingCode(e.target.value)}
                     placeholder="Aguardando envio"
-                    className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-200 outline-none focus:border-purple-500 placeholder:text-slate-600"
+                    className="flex-1 rounded-xl border border-line-default bg-surface-card px-3 py-2 text-sm text-ink outline-none focus:border-brand placeholder:text-ink-muted"
                   />
                   <button
                     onClick={() => void saveTrackingCode()}
                     disabled={saving}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-purple-500 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-2 text-xs font-semibold text-on-brand transition-all hover:bg-brand-hover disabled:opacity-50"
                   >
                     <Save className="h-3.5 w-3.5" strokeWidth={1.8} />
                     Salvar
@@ -402,15 +413,15 @@ export default function AdminPedidoDetalhe() {
               </div>
 
               {saveError && (
-                <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400">
+                <p className="rounded-xl border border-danger/30 bg-danger-subtle px-3 py-2 text-xs font-semibold text-danger">
                   {saveError}
                 </p>
               )}
 
-              <div className="space-y-2 border-t border-slate-800 pt-3">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Tiny ERP</p>
-                <div className="rounded-xl bg-slate-950/60 p-3">
-                  <p className="text-xs text-slate-500">Sincronização</p>
+              <div className="space-y-2 border-t border-line pt-3">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink-muted">Tiny ERP</p>
+                <div className="rounded-xl bg-surface-sunken p-3">
+                  <p className="text-xs text-ink-muted">Sincronização</p>
                   <div className="mt-1.5 flex items-center gap-2">
                     {(() => {
                       const b = tinyBadgeMeta(order.tinySyncStatus);
@@ -422,28 +433,28 @@ export default function AdminPedidoDetalhe() {
                       );
                     })()}
                     {order.tinyPedidoId != null && (
-                      <span className="text-xs text-slate-500">Pedido #{order.tinyPedidoId}</span>
+                      <span className="text-xs text-ink-muted">Pedido #{order.tinyPedidoId}</span>
                     )}
                   </div>
                 </div>
-                <div className="rounded-xl bg-slate-950/60 p-3">
-                  <p className="text-xs text-slate-500">Nota fiscal</p>
+                <div className="rounded-xl bg-surface-sunken p-3">
+                  <p className="text-xs text-ink-muted">Nota fiscal</p>
                   {order.nfNumero ? (
                     <div className="mt-1 flex items-center gap-2">
-                      <p className="text-xs font-bold text-slate-200">NF-e #{order.nfNumero}</p>
+                      <p className="text-xs font-bold text-ink">NF-e #{order.nfNumero}</p>
                       {order.nfUrl && (
                         <a
                           href={order.nfUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-purple-400 transition-colors hover:text-purple-300"
+                          className="text-brand-700 transition-colors hover:text-brand-800"
                         >
                           <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
                         </a>
                       )}
                     </div>
                   ) : (
-                    <p className="mt-1 text-xs text-slate-500">Não emitida</p>
+                    <p className="mt-1 text-xs text-ink-muted">Não emitida</p>
                   )}
                 </div>
                 {(order.tinySyncStatus === 'ERRO' || order.tinySyncStatus === null) && order.status !== 'aguardando_pagamento' && (
@@ -451,14 +462,14 @@ export default function AdminPedidoDetalhe() {
                     <button
                       onClick={() => void handleResync()}
                       disabled={resyncing}
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-purple-600/15 px-3 py-2.5 text-xs font-semibold text-purple-300 transition-all hover:bg-purple-600/25 disabled:opacity-50"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-brand-50 px-3 py-2.5 text-xs font-semibold text-brand-700 transition-all hover:bg-brand-100 disabled:opacity-50"
                     >
                       <RefreshCw className={`h-3.5 w-3.5 ${resyncing ? 'animate-spin' : ''}`} strokeWidth={1.8} />
                       {resyncing ? 'Sincronizando...' : 'Re-sincronizar'}
                     </button>
                     {resyncMsg && (
                       <p className={`mt-2 rounded-xl px-3 py-2 text-xs font-semibold ${
-                        resyncMsg.startsWith('Erro') ? 'border border-red-500/30 bg-red-500/10 text-red-400' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                        resyncMsg.startsWith('Erro') ? 'border border-danger/30 bg-danger-subtle text-danger' : 'border border-success/30 bg-success-subtle text-success'
                       }`}>
                         {resyncMsg}
                       </p>

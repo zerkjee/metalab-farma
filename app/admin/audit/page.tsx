@@ -21,24 +21,26 @@ interface AuditResponse {
   totalPaginas: number;
 }
 
+// Cor semântica por ação (design system). Verde = criação, azul = atualização,
+// vermelho = remoção, âmbar = reprovação, navy = ações neutras/administrativas.
 const acaoCor: Record<string, string> = {
-  'cupom.criado':         'text-emerald-400',
-  'cupom.atualizado':     'text-sky-400',
-  'cupom.deletado':       'text-red-400',
-  'admin.criado':         'text-violet-400',
-  'admin.removido':       'text-orange-400',
-  'produto.criado':       'text-emerald-400',
-  'produto.atualizado':   'text-sky-400',
-  'produto.desativado':   'text-red-400',
-  'banner.criado':        'text-emerald-400',
-  'banner.atualizado':    'text-sky-400',
-  'banner.deletado':      'text-red-400',
-  'avaliacao.aprovada':   'text-emerald-400',
-  'avaliacao.reprovada':  'text-amber-400',
-  'avaliacao.deletada':   'text-red-400',
-  'pedido.atualizado':    'text-sky-400',
-  'pedido.reembolsado':   'text-orange-400',
-  'upload.criado':        'text-violet-400',
+  'cupom.criado':         'text-success',
+  'cupom.atualizado':     'text-brand-700',
+  'cupom.deletado':       'text-danger',
+  'admin.criado':         'text-navy-600',
+  'admin.removido':       'text-warning',
+  'produto.criado':       'text-success',
+  'produto.atualizado':   'text-brand-700',
+  'produto.desativado':   'text-danger',
+  'banner.criado':        'text-success',
+  'banner.atualizado':    'text-brand-700',
+  'banner.deletado':      'text-danger',
+  'avaliacao.aprovada':   'text-success',
+  'avaliacao.reprovada':  'text-warning',
+  'avaliacao.deletada':   'text-danger',
+  'pedido.atualizado':    'text-brand-700',
+  'pedido.reembolsado':   'text-warning',
+  'upload.criado':        'text-navy-600',
 };
 
 export default function AuditPage() {
@@ -68,8 +70,8 @@ export default function AuditPage() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="text-white font-black text-lg">Auditoria</h2>
-        <p className="text-slate-500 text-xs">Ações administrativas registradas — visível apenas para SUPER_ADMIN</p>
+        <h2 className="text-navy font-display text-lg">Auditoria</h2>
+        <p className="text-ink-muted text-xs">Ações administrativas registradas — visível apenas para SUPER_ADMIN</p>
       </div>
 
       {/* Busca por ação */}
@@ -79,11 +81,11 @@ export default function AuditPage() {
           value={filtroAcao}
           onChange={(e) => setFiltroAcao(e.target.value)}
           placeholder="Filtrar por ação (ex: cupom, produto, banner)"
-          className="flex-1 max-w-md px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-xs placeholder-slate-500 focus:outline-none focus:border-purple-500"
+          className="flex-1 max-w-md px-3 py-2 rounded-full bg-surface-card border border-line text-ink text-xs placeholder-ink-muted focus:outline-none focus:border-brand"
         />
         <button
           type="submit"
-          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors"
+          className="px-4 py-2 rounded-full bg-brand hover:bg-brand-hover text-on-brand text-xs font-bold transition-colors"
         >
           Buscar
         </button>
@@ -91,7 +93,7 @@ export default function AuditPage() {
           <button
             type="button"
             onClick={() => { setFiltroAcao(''); setFiltroAplicado(''); setPagina(1); }}
-            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+            className="px-3 py-2 rounded-full bg-surface-card border border-line hover:bg-surface-sunken text-ink-secondary text-xs transition-colors"
           >
             Limpar
           </button>
@@ -100,53 +102,53 @@ export default function AuditPage() {
 
       {/* Contagem */}
       {data && (
-        <p className="text-slate-400 text-xs">
+        <p className="text-ink-secondary text-xs">
           {data.total} registro{data.total !== 1 ? 's' : ''}
           {filtroAplicado && ` (filtro: "${filtroAplicado}")`}
         </p>
       )}
 
       {/* Tabela */}
-      <div className="rounded-2xl border border-slate-700/50 overflow-hidden" style={{ background: '#1e293b' }}>
+      <div className="rounded-2xl border border-line bg-surface-card shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex flex-col gap-1 p-4">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-10 rounded-xl bg-slate-700/50 animate-pulse" />
+              <div key={i} className="h-10 rounded-xl bg-surface-sunken animate-pulse" />
             ))}
           </div>
         ) : data?.logs.length === 0 ? (
-          <p className="text-slate-500 text-sm text-center py-12">Nenhum evento de auditoria ainda.</p>
+          <p className="text-ink-muted text-sm text-center py-12">Nenhum evento de auditoria ainda.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-slate-700">
+                <tr className="border-b border-line">
                   {['Data/hora', 'Admin', 'Ação', 'Recurso', 'ID', 'IP'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-slate-500 font-semibold uppercase tracking-wider">
+                    <th key={h} className="px-4 py-3 text-left text-ink-muted font-semibold uppercase tracking-wider">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-line">
                 {data?.logs.map((log) => (
                   <tr
                     key={log.id}
-                    className="hover:bg-slate-800/50 transition-colors"
+                    className="hover:bg-surface-sunken transition-colors"
                     title={log.detalhe ? `Detalhe: ${log.detalhe}` : undefined}
                   >
-                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{fmtDate(log.criadoEm)}</td>
-                    <td className="px-4 py-3 text-slate-300 max-w-[160px] truncate">{log.adminEmail}</td>
+                    <td className="px-4 py-3 text-ink-secondary whitespace-nowrap">{fmtDate(log.criadoEm)}</td>
+                    <td className="px-4 py-3 text-ink max-w-[160px] truncate">{log.adminEmail}</td>
                     <td className="px-4 py-3">
-                      <span className={`font-semibold ${acaoCor[log.acao] ?? 'text-slate-300'}`}>
+                      <span className={`font-semibold ${acaoCor[log.acao] ?? 'text-ink-secondary'}`}>
                         {log.acao}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-400">{log.recurso}</td>
-                    <td className="px-4 py-3 text-slate-600 font-mono text-[11px] max-w-[100px] truncate">
+                    <td className="px-4 py-3 text-ink-secondary">{log.recurso}</td>
+                    <td className="px-4 py-3 text-ink-muted font-mono text-[11px] max-w-[100px] truncate">
                       {log.recursoId ?? '—'}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{log.ip ?? '—'}</td>
+                    <td className="px-4 py-3 text-ink-muted">{log.ip ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -161,17 +163,17 @@ export default function AuditPage() {
           <button
             onClick={() => setPagina((p) => Math.max(1, p - 1))}
             disabled={pagina === 1}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+            className="px-3 py-1.5 rounded-full text-xs font-semibold bg-surface-card border border-line text-ink-secondary disabled:opacity-40 hover:bg-surface-sunken transition-colors"
           >
             Anterior
           </button>
-          <span className="text-slate-500 text-xs">
+          <span className="text-ink-muted text-xs">
             {pagina} / {data.totalPaginas}
           </span>
           <button
             onClick={() => setPagina((p) => Math.min(data.totalPaginas, p + 1))}
             disabled={pagina === data.totalPaginas}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+            className="px-3 py-1.5 rounded-full text-xs font-semibold bg-surface-card border border-line text-ink-secondary disabled:opacity-40 hover:bg-surface-sunken transition-colors"
           >
             Próxima
           </button>
