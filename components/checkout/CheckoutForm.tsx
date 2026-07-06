@@ -48,8 +48,10 @@ function cepMask(v: string) {
     .replace(/(\d{5})(\d{1,3})$/, '$1-$2');
 }
 
-
-const inputCls = 'w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-950 outline-none transition-colors placeholder:text-gray-400 focus:border-[#0f2756] focus:bg-white';
+// Estilo visual equivalente ao componente <Input /> do design system, mas em
+// <input> nativo — necessário para preservar required/inputMode/maxLength que
+// o componente da lib ainda não repassa via props.
+const inputCls = 'w-full rounded-xl border border-line-default bg-surface-sunken px-3 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-brand focus:bg-surface-card focus:ring-2 focus:ring-brand-100';
 
 export default function CheckoutForm({
   formId,
@@ -91,49 +93,49 @@ export default function CheckoutForm({
       onSubmit={(e) => { e.preventDefault(); onSubmit(); }}
     >
       {/* ── Dados do cliente ── */}
-      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-line bg-surface-card p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Dados do cliente</p>
-          <h2 className="mt-1 text-xl font-black text-gray-950">Identificação</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-navy">Dados do cliente</p>
+          <h2 className="mt-1 font-display text-xl font-semibold text-navy">Identificação</h2>
         </div>
 
         {logado ? (
           /* Logado: exibe dados do perfil somente-leitura */
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="md:col-span-2 rounded-xl bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold text-gray-400">Nome completo</p>
-              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.fullName}</p>
+            <div className="md:col-span-2 rounded-xl bg-surface-sunken px-4 py-3">
+              <p className="text-xs font-semibold text-ink-muted">Nome completo</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">{values.fullName}</p>
             </div>
-            <div className="rounded-xl bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold text-gray-400">E-mail</p>
-              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.email}</p>
+            <div className="rounded-xl bg-surface-sunken px-4 py-3">
+              <p className="text-xs font-semibold text-ink-muted">E-mail</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">{values.email}</p>
             </div>
-            <div className="rounded-xl bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold text-gray-400">CPF</p>
-              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.cpf}</p>
+            <div className="rounded-xl bg-surface-sunken px-4 py-3">
+              <p className="text-xs font-semibold text-ink-muted">CPF</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">{values.cpf}</p>
             </div>
-            <div className="rounded-xl bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold text-gray-400">Telefone</p>
-              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.phone || '—'}</p>
+            <div className="rounded-xl bg-surface-sunken px-4 py-3">
+              <p className="text-xs font-semibold text-ink-muted">Telefone</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">{values.phone || '—'}</p>
             </div>
           </div>
         ) : (
           /* Não logado: formulário completo */
           <div className="grid gap-4 md:grid-cols-2">
             <label className="md:col-span-2">
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Nome completo</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Nome completo</span>
               <input value={values.fullName} onChange={(e) => onChange('fullName', e.target.value)} placeholder="Maria Silva" required className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">E-mail</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">E-mail</span>
               <input type="email" value={values.email} onChange={(e) => onChange('email', e.target.value)} placeholder="maria@email.com" required className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Telefone</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Telefone</span>
               <input type="tel" value={values.phone} onChange={(e) => onChange('phone', phoneMask(e.target.value))} placeholder="(11) 99999-9999" inputMode="numeric" required className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">CPF</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">CPF</span>
               <input value={values.cpf} onChange={(e) => onChange('cpf', cpfMask(e.target.value))} placeholder="000.000.000-00" inputMode="numeric" required className={inputCls} />
             </label>
           </div>
@@ -141,10 +143,10 @@ export default function CheckoutForm({
       </section>
 
       {/* ── Endereço de entrega ── */}
-      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-line bg-surface-card p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Entrega</p>
-          <h2 className="mt-1 text-xl font-black text-gray-950">Endereço de entrega</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-navy">Entrega</p>
+          <h2 className="mt-1 font-display text-xl font-semibold text-navy">Endereço de entrega</h2>
         </div>
 
         {temEnderecoSalvo && (
@@ -154,10 +156,10 @@ export default function CheckoutForm({
                 key={mode}
                 type="button"
                 onClick={() => onEnderecoModeChange(mode)}
-                className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-all ${
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                   enderecoMode === mode
-                    ? 'border-[#0f2756] bg-[#0f2756]/5 text-[#0f2756]'
-                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-[#0f2756]/30'
+                    ? 'bg-brand text-on-brand'
+                    : 'bg-neutral-100 text-ink-secondary hover:bg-neutral-200'
                 }`}
               >
                 {mode === 'salvo' ? 'Meu endereço' : 'Outro endereço'}
@@ -169,24 +171,24 @@ export default function CheckoutForm({
         {!mostrarFormEndereco ? (
           /* Endereço salvo: exibe resumo */
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="md:col-span-2 rounded-xl bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold text-gray-400">Logradouro</p>
-              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.address}, {values.number}{values.complement ? ` — ${values.complement}` : ''}</p>
+            <div className="md:col-span-2 rounded-xl bg-surface-sunken px-4 py-3">
+              <p className="text-xs font-semibold text-ink-muted">Logradouro</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">{values.address}, {values.number}{values.complement ? ` — ${values.complement}` : ''}</p>
             </div>
-            <div className="rounded-xl bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold text-gray-400">Bairro / Cidade</p>
-              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.district}, {values.city} — {values.state}</p>
+            <div className="rounded-xl bg-surface-sunken px-4 py-3">
+              <p className="text-xs font-semibold text-ink-muted">Bairro / Cidade</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">{values.district}, {values.city} — {values.state}</p>
             </div>
-            <div className="rounded-xl bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold text-gray-400">CEP</p>
-              <p className="mt-0.5 text-sm font-bold text-gray-900">{values.zipCode}</p>
+            <div className="rounded-xl bg-surface-sunken px-4 py-3">
+              <p className="text-xs font-semibold text-ink-muted">CEP</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">{values.zipCode}</p>
             </div>
           </div>
         ) : (
           /* Formulário de endereço */
           <div className="grid gap-4 md:grid-cols-2">
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">CEP</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">CEP</span>
               <input
                 value={values.zipCode}
                 onChange={(e) => {
@@ -201,27 +203,27 @@ export default function CheckoutForm({
               />
             </label>
             <label className="md:col-span-2">
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Endereço</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Endereço</span>
               <input value={values.address} onChange={(e) => onChange('address', e.target.value)} placeholder="Rua das Fórmulas" required className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Número</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Número</span>
               <input value={values.number} onChange={(e) => onChange('number', e.target.value)} placeholder="120" required className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Complemento</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Complemento</span>
               <input value={values.complement} onChange={(e) => onChange('complement', e.target.value)} placeholder="Apto 402" className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Bairro</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Bairro</span>
               <input value={values.district} onChange={(e) => onChange('district', e.target.value)} placeholder="Centro" required className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Cidade</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Cidade</span>
               <input value={values.city} onChange={(e) => onChange('city', e.target.value)} placeholder="São Paulo" required className={inputCls} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-semibold text-gray-500">Estado</span>
+              <span className="mb-1 block text-xs font-semibold text-ink-secondary">Estado</span>
               <input value={values.state} onChange={(e) => onChange('state', e.target.value.toUpperCase().slice(0, 2))} placeholder="SP" maxLength={2} required className={inputCls} />
             </label>
           </div>
@@ -229,27 +231,27 @@ export default function CheckoutForm({
       </section>
 
       {/* ── Entrega ── */}
-      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-line bg-surface-card p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Entrega</p>
-          <h2 className="mt-1 text-xl font-black text-gray-950">Escolha a forma de entrega</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-navy">Entrega</p>
+          <h2 className="mt-1 font-display text-xl font-semibold text-navy">Escolha a forma de entrega</h2>
         </div>
 
         {freteStatus === 'idle' && (
-          <p className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-4 text-sm text-gray-400">
+          <p className="rounded-xl border border-line bg-surface-sunken px-4 py-4 text-sm text-ink-muted">
             Informe o CEP acima para calcular o frete.
           </p>
         )}
 
         {freteStatus === 'loading' && (
-          <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0f2756] border-t-transparent" />
-            <p className="text-sm text-gray-500">Calculando frete...</p>
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-surface-sunken px-4 py-4">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-navy border-t-transparent" />
+            <p className="text-sm text-ink-secondary">Calculando frete...</p>
           </div>
         )}
 
         {freteStatus === 'error' && (
-          <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-4 text-sm text-red-600">
+          <p className="rounded-xl border border-danger/20 bg-danger-subtle px-4 py-4 text-sm text-danger">
             Não foi possível calcular o frete para este CEP. Verifique o CEP e tente novamente.
           </p>
         )}
@@ -265,17 +267,17 @@ export default function CheckoutForm({
                   onClick={() => onShippingChange(method.id)}
                   className={`rounded-2xl border p-4 text-left transition-all ${
                     active
-                      ? 'border-[#0f2756] bg-[#0f2756]/5 shadow-sm'
-                      : 'border-gray-200 bg-gray-50 hover:border-[#0f2756]/40 hover:bg-white'
+                      ? 'border-brand bg-brand-subtle shadow-sm'
+                      : 'border-line-default bg-surface-sunken hover:border-brand/40 hover:bg-surface-card'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-black text-gray-950">{method.label}</p>
-                      <p className="mt-1 text-sm leading-5 text-gray-500">{method.description}</p>
-                      <p className="mt-2 text-xs font-semibold text-gray-400">{method.estimate}</p>
+                      <p className="font-semibold text-ink">{method.label}</p>
+                      <p className="mt-1 text-sm leading-5 text-ink-secondary">{method.description}</p>
+                      <p className="mt-2 text-xs font-semibold text-ink-muted">{method.estimate}</p>
                     </div>
-                    <span className="shrink-0 text-sm font-black text-[#0f2756]">{fmtCurrency(method.price)}</span>
+                    <span className="shrink-0 text-sm font-semibold text-navy">{fmtCurrency(method.price)}</span>
                   </div>
                 </button>
               );
@@ -285,10 +287,10 @@ export default function CheckoutForm({
       </section>
 
       {/* ── Pagamento ── */}
-      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-line bg-surface-card p-5 shadow-sm">
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0f2756]">Pagamento</p>
-          <h2 className="mt-1 text-xl font-black text-gray-950">Como você quer pagar?</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-navy">Pagamento</p>
+          <h2 className="mt-1 font-display text-xl font-semibold text-navy">Como você quer pagar?</h2>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
@@ -303,21 +305,21 @@ export default function CheckoutForm({
                 onClick={() => !disabled && onPaymentChange(method.id)}
                 className={`rounded-2xl border p-4 text-left transition-all ${
                   disabled
-                    ? 'cursor-not-allowed border-gray-100 bg-gray-50 opacity-50'
+                    ? 'cursor-not-allowed border-line bg-surface-sunken opacity-50'
                     : active
-                    ? 'border-[#0f2756] bg-[#0f2756]/5 shadow-sm'
-                    : 'border-gray-200 bg-gray-50 hover:border-[#0f2756]/40 hover:bg-white'
+                    ? 'border-brand bg-brand-subtle shadow-sm'
+                    : 'border-line-default bg-surface-sunken hover:border-brand/40 hover:bg-surface-card'
                 }`}
               >
                 <div className="flex items-start justify-between gap-1">
-                  <p className="font-black text-gray-950">{method.label}</p>
+                  <p className="font-semibold text-ink">{method.label}</p>
                   {disabled && (
-                    <span className="shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold text-gray-500">
+                    <span className="shrink-0 rounded-full bg-neutral-200 px-2 py-0.5 text-[10px] font-bold text-ink-secondary">
                       Em breve
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-sm leading-5 text-gray-500">{method.description}</p>
+                <p className="mt-1 text-sm leading-5 text-ink-secondary">{method.description}</p>
               </button>
             );
           })}
