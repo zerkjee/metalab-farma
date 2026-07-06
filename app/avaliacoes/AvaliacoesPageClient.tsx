@@ -128,11 +128,11 @@ export default function AvaliacoesPageClient() {
       <Header />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-[#1a0533] via-[#2d1654] to-[#1e3a5f] py-20 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm font-semibold text-[#60a5fa] uppercase tracking-widest mb-3">Prova Social</p>
-          <h1 className="text-4xl sm:text-5xl font-black mb-4">Avaliações dos Clientes</h1>
-          <p className="text-blue-200 text-lg max-w-xl mx-auto mb-10">
+      <section className="bg-navy py-16 sm:py-20 text-on-navy">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-8 text-center">
+          <p className="text-xs font-bold text-brand-300 uppercase tracking-wide mb-3">Prova Social</p>
+          <h1 className="font-display text-4xl sm:text-5xl mb-4">Avaliações dos Clientes</h1>
+          <p className="text-navy-100 text-lg max-w-xl mx-auto mb-10">
             Transparência total — veja o que nossos clientes reais dizem sobre os suplementos Metalab.
           </p>
 
@@ -141,28 +141,28 @@ export default function AvaliacoesPageClient() {
             {loading ? (
               <div className="h-24 w-48 bg-white/10 rounded-2xl animate-pulse" />
             ) : totalCount === 0 ? (
-              <p className="text-[#60a5fa] text-lg">Seja o primeiro a avaliar!</p>
+              <p className="text-brand-200 text-lg">Seja o primeiro a avaliar!</p>
             ) : (
               <>
                 <div className="flex flex-col items-center">
-                  <span className="text-6xl font-black">{overallAvg}</span>
+                  <span className="font-display text-6xl">{overallAvg}</span>
                   <StarRating rating={overallAvg} size="lg" />
-                  <span className="text-[#60a5fa] text-sm mt-2">{totalCount} avaliações</span>
+                  <span className="text-navy-100 text-sm mt-2">{totalCount} avaliações</span>
                 </div>
 
-                <div className="hidden sm:block w-px h-24 bg-white/20" />
+                <div className="hidden sm:block w-px h-24 bg-white/15" />
 
                 <div className="flex flex-col gap-2 w-56">
                   {dist.map(({ star, count, pct }) => (
                     <div key={star} className="flex items-center gap-2.5">
-                      <span className="text-xs text-[#60a5fa] w-3">{star}</span>
-                      <svg className="w-3 h-3 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                      <span className="text-xs text-navy-100 w-3">{star}</span>
+                      <svg className="w-3 h-3 flex-shrink-0 text-gold-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                       </svg>
                       <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-gold-400 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-xs text-[#60a5fa] w-5 text-right">{count}</span>
+                      <span className="text-xs text-navy-100 w-5 text-right">{count}</span>
                     </div>
                   ))}
                 </div>
@@ -173,12 +173,12 @@ export default function AvaliacoesPageClient() {
       </section>
 
       {/* Filters + Reviews */}
-      <section className="py-16 bg-gray-50 min-h-screen">
+      <section className="py-16 bg-surface-page min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Search */}
           <div className="relative mb-6">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -186,7 +186,7 @@ export default function AvaliacoesPageClient() {
               placeholder="Buscar por produto, cliente ou comentário..."
               value={search}
               onChange={(e) => changeSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2756]/30 focus:border-[#0f2756] transition-all shadow-sm"
+              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-line-default bg-surface-card text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-navy transition-all shadow-sm"
             />
           </div>
 
@@ -199,8 +199,8 @@ export default function AvaliacoesPageClient() {
                   onClick={() => changeFilter(val)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 ${
                     filter === val
-                      ? 'bg-[#0f2756] text-white border-[#0f2756]'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#0f2756] hover:text-[#0f2756]'
+                      ? 'bg-navy text-on-navy border-navy'
+                      : 'bg-surface-card text-ink-secondary border-line-default hover:border-navy hover:text-navy'
                   }`}
                 >
                   {val === 'all' ? 'Todas' : `${val} ★`}
@@ -211,8 +211,8 @@ export default function AvaliacoesPageClient() {
                 onClick={() => { setOnlyVerified((v) => !v); setPage(1); }}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 flex items-center gap-1.5 ${
                   onlyVerified
-                    ? 'bg-emerald-500 text-white border-emerald-500'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-emerald-500 hover:text-emerald-600'
+                    ? 'bg-success text-white border-success'
+                    : 'bg-surface-card text-ink-secondary border-line-default hover:border-success hover:text-success'
                 }`}
               >
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@ export default function AvaliacoesPageClient() {
             <select
               value={sort}
               onChange={(e) => { setSort(e.target.value as SortKey); setPage(1); }}
-              className="text-xs font-medium text-gray-600 border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#0f2756]/30 focus:border-[#0f2756] shadow-sm"
+              className="text-xs font-medium text-ink-secondary border border-line-default rounded-xl px-3 py-2 bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-navy shadow-sm"
             >
               <option value="recent">Mais recentes</option>
               <option value="highest">Maior nota</option>
@@ -238,14 +238,14 @@ export default function AvaliacoesPageClient() {
           {loading && (
             <div className="flex flex-col gap-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-40 rounded-2xl bg-gray-200 animate-pulse" />
+                <div key={i} className="h-40 rounded-2xl bg-surface-sunken animate-pulse" />
               ))}
             </div>
           )}
 
           {/* Result count */}
           {!loading && (
-            <p className="text-sm text-gray-400 mb-6 font-medium">
+            <p className="text-sm text-ink-muted mb-6 font-medium">
               {filtered.length} avaliação{filtered.length !== 1 ? 'ões' : ''} encontrada{filtered.length !== 1 ? 's' : ''}
             </p>
           )}
@@ -273,23 +273,23 @@ export default function AvaliacoesPageClient() {
 
           {/* Empty state */}
           {!loading && paginated.length === 0 && (
-            <div className="text-center py-20 text-gray-400">
-              <svg className="w-14 h-14 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-20 text-ink-muted">
+              <svg className="w-14 h-14 mx-auto mb-4 text-line-default" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {allReviews.length === 0 ? (
                 <>
-                  <p className="font-semibold text-gray-500 text-lg">Nenhuma avaliação ainda</p>
+                  <p className="font-semibold text-navy text-lg">Nenhuma avaliação ainda</p>
                   <p className="text-sm mt-1">Compre um produto e deixe sua opinião!</p>
                 </>
               ) : (
                 <>
-                  <p className="font-semibold text-gray-500 text-lg">Nenhuma avaliação encontrada</p>
+                  <p className="font-semibold text-navy text-lg">Nenhuma avaliação encontrada</p>
                   <p className="text-sm mt-1">Tente outros filtros ou limpe a busca</p>
                   <button
                     onClick={() => { setSearch(''); setFilter('all'); setOnlyVerified(false); setPage(1); }}
-                    className="mt-6 px-5 py-2.5 rounded-xl bg-[#0f2756] text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                    className="mt-6 px-5 py-2.5 rounded-full bg-navy text-on-navy text-sm font-bold hover:opacity-90 transition-opacity"
                   >
                     Limpar filtros
                   </button>
@@ -304,7 +304,7 @@ export default function AvaliacoesPageClient() {
               <button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-[#0f2756] hover:text-[#0f2756] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+                className="w-10 h-10 rounded-full border border-line-default bg-surface-card flex items-center justify-center text-ink-secondary hover:border-navy hover:text-navy transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -315,10 +315,10 @@ export default function AvaliacoesPageClient() {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`w-10 h-10 rounded-xl text-sm font-bold border transition-all duration-200 shadow-sm ${
+                  className={`w-10 h-10 rounded-full text-sm font-bold border transition-all duration-200 shadow-sm ${
                     p === page
-                      ? 'bg-[#0f2756] text-white border-[#0f2756]'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#0f2756] hover:text-[#0f2756]'
+                      ? 'bg-navy text-on-navy border-navy'
+                      : 'bg-surface-card text-ink-secondary border-line-default hover:border-navy hover:text-navy'
                   }`}
                 >
                   {p}
@@ -328,7 +328,7 @@ export default function AvaliacoesPageClient() {
               <button
                 disabled={page === totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-[#0f2756] hover:text-[#0f2756] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+                className="w-10 h-10 rounded-full border border-line-default bg-surface-card flex items-center justify-center text-ink-secondary hover:border-navy hover:text-navy transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

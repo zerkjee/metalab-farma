@@ -2,25 +2,23 @@ import { levels } from '@/data/loyalty';
 
 export default function VipBanner() {
   return (
-    <section className="py-20 border-b border-purple-100 overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #1a0533 0%, #2d1654 60%, #1e3a5f 100%)' }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 sm:py-20 bg-navy border-b border-navy-700 overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
           {/* Texto */}
           <div>
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-6">
-              <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-              <span className="text-sm text-white/90 font-medium">Programa de Fidelidade</span>
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-2 mb-6">
+              <span className="w-2 h-2 rounded-full bg-gold-400" />
+              <span className="text-sm text-on-navy/90 font-medium">Programa de Fidelidade</span>
             </div>
 
-            <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-4">
-              Ganhe <span className="text-yellow-400">cashback</span> em{' '}
+            <h2 className="font-display text-4xl sm:text-5xl text-on-navy leading-tight mb-4">
+              Ganhe <span className="text-gold-400">cashback</span> em{' '}
               cada compra
             </h2>
 
-            <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-lg">
+            <p className="text-navy-100 text-lg leading-relaxed mb-8 max-w-lg">
               Acumule pontos, suba de nível e desbloqueie benefícios exclusivos como frete grátis,
               cupons e acesso antecipado a lançamentos.
             </p>
@@ -28,13 +26,15 @@ export default function VipBanner() {
             {/* Mini benefícios */}
             <div className="grid grid-cols-2 gap-3 mb-8">
               {[
-                { icon: '💰', text: 'Até 8% cashback' },
-                { icon: '🚚', text: 'Frete grátis' },
-                { icon: '⚡', text: 'Acesso antecipado' },
-                { icon: '🎫', text: 'Cupons exclusivos' },
-              ].map(({ icon, text }) => (
-                <div key={text} className="flex items-center gap-2.5 text-white/80 text-sm">
-                  <span className="text-lg">{icon}</span>
+                { text: 'Até 8% cashback' },
+                { text: 'Frete grátis' },
+                { text: 'Acesso antecipado' },
+                { text: 'Cupons exclusivos' },
+              ].map(({ text }) => (
+                <div key={text} className="flex items-center gap-2.5 text-navy-100 text-sm">
+                  <svg className="w-4 h-4 text-gold-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
                   <span>{text}</span>
                 </div>
               ))}
@@ -42,10 +42,9 @@ export default function VipBanner() {
 
             <a
               href="/vip"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all duration-200 hover:scale-105 hover:shadow-2xl text-base"
-              style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold bg-brand text-on-brand transition-all duration-200 hover:bg-brand-hover text-base"
             >
-              Acessar Área VIP
+              Acessar área VIP
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -73,19 +72,19 @@ export default function VipBanner() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-black text-base uppercase tracking-widest" style={{ color: lvl.color }}>
+                    <span className="font-bold text-base uppercase tracking-widest" style={{ color: lvl.color }}>
                       {lvl.name}
                     </span>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/10 text-navy-100">
                       {lvl.cashbackPct}% cashback
                     </span>
                   </div>
-                  <p className="text-white/50 text-xs">
+                  <p className="text-navy-200 text-xs">
                     {lvl.maxPoints
                       ? `${lvl.minPoints.toLocaleString('pt-BR')} – ${lvl.maxPoints.toLocaleString('pt-BR')} pontos`
                       : `${lvl.minPoints.toLocaleString('pt-BR')}+ pontos`}
                   </p>
-                  <p className="text-white/70 text-xs mt-1">{lvl.benefits[0].text}</p>
+                  <p className="text-navy-100 text-xs mt-1">{lvl.benefits[0].text}</p>
                 </div>
 
                 {i < levels.length - 1 && (

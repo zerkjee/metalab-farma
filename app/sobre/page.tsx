@@ -67,7 +67,7 @@ const milestones = [
   },
   {
     year: 'Portfólio',
-    title: 'Expansão do Catálogo',
+    title: 'Expansão do catálogo',
     desc: 'Desenvolvimento das primeiras linhas exclusivas: proteínas, aminoácidos e vitaminas formulados com insumos de origem controlada.',
   },
   {
@@ -77,7 +77,7 @@ const milestones = [
   },
   {
     year: 'Hoje',
-    title: 'Metalab Store Online',
+    title: 'Metalab Store online',
     desc: 'Plataforma digital própria com checkout seguro, frete calculado em tempo real e experiência de compra pensada para o consumidor.',
   },
 ]
@@ -86,19 +86,19 @@ export default function Sobre() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#fafafa]">
+      <main className="min-h-screen bg-surface-page">
 
         {/* Hero */}
-        <section className="bg-gray-950 text-white py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="bg-brand-50 py-16 sm:py-24">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold text-[#60a5fa] uppercase tracking-widest mb-4">
+              <p className="text-xs font-bold text-brand-700 uppercase tracking-wide mb-4">
                 Sobre a Metalab
               </p>
-              <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-6">
+              <h1 className="font-display text-navy text-4xl sm:text-5xl leading-tight mb-6">
                 Compromisso com a vida em cada fórmula
               </h1>
-              <p className="text-lg text-gray-400 leading-relaxed mb-8">
+              <p className="text-lg text-ink-secondary leading-relaxed mb-8">
                 A Metalab é uma empresa especializada em suplementos alimentares desenvolvidos com rigor técnico,
                 insumos de procedência comprovada e respeito à legislação brasileira. Nosso propósito é simples:
                 entregar qualidade real, sem promessas que a ciência não sustenta.
@@ -106,13 +106,13 @@ export default function Sobre() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/#produtos"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#60a5fa] text-gray-950 font-bold rounded-xl hover:bg-blue-300 transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-brand text-on-brand font-bold rounded-full hover:bg-brand-hover transition-colors"
                 >
                   Ver produtos
                 </Link>
                 <Link
                   href="/qualidade"
-                  className="inline-flex items-center gap-2 px-6 py-3 border border-gray-700 text-white font-semibold rounded-xl hover:border-[#60a5fa] hover:text-[#60a5fa] transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-line-strong text-navy font-semibold rounded-full hover:border-navy hover:bg-surface-card transition-colors"
                 >
                   Nossa qualidade
                 </Link>
@@ -122,13 +122,13 @@ export default function Sobre() {
         </section>
 
         {/* Stats */}
-        <section className="bg-white border-b border-gray-100 py-14">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="bg-surface-card border-b border-line py-14">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map(({ value, label }) => (
-                <div key={label} className="flex flex-col items-center text-center p-6 rounded-2xl bg-[#eff6ff] border border-[#dbeafe]">
-                  <span className="text-3xl font-black text-[#0f2756] mb-1">{value}</span>
-                  <span className="text-sm text-gray-500 font-medium">{label}</span>
+                <div key={label} className="flex flex-col items-center text-center p-6 rounded-2xl bg-brand-50 border border-line">
+                  <span className="font-display text-3xl text-navy mb-1">{value}</span>
+                  <span className="text-sm text-ink-muted font-medium">{label}</span>
                 </div>
               ))}
             </div>
@@ -136,26 +136,26 @@ export default function Sobre() {
         </section>
 
         {/* Missão */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-24 bg-surface-card">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-4">Nossa Missão</p>
-                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 leading-tight mb-6">
+                <p className="text-xs font-bold text-navy uppercase tracking-wide mb-4">Nossa missão</p>
+                <h2 className="font-display text-3xl sm:text-4xl text-navy leading-tight mb-6">
                   Suplementação honesta, sem promessas vazias
                 </h2>
-                <p className="text-gray-600 leading-relaxed mb-6">
+                <p className="text-ink-secondary leading-relaxed mb-6">
                   O mercado de suplementos alimentares é repleto de alegações exageradas e produtos sem
                   comprovação. A Metalab nasceu para ser diferente: cada produto que comercializamos tem
                   procedência declarada, fórmula transparente e embalagem lacrada com rastreabilidade.
                 </p>
-                <p className="text-gray-600 leading-relaxed mb-8">
+                <p className="text-ink-secondary leading-relaxed mb-8">
                   Não vendemos medicamentos, não fazemos promessas terapêuticas e não comprometemos sua
                   saúde por resultados rápidos. Acreditamos que suplementar bem começa pela escolha certa.
                 </p>
-                <div className="p-5 rounded-2xl bg-[#eff6ff] border border-[#dbeafe]">
-                  <p className="text-sm text-[#0f2756] font-semibold mb-1">⚠️ Aviso importante</p>
-                  <p className="text-sm text-gray-600">
+                <div className="p-5 rounded-2xl bg-brand-50 border border-line">
+                  <p className="text-sm text-navy font-semibold mb-1">Aviso importante</p>
+                  <p className="text-sm text-ink-secondary">
                     Nossos produtos são suplementos alimentares. Não são medicamentos e não têm indicação
                     terapêutica. Consulte sempre um profissional de saúde antes de suplementar.
                   </p>
@@ -167,17 +167,17 @@ export default function Sobre() {
                 {milestones.map(({ year, title, desc }, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="flex flex-col items-center">
-                      <div className="w-10 h-10 rounded-full bg-[#0f2756] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-navy text-on-navy flex items-center justify-center text-xs font-bold shrink-0">
                         {i + 1}
                       </div>
                       {i < milestones.length - 1 && (
-                        <div className="w-px flex-1 bg-[#dbeafe] mt-2" />
+                        <div className="w-px flex-1 bg-line mt-2" />
                       )}
                     </div>
                     <div className="pb-6">
-                      <span className="text-xs font-bold text-[#0f2756] uppercase tracking-wider">{year}</span>
-                      <h3 className="text-base font-bold text-gray-900 mt-1 mb-2">{title}</h3>
-                      <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                      <span className="text-xs font-bold text-navy uppercase tracking-wider">{year}</span>
+                      <h3 className="text-base font-bold text-navy mt-1 mb-2">{title}</h3>
+                      <p className="text-sm text-ink-muted leading-relaxed">{desc}</p>
                     </div>
                   </div>
                 ))}
@@ -187,11 +187,11 @@ export default function Sobre() {
         </section>
 
         {/* Valores */}
-        <section className="py-24 bg-[#eff6ff]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-24 bg-brand-50">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Nossos Valores</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+              <p className="text-xs font-bold text-navy uppercase tracking-wide mb-3">Nossos valores</p>
+              <h2 className="font-display text-3xl sm:text-4xl text-navy">
                 O que nos guia todos os dias
               </h2>
             </div>
@@ -199,14 +199,14 @@ export default function Sobre() {
               {values.map(({ title, desc, icon }) => (
                 <div
                   key={title}
-                  className="group flex flex-col items-start gap-4 p-6 rounded-2xl bg-white hover:bg-[#dbeafe] border border-[#dbeafe] hover:border-[#c4b5fd] hover:shadow-lg transition-all duration-300"
+                  className="group flex flex-col items-start gap-4 p-6 rounded-2xl bg-surface-card border border-line hover:shadow-md transition-shadow duration-300"
                 >
-                  <div className="p-3 rounded-xl bg-[#eff6ff] text-[#0f2756] group-hover:bg-white shadow-sm transition-colors">
+                  <div className="p-3 rounded-xl bg-brand-50 text-navy group-hover:bg-brand-100 shadow-xs transition-colors">
                     {icon}
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-base mb-1">{title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                    <h3 className="font-bold text-navy text-base mb-1">{title}</h3>
+                    <p className="text-sm text-ink-muted leading-relaxed">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -215,15 +215,15 @@ export default function Sobre() {
         </section>
 
         {/* CTA */}
-        <section className="py-20 bg-gray-950 text-white">
-          <div className="max-w-3xl mx-auto px-4 text-center">
-            <h2 className="text-3xl font-black mb-4">Pronto para começar?</h2>
-            <p className="text-gray-400 mb-8">
+        <section className="py-16 sm:py-20 bg-navy text-on-navy">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            <h2 className="font-display text-3xl mb-4">Pronto para começar?</h2>
+            <p className="text-navy-100 mb-8">
               Explore nosso catálogo de suplementos alimentares com qualidade e procedência garantidas.
             </p>
             <Link
               href="/#produtos"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#60a5fa] text-gray-950 font-bold rounded-xl hover:bg-blue-300 transition-colors text-base"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-brand text-on-brand font-bold rounded-full hover:bg-brand-hover transition-colors text-base"
             >
               Ver todos os produtos
             </Link>
