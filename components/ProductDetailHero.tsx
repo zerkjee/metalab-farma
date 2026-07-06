@@ -76,6 +76,10 @@ export default function ProductDetailHero({
                 className="w-full object-contain max-h-[420px] p-6"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
+                placeholder="blur"
+                blurDataURL={`data:image/svg+xml;base64,${btoa(
+                  `<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='${corPrincipal}' opacity='0.15'/></svg>`
+                )}`}
                 style={{ filter: `drop-shadow(0 12px 36px ${corPrincipal}30)` }}
               />
             ) : (
