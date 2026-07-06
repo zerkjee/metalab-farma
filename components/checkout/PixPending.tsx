@@ -88,17 +88,17 @@ export default function PixPending({ order, onConfirmed }: PixPendingProps) {
     <div className="mx-auto max-w-2xl space-y-4">
 
       {/* Status header — NUNCA mostra "compra finalizada" */}
-      <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100">
-          <Clock className="h-8 w-8 text-amber-600" strokeWidth={1.8} />
+      <div className="rounded-3xl border border-warning/25 bg-warning-subtle p-8 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-card text-warning shadow-sm">
+          <Clock className="h-8 w-8" strokeWidth={1.8} />
         </div>
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-warning">
           Pedido {order.numero}
         </p>
-        <h1 className="mt-2 text-2xl font-black text-gray-950">
+        <h1 className="mt-2 font-display text-2xl font-semibold text-navy">
           Aguardando pagamento PIX
         </h1>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-600">
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink-secondary">
           Seu pedido foi criado, mas o pagamento{' '}
           <strong>ainda não foi confirmado</strong>. Pague o PIX abaixo para concluir a compra.
         </p>
@@ -106,12 +106,12 @@ export default function PixPending({ order, onConfirmed }: PixPendingProps) {
 
       {/* PIX QR code — só exibe se não expirou */}
       {!expired ? (
-        <div className="rounded-3xl border border-purple-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-line bg-surface-card p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <p className="font-black text-gray-950">Pague com PIX</p>
+            <p className="font-display font-semibold text-navy">Pague com PIX</p>
             <span
               className={`rounded-full px-3 py-1 text-xs font-bold ${
-                urgente ? 'bg-red-100 text-red-700' : 'bg-purple-100 text-purple-700'
+                urgente ? 'bg-danger-subtle text-danger' : 'bg-brand-subtle text-brand-700'
               }`}
             >
               {expired
@@ -128,31 +128,31 @@ export default function PixPending({ order, onConfirmed }: PixPendingProps) {
                 alt="QR Code PIX"
                 width={208}
                 height={208}
-                className="rounded-xl border border-purple-200 bg-white p-2"
+                className="rounded-xl border border-line bg-surface-card p-2"
               />
             </div>
           )}
 
           {order.pixQrCode && (
             <div className="mb-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 PIX Copia e Cola
               </p>
-              <div className="flex items-center gap-2 rounded-xl border border-purple-200 bg-gray-50 px-3 py-3">
-                <p className="min-w-0 flex-1 truncate font-mono text-xs text-gray-700">
+              <div className="flex items-center gap-2 rounded-xl border border-line bg-surface-sunken px-3 py-3">
+                <p className="min-w-0 flex-1 truncate font-mono text-xs text-ink-secondary">
                   {order.pixQrCode}
                 </p>
                 <button
                   type="button"
                   onClick={copyPix}
-                  className="shrink-0 rounded-lg bg-[#0f2756] p-1.5 text-white transition-all hover:opacity-90"
+                  className="shrink-0 rounded-full bg-navy p-1.5 text-on-navy transition-all hover:bg-navy-hover"
                   aria-label="Copiar código PIX"
                 >
                   <Copy className="h-4 w-4" strokeWidth={1.8} />
                 </button>
               </div>
               {copied && (
-                <p className="mt-2 text-center text-xs font-semibold text-emerald-600">
+                <p className="mt-2 text-center text-xs font-semibold text-success">
                   Código copiado!
                 </p>
               )}
@@ -163,31 +163,31 @@ export default function PixPending({ order, onConfirmed }: PixPendingProps) {
             type="button"
             onClick={handleCheckNow}
             disabled={checkingManual}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#0f2756] px-5 py-3 text-sm font-black text-[#0f2756] transition-all hover:bg-[#0f2756]/5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-navy px-5 py-3 text-sm font-bold text-navy transition-all hover:bg-navy/5 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${checkingManual ? 'animate-spin' : ''}`} strokeWidth={2} />
             {checkingManual ? 'Verificando...' : 'Já paguei — confirmar'}
           </button>
 
           {manualResult === 'not_paid' && (
-            <p className="mt-3 text-center text-xs text-amber-600">
+            <p className="mt-3 text-center text-xs text-warning">
               Pagamento ainda não identificado. Aguarde alguns segundos e tente novamente.
             </p>
           )}
 
-          <p className="mt-4 text-center text-xs text-gray-400">
+          <p className="mt-4 text-center text-xs text-ink-muted">
             Confirmação automática a cada 5 segundos. Não feche esta página.
           </p>
         </div>
       ) : (
-        <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-center">
-          <p className="font-black text-gray-950">Código PIX expirado</p>
-          <p className="mt-2 text-sm leading-6 text-gray-600">
+        <div className="rounded-3xl border border-danger/20 bg-danger-subtle p-6 text-center">
+          <p className="font-display font-semibold text-navy">Código PIX expirado</p>
+          <p className="mt-2 text-sm leading-6 text-ink-secondary">
             O código PIX expirou. Acesse <em>Meus pedidos</em> para gerar um novo código de pagamento.
           </p>
           <Link
             href="/pedidos"
-            className="mt-4 inline-flex items-center justify-center rounded-xl bg-[#0f2756] px-5 py-3 text-sm font-black text-white transition-all hover:opacity-90"
+            className="mt-4 inline-flex items-center justify-center rounded-full bg-navy px-5 py-3 text-sm font-bold text-on-navy transition-all hover:bg-navy-hover"
           >
             Ir para Meus pedidos
           </Link>
@@ -195,25 +195,25 @@ export default function PixPending({ order, onConfirmed }: PixPendingProps) {
       )}
 
       {/* Resumo do pedido */}
-      <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-600">
+      <div className="rounded-2xl border border-line bg-surface-sunken p-4 text-sm text-ink-secondary">
         <div className="flex justify-between">
-          <span className="font-bold text-gray-700">Total</span>
-          <span className="font-black text-[#0f2756]">{fmtCurrency(order.total)}</span>
+          <span className="font-semibold text-ink">Total</span>
+          <span className="font-display font-semibold text-navy">{fmtCurrency(order.total)}</span>
         </div>
         <div className="mt-1 flex justify-between">
-          <span className="font-bold text-gray-700">Cliente</span>
+          <span className="font-semibold text-ink">Cliente</span>
           <span>{order.customer.fullName}</span>
         </div>
         <div className="mt-1 flex justify-between">
-          <span className="font-bold text-gray-700">Entrega</span>
+          <span className="font-semibold text-ink">Entrega</span>
           <span>{order.shipping.label}</span>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
+      <div className="rounded-2xl border border-brand/20 bg-brand-subtle px-4 py-3">
         <div className="flex items-start gap-2">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" strokeWidth={2} />
-          <p className="text-xs leading-5 text-blue-700">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" strokeWidth={2} />
+          <p className="text-xs leading-5 text-brand-700">
             Seu pedido ficará reservado por <strong>30 minutos</strong>. Após esse prazo, o estoque
             é liberado automaticamente se o pagamento não for confirmado.
           </p>
