@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { Badge } from '@/components/ui'
 
 export const metadata: Metadata = {
   title: 'Certificações',
@@ -12,7 +13,6 @@ export const metadata: Metadata = {
 const certifications = [
   {
     badge: 'ANVISA',
-    color: '#0f2756',
     title: 'Conformidade ANVISA',
     subtitle: 'Agência Nacional de Vigilância Sanitária',
     desc: 'Todos os nossos suplementos alimentares são desenvolvidos em conformidade com as normas da ANVISA, incluindo as RDC nº 243/2018 e RDC nº 786/2023, que regulamentam os suplementos alimentares no Brasil.',
@@ -25,7 +25,6 @@ const certifications = [
   },
   {
     badge: 'BPF',
-    color: '#1d4ed8',
     title: 'Boas Práticas de Fabricação',
     subtitle: 'RDC nº 275/2002 — Anvisa',
     desc: 'A fabricação dos produtos Metalab segue as Boas Práticas de Fabricação (BPF), conjunto de normas que garantem condições higiênico-sanitárias adequadas em todo o processo produtivo.',
@@ -38,7 +37,6 @@ const certifications = [
   },
   {
     badge: 'CDC',
-    color: '#059669',
     title: 'Código de Defesa do Consumidor',
     subtitle: 'Lei nº 8.078/1990',
     desc: 'Operamos em total conformidade com o Código de Defesa do Consumidor, garantindo seus direitos de arrependimento, troca, devolução e informação adequada sobre cada produto.',
@@ -51,7 +49,6 @@ const certifications = [
   },
   {
     badge: 'LGPD',
-    color: '#d97706',
     title: 'Lei Geral de Proteção de Dados',
     subtitle: 'Lei nº 13.709/2018',
     desc: 'Tratamos seus dados pessoais com responsabilidade e transparência, em conformidade com a LGPD. Você tem controle total sobre seus dados e pode exercer seus direitos a qualquer momento.',
@@ -91,19 +88,19 @@ export default function Certificacoes() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#fafafa]">
+      <main className="min-h-screen bg-surface-page">
 
         {/* Hero */}
-        <section className="bg-gray-950 text-white py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="bg-navy text-on-navy py-16 sm:py-24">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold text-[#60a5fa] uppercase tracking-widest mb-4">
+              <p className="text-xs font-bold text-gold-300 uppercase tracking-wide mb-4">
                 Certificações e Conformidade
               </p>
-              <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-6">
+              <h1 className="font-display text-4xl sm:text-5xl leading-tight mb-6">
                 Regulamentação e transparência em tudo que fazemos
               </h1>
-              <p className="text-lg text-gray-400 leading-relaxed">
+              <p className="text-lg text-navy-100 leading-relaxed">
                 A Metalab opera dentro dos mais rigorosos padrões regulatórios brasileiros.
                 Conheça as normas que guiam nossa operação e como elas protegem você como consumidor.
               </p>
@@ -112,21 +109,16 @@ export default function Certificacoes() {
         </section>
 
         {/* Badges rápidos */}
-        <section className="bg-white border-b border-gray-100 py-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="bg-surface-card border-b border-line py-10">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="flex flex-wrap justify-center gap-4">
-              {certifications.map(({ badge, color, subtitle }) => (
+              {certifications.map(({ badge, subtitle }) => (
                 <div
                   key={badge}
-                  className="flex items-center gap-3 px-5 py-3 rounded-full border border-gray-200 bg-gray-50"
+                  className="flex items-center gap-3 px-5 py-3 rounded-full border border-line bg-surface-sunken"
                 >
-                  <span
-                    className="text-sm font-black px-2 py-0.5 rounded text-white"
-                    style={{ backgroundColor: color }}
-                  >
-                    {badge}
-                  </span>
-                  <span className="text-sm text-gray-600 font-medium">{subtitle}</span>
+                  <Badge variant="gold">{badge}</Badge>
+                  <span className="text-sm text-ink-secondary font-medium">{subtitle}</span>
                 </div>
               ))}
             </div>
@@ -134,42 +126,39 @@ export default function Certificacoes() {
         </section>
 
         {/* Certificações detalhadas */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-24 bg-surface-card">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="text-center mb-16">
-              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Detalhamento</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+              <p className="text-xs font-bold text-navy uppercase tracking-wide mb-3">Detalhamento</p>
+              <h2 className="font-display text-3xl sm:text-4xl text-navy">
                 Nossas conformidades regulatórias
               </h2>
-              <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+              <p className="mt-4 text-ink-muted max-w-xl mx-auto">
                 Cada certificação representa um conjunto de obrigações que cumprimos para garantir
                 a segurança e a qualidade dos nossos produtos.
               </p>
             </div>
 
             <div className="space-y-6">
-              {certifications.map(({ badge, color, title, subtitle, desc, items }) => (
+              {certifications.map(({ badge, title, subtitle, desc, items }) => (
                 <div
                   key={badge}
-                  className="grid grid-cols-1 lg:grid-cols-3 gap-0 rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  className="grid grid-cols-1 lg:grid-cols-3 gap-0 rounded-2xl border border-line bg-surface-card overflow-hidden hover:shadow-md transition-shadow duration-300"
                 >
                   {/* Badge lateral */}
-                  <div
-                    className="flex flex-col items-center justify-center p-8 text-white"
-                    style={{ backgroundColor: color }}
-                  >
-                    <span className="text-5xl font-black mb-2">{badge}</span>
-                    <span className="text-sm text-white/75 text-center">{subtitle}</span>
+                  <div className="flex flex-col items-center justify-center p-8 text-on-navy bg-navy gap-2">
+                    <span className="font-display text-4xl">{badge}</span>
+                    <span className="text-sm text-navy-100 text-center">{subtitle}</span>
                   </div>
 
                   {/* Descrição */}
-                  <div className="p-8 lg:col-span-2 bg-white">
-                    <h3 className="text-xl font-black text-gray-900 mb-3">{title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-5">{desc}</p>
+                  <div className="p-8 lg:col-span-2 bg-surface-card">
+                    <h3 className="font-display text-xl text-navy mb-3">{title}</h3>
+                    <p className="text-sm text-ink-secondary leading-relaxed mb-5">{desc}</p>
                     <ul className="space-y-2">
                       {items.map((item) => (
-                        <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
-                          <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <li key={item} className="flex items-start gap-2 text-sm text-ink-secondary">
+                          <svg className="w-4 h-4 flex-shrink-0 mt-0.5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                           </svg>
                           {item}
@@ -184,19 +173,19 @@ export default function Certificacoes() {
         </section>
 
         {/* FAQ */}
-        <section className="py-24 bg-[#eff6ff]">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-24 bg-brand-50">
+          <div className="max-w-3xl mx-auto px-6 sm:px-8">
             <div className="text-center mb-14">
-              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Perguntas Frequentes</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+              <p className="text-xs font-bold text-navy uppercase tracking-wide mb-3">Perguntas Frequentes</p>
+              <h2 className="font-display text-3xl sm:text-4xl text-navy">
                 Dúvidas sobre regulamentação
               </h2>
             </div>
             <div className="space-y-4">
               {faqs.map(({ q, a }) => (
-                <div key={q} className="p-6 rounded-2xl bg-white border border-[#dbeafe]">
-                  <p className="font-bold text-gray-900 mb-2">{q}</p>
-                  <p className="text-sm text-gray-600 leading-relaxed">{a}</p>
+                <div key={q} className="p-6 rounded-2xl bg-surface-card border border-line">
+                  <p className="font-bold text-navy mb-2">{q}</p>
+                  <p className="text-sm text-ink-secondary leading-relaxed">{a}</p>
                 </div>
               ))}
             </div>
@@ -204,23 +193,23 @@ export default function Certificacoes() {
         </section>
 
         {/* Disclaimer */}
-        <section className="py-14 bg-gray-950 text-white">
-          <div className="max-w-3xl mx-auto px-4 text-center">
-            <p className="text-sm text-gray-400 leading-relaxed mb-6">
-              ⚠️ Os suplementos alimentares Metalab <strong className="text-white">não são medicamentos</strong> e
+        <section className="py-14 bg-navy text-on-navy">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            <p className="text-sm text-navy-100 leading-relaxed mb-6">
+              Os suplementos alimentares Metalab <strong className="text-on-navy">não são medicamentos</strong> e
               não têm indicação para diagnóstico, tratamento, cura ou prevenção de doenças.
               Não substituem uma alimentação equilibrada nem o acompanhamento de um profissional de saúde.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
                 href="/qualidade"
-                className="inline-flex items-center gap-2 px-6 py-3 border border-gray-700 text-gray-300 font-semibold rounded-xl hover:border-[#60a5fa] hover:text-[#60a5fa] transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 border border-navy-300 text-navy-100 font-semibold rounded-full hover:border-brand hover:text-brand-300 transition-colors text-sm"
               >
                 Ver nossa qualidade
               </Link>
               <Link
                 href="/#produtos"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#60a5fa] text-gray-950 font-bold rounded-xl hover:bg-blue-300 transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-brand text-on-brand font-bold rounded-full hover:bg-brand-hover transition-colors text-sm"
               >
                 Ver produtos
               </Link>

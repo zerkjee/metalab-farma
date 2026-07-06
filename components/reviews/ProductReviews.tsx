@@ -30,7 +30,7 @@ interface ApiResponse {
 type FilterRating = 'all' | 5 | 4 | 3 | 2 | 1;
 type SortKey = 'recent' | 'highest' | 'lowest';
 
-const AVATAR_COLORS = ['#1e50a8', '#0f2756', '#9333ea', '#3b82f6', '#081a42'];
+const AVATAR_COLORS = ['#5CA8D1', '#323C64', '#C9903A', '#35759A', '#222A46'];
 
 function toReview(a: ApiAvaliacao, productId: string): Review {
   const colorIdx = (a.cliente.primeiroNome.charCodeAt(0) || 0) % AVATAR_COLORS.length;
@@ -38,7 +38,7 @@ function toReview(a: ApiAvaliacao, productId: string): Review {
     id: a.id,
     productId,
     productName: '',
-    productColor: '#1e50a8',
+    productColor: '#323C64',
     customerName: a.cliente.primeiroNome,
     customerCity: a.cliente.cidade,
     customerState: a.cliente.estado,
@@ -54,7 +54,7 @@ function toReview(a: ApiAvaliacao, productId: string): Review {
   };
 }
 
-export default function ProductReviews({ productId, color = '#0f2756' }: ProductReviewsProps) {
+export default function ProductReviews({ productId, color = '#323C64' }: ProductReviewsProps) {
   const { data: session } = useSession();
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -151,17 +151,17 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
   ];
 
   return (
-    <section className="py-16 border-t border-gray-100 bg-gray-50">
+    <section className="py-16 border-t border-line bg-surface-sunken">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10">
-          <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color }}>
+          <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color }}>
             O que dizem nossos clientes
           </p>
-          <h2 className="text-3xl font-black text-gray-900">Avaliações do Produto</h2>
+          <h2 className="font-display text-3xl text-navy">Avaliações do Produto</h2>
         </div>
 
         {summary && summary.totalReviews > 0 && (
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 mb-8 shadow-sm">
+          <div className="bg-surface-card rounded-2xl p-6 sm:p-8 border border-line mb-8 shadow-sm">
             <RatingDistribution summary={summary} color={color} />
           </div>
         )}
@@ -174,7 +174,7 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
                   key={value}
                   onClick={() => { setFilter(value); setVisible(4); }}
                   className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 ${
-                    filter === value ? 'text-white border-transparent' : 'text-gray-600 border-gray-200 bg-white hover:border-[#0f2756] hover:text-[#0f2756]'
+                    filter === value ? 'text-white border-transparent' : 'text-ink-secondary border-line-default bg-surface-card hover:border-navy hover:text-navy'
                   }`}
                   style={filter === value ? { backgroundColor: color, borderColor: color } : {}}
                 >
@@ -185,7 +185,7 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
-              className="text-xs font-medium text-gray-600 border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:border-transparent"
+              className="text-xs font-medium text-ink-secondary border border-line-default rounded-xl px-3 py-2 bg-surface-card focus:outline-none focus:ring-2 focus:border-transparent"
               style={{ '--tw-ring-color': color } as React.CSSProperties}
             >
               <option value="recent">Mais recentes</option>
@@ -196,7 +196,7 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Carregando avaliações...</div>
+          <div className="text-center py-12 text-ink-muted">Carregando avaliações...</div>
         ) : displayed.length > 0 ? (
           <>
             <div className="flex flex-col gap-4">
@@ -206,7 +206,7 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={() => setVisible((n) => n + 4)}
-                  className="px-8 py-3 rounded-xl border-2 font-bold text-sm transition-all duration-200 hover:bg-gray-100"
+                  className="px-8 py-3 rounded-full border-2 font-bold text-sm transition-all duration-200 hover:bg-surface-sunken"
                   style={{ borderColor: color, color }}
                 >
                   Ver mais avaliações
@@ -215,18 +215,18 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
             )}
           </>
         ) : (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-ink-muted">
             <p className="font-medium">Seja o primeiro a avaliar este produto.</p>
           </div>
         )}
 
-        <div className="mt-10 p-6 bg-white rounded-2xl border border-gray-100 text-center shadow-sm">
-          <p className="font-bold text-gray-900 mb-1">Já comprou este produto?</p>
-          <p className="text-sm text-gray-500 mb-4">Sua opinião ajuda outros clientes a escolher melhor.</p>
+        <div className="mt-10 p-6 bg-surface-card rounded-2xl border border-line text-center shadow-sm">
+          <p className="font-bold text-navy mb-1">Já comprou este produto?</p>
+          <p className="text-sm text-ink-muted mb-4">Sua opinião ajuda outros clientes a escolher melhor.</p>
           {session?.user ? (
             <button
               onClick={() => setShowForm(true)}
-              className="px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-95"
+              className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-95"
               style={{ backgroundColor: color }}
             >
               Escrever avaliação
@@ -234,7 +234,7 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
           ) : (
             <Link
               href="/login"
-              className="inline-block px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-95"
+              className="inline-block px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-95"
               style={{ backgroundColor: color }}
             >
               Faça login para avaliar
@@ -244,17 +244,17 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !submitting && setShowForm(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] p-4" onClick={() => !submitting && setShowForm(false)}>
           <form
             onSubmit={submitReview}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"
+            className="bg-surface-card rounded-2xl max-w-md w-full p-6 shadow-lg"
           >
-            <h3 className="text-xl font-black text-gray-900 mb-1">Avaliar produto</h3>
-            <p className="text-sm text-gray-500 mb-6">Sua avaliação passa por moderação antes de ser publicada.</p>
+            <h3 className="font-display text-xl text-navy mb-1">Avaliar produto</h3>
+            <p className="text-sm text-ink-muted mb-6">Sua avaliação passa por moderação antes de ser publicada.</p>
 
             <div className="mb-5">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2">Sua nota</label>
+              <label className="text-xs font-bold text-ink-secondary uppercase tracking-wide block mb-2">Sua nota</label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
@@ -262,7 +262,7 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
                     type="button"
                     onClick={() => setNota(n)}
                     className="text-3xl transition-transform hover:scale-110"
-                    style={{ color: n <= nota ? '#f59e0b' : '#e5e7eb' }}
+                    style={{ color: n <= nota ? '#C9903A' : '#E1E1DE' }}
                   >
                     ★
                   </button>
@@ -271,31 +271,31 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
             </div>
 
             <div className="mb-4">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2">Título</label>
+              <label className="text-xs font-bold text-ink-secondary uppercase tracking-wide block mb-2">Título</label>
               <input
                 type="text"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 maxLength={120}
                 placeholder="Resumo da sua experiência"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-2.5 rounded-xl border border-line-default text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
               />
             </div>
 
             <div className="mb-5">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2">Comentário</label>
+              <label className="text-xs font-bold text-ink-secondary uppercase tracking-wide block mb-2">Comentário</label>
               <textarea
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
                 maxLength={2000}
                 rows={4}
                 placeholder="Conte sua experiência com o produto"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                className="w-full px-4 py-2.5 rounded-xl border border-line-default text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 resize-none"
               />
             </div>
 
             {message && (
-              <div className={`mb-4 px-4 py-2.5 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+              <div className={`mb-4 px-4 py-2.5 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
                 {message.text}
               </div>
             )}
@@ -305,14 +305,14 @@ export default function ProductReviews({ productId, color = '#0f2756' }: Product
                 type="button"
                 onClick={() => setShowForm(false)}
                 disabled={submitting}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-full text-sm font-bold text-ink-secondary border border-line-default hover:bg-surface-sunken transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
                 style={{ backgroundColor: color }}
               >
                 {submitting ? 'Enviando...' : 'Enviar avaliação'}

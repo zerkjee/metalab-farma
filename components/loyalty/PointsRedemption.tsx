@@ -58,15 +58,15 @@ export default function PointsRedemption({
   const saldo = stats?.points ?? 0;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] backdrop-blur-sm p-6">
+    <div className="relative overflow-hidden rounded-2xl border border-line bg-surface-card shadow-sm p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-white font-black text-lg">Resgate de Pontos</h2>
-          <p className="text-white/40 text-xs mt-0.5">Troque seus pontos por cupons de desconto</p>
+          <h2 className="font-display text-lg text-navy">Resgate de Pontos</h2>
+          <p className="text-ink-muted text-xs mt-0.5">Troque seus pontos por cupons de desconto</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-black" style={{ color: levelCfg.color }}>{saldo.toLocaleString('pt-BR')}</p>
-          <p className="text-white/30 text-xs">pontos disponíveis</p>
+          <p className="font-display text-2xl" style={{ color: levelCfg.color }}>{saldo.toLocaleString('pt-BR')}</p>
+          <p className="text-ink-muted text-xs">pontos disponíveis</p>
         </div>
       </div>
 
@@ -80,15 +80,15 @@ export default function PointsRedemption({
               disabled={!podeResgatar || busy !== null}
               className={`relative rounded-xl border p-4 text-left transition-all ${
                 podeResgatar
-                  ? 'border-white/15 bg-white/[0.06] hover:bg-white/10 hover:border-white/25 cursor-pointer'
-                  : 'border-white/5 bg-white/[0.02] opacity-50 cursor-not-allowed'
+                  ? 'border-line-default bg-surface-sunken hover:border-navy cursor-pointer'
+                  : 'border-line bg-surface-sunken opacity-50 cursor-not-allowed'
               }`}
             >
-              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Cupom</p>
-              <p className="text-2xl font-black text-emerald-400">R$ {opt.valor}</p>
-              <p className="text-white/50 text-xs mt-1.5">por {opt.pontos.toLocaleString('pt-BR')} pts</p>
+              <p className="text-[10px] uppercase tracking-widest text-ink-muted mb-1">Cupom</p>
+              <p className="font-display text-2xl text-success">R$ {opt.valor}</p>
+              <p className="text-ink-muted text-xs mt-1.5">por {opt.pontos.toLocaleString('pt-BR')} pts</p>
               {busy === opt.pontos && (
-                <p className="text-[#60a5fa] text-xs mt-1 animate-pulse">Resgatando...</p>
+                <p className="text-brand-600 text-xs mt-1 animate-pulse">Resgatando...</p>
               )}
             </button>
           );
@@ -96,16 +96,16 @@ export default function PointsRedemption({
       </div>
 
       {result && (
-        <div className={`mt-4 rounded-xl px-4 py-3 text-sm ${result.ok ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-red-500/10 text-red-300 border border-red-500/20'}`}>
+        <div className={`mt-4 rounded-xl px-4 py-3 text-sm ${result.ok ? 'bg-success-subtle text-success border border-success/20' : 'bg-danger-subtle text-danger border border-danger/20'}`}>
           {result.codigo && (
-            <p className="font-mono font-black text-base mb-1">{result.codigo}</p>
+            <p className="font-mono font-bold text-base mb-1">{result.codigo}</p>
           )}
           <p className="text-xs">{result.text}</p>
         </div>
       )}
 
       {saldo < (options[0]?.pontos ?? 100) && (
-        <p className="text-white/30 text-xs text-center mt-4">
+        <p className="text-ink-muted text-xs text-center mt-4">
           Compre mais para acumular pontos e desbloquear resgates.
         </p>
       )}

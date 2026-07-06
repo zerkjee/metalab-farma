@@ -88,19 +88,19 @@ export default function Qualidade() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#fafafa]">
+      <main className="min-h-screen bg-surface-page">
 
         {/* Hero */}
-        <section className="bg-gray-950 text-white py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="bg-navy text-on-navy py-16 sm:py-24">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold text-[#60a5fa] uppercase tracking-widest mb-4">
+              <p className="text-xs font-bold text-brand-300 uppercase tracking-wide mb-4">
                 Qualidade Metalab
               </p>
-              <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-6">
+              <h1 className="font-display text-4xl sm:text-5xl leading-tight mb-6">
                 Do insumo à sua porta: controle em cada etapa
               </h1>
-              <p className="text-lg text-gray-400 leading-relaxed">
+              <p className="text-lg text-navy-100 leading-relaxed">
                 Qualidade não começa na embalagem. Começa na escolha da matéria-prima,
                 passa pelo controle de fabricação e termina na entrega íntegra do produto.
                 Veja como garantimos isso em cada passo do processo.
@@ -110,14 +110,14 @@ export default function Qualidade() {
         </section>
 
         {/* Processo */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-24 bg-surface-card">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="text-center mb-16">
-              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Nosso Processo</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+              <p className="text-xs font-bold text-navy uppercase tracking-wide mb-3">Nosso Processo</p>
+              <h2 className="font-display text-3xl sm:text-4xl text-navy">
                 6 etapas de controle de qualidade
               </h2>
-              <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+              <p className="mt-4 text-ink-muted max-w-xl mx-auto">
                 Cada produto percorre um processo rigoroso antes de chegar até você.
               </p>
             </div>
@@ -126,13 +126,13 @@ export default function Qualidade() {
               {steps.map(({ number, title, desc }) => (
                 <div
                   key={number}
-                  className="group p-7 rounded-2xl border border-gray-100 hover:border-[#c4b5fd] hover:shadow-xl transition-all duration-300"
+                  className="group p-7 rounded-2xl border border-line bg-surface-card hover:shadow-md transition-shadow duration-300"
                 >
-                  <div className="text-5xl font-black text-[#dbeafe] group-hover:text-[#c4b5fd] transition-colors mb-4 leading-none">
+                  <div className="font-display text-5xl text-brand-200 group-hover:text-brand-300 transition-colors mb-4 leading-none">
                     {number}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                  <h3 className="text-lg font-bold text-navy mb-2">{title}</h3>
+                  <p className="text-sm text-ink-muted leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -140,11 +140,11 @@ export default function Qualidade() {
         </section>
 
         {/* Pilares */}
-        <section className="py-24 bg-[#eff6ff]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-24 bg-brand-50">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="text-center mb-16">
-              <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-3">Nossos Pilares</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+              <p className="text-xs font-bold text-navy uppercase tracking-wide mb-3">Nossos Pilares</p>
+              <h2 className="font-display text-3xl sm:text-4xl text-navy">
                 O que sustenta nossa qualidade
               </h2>
             </div>
@@ -152,13 +152,13 @@ export default function Qualidade() {
               {pillars.map(({ icon, title, desc }) => (
                 <div
                   key={title}
-                  className="group flex flex-col items-center text-center p-8 rounded-2xl bg-white border border-[#dbeafe] hover:border-[#c4b5fd] hover:shadow-xl transition-all duration-300"
+                  className="group flex flex-col items-center text-center p-8 rounded-2xl bg-surface-card border border-line hover:shadow-md transition-shadow duration-300"
                 >
-                  <div className="p-4 rounded-2xl mb-6 text-[#0f2756] bg-[#eff6ff] group-hover:bg-[#dbeafe] transition-colors">
+                  <div className="p-4 rounded-2xl mb-6 text-navy bg-brand-50 group-hover:bg-brand-100 transition-colors">
                     {icon}
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 mb-3">{title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                  <h3 className="font-display text-xl text-navy mb-3">{title}</h3>
+                  <p className="text-sm text-ink-muted leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -166,18 +166,18 @@ export default function Qualidade() {
         </section>
 
         {/* Checklist + disclaimer */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 sm:py-24 bg-surface-card">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-4">Padrão Metalab</p>
-                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 leading-tight mb-6">
+                <p className="text-xs font-bold text-navy uppercase tracking-wide mb-4">Padrão Metalab</p>
+                <h2 className="font-display text-3xl sm:text-4xl text-navy leading-tight mb-6">
                   O que você pode esperar de cada produto
                 </h2>
                 <ul className="space-y-3">
                   {bullets.map((b) => (
-                    <li key={b} className="flex items-start gap-3 text-sm text-gray-700">
-                      <svg className="w-5 h-5 text-[#0f2756] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <li key={b} className="flex items-start gap-3 text-sm text-ink-secondary">
+                      <svg className="w-5 h-5 text-success flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                       </svg>
                       {b}
@@ -187,18 +187,18 @@ export default function Qualidade() {
               </div>
 
               <div className="space-y-4">
-                <div className="p-7 rounded-2xl bg-[#0f2756] text-white">
-                  <p className="text-lg font-bold mb-2">Aviso Legal</p>
-                  <p className="text-sm text-white/80 leading-relaxed">
-                    Os suplementos alimentares Metalab <strong className="text-white">não são medicamentos</strong> e
+                <div className="p-7 rounded-2xl bg-navy text-on-navy">
+                  <p className="text-lg font-bold mb-2">Aviso legal</p>
+                  <p className="text-sm text-navy-100 leading-relaxed">
+                    Os suplementos alimentares Metalab <strong className="text-on-navy">não são medicamentos</strong> e
                     não têm indicação para diagnóstico, tratamento, cura ou prevenção de doenças.
                     Não substituem uma alimentação equilibrada. Leia o rótulo com atenção e consulte
                     um profissional de saúde antes de consumir.
                   </p>
                 </div>
-                <div className="p-7 rounded-2xl bg-[#eff6ff] border border-[#dbeafe]">
-                  <p className="text-base font-bold text-gray-900 mb-2">Legislação aplicável</p>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                <div className="p-7 rounded-2xl bg-brand-50 border border-line">
+                  <p className="text-base font-bold text-navy mb-2">Legislação aplicável</p>
+                  <ul className="text-sm text-ink-secondary space-y-1">
                     <li>• RDC nº 243/2018 — Suplementos Alimentares</li>
                     <li>• RDC nº 786/2023 — Atualização regulatória</li>
                     <li>• Portaria SVS/MS nº 32/1998 — Suplementos vitamínicos</li>
@@ -211,23 +211,23 @@ export default function Qualidade() {
         </section>
 
         {/* CTA */}
-        <section className="py-20 bg-gray-950 text-white">
-          <div className="max-w-3xl mx-auto px-4 text-center">
-            <h2 className="text-3xl font-black mb-4">Qualidade que você pode verificar</h2>
-            <p className="text-gray-400 mb-8">
+        <section className="py-16 sm:py-20 bg-navy text-on-navy">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            <h2 className="font-display text-3xl mb-4">Qualidade que você pode verificar</h2>
+            <p className="text-navy-100 mb-8">
               Dúvidas sobre algum produto? Entre em contato — respondemos sobre ingredientes,
               lotes e procedência de qualquer item do nosso catálogo.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
                 href="/#produtos"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#60a5fa] text-gray-950 font-bold rounded-xl hover:bg-blue-300 transition-colors"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-brand text-on-brand font-bold rounded-full hover:bg-brand-hover transition-colors"
               >
                 Ver produtos
               </Link>
               <Link
                 href="/certificacoes"
-                className="inline-flex items-center gap-2 px-8 py-4 border border-gray-700 text-white font-semibold rounded-xl hover:border-[#60a5fa] hover:text-[#60a5fa] transition-colors"
+                className="inline-flex items-center gap-2 px-8 py-4 border border-navy-300 text-on-navy font-semibold rounded-full hover:border-brand hover:text-brand-300 transition-colors"
               >
                 Ver certificações
               </Link>

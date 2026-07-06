@@ -14,7 +14,7 @@ const sizes = {
   lg: 'w-7 h-7',
 };
 
-export default function StarRating({ rating, size = 'sm', showValue = false, color = '#f59e0b' }: StarRatingProps) {
+export default function StarRating({ rating, size = 'sm', showValue = false, color = '#C9903A' }: StarRatingProps) {
   const stars = Array.from({ length: 5 }, (_, i) => {
     const filled = rating >= i + 1;
     const half = !filled && rating >= i + 0.5;
@@ -41,12 +41,12 @@ export default function StarRating({ rating, size = 'sm', showValue = false, col
             </>
           ) : (
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-              fill="transparent" stroke="#d1d5db" strokeWidth="1.5" strokeLinejoin="round" />
+              fill="transparent" stroke="#C9C9C7" strokeWidth="1.5" strokeLinejoin="round" />
           )}
         </svg>
       ))}
       {showValue && (
-        <span className="ml-1 text-sm font-bold text-gray-700">{rating.toFixed(1)}</span>
+        <span className="ml-1 text-sm font-bold text-navy">{rating.toFixed(1)}</span>
       )}
     </span>
   );
