@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User, LogOut, Package } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/context/CartContext';
 import SearchBar from '@/components/SearchBar';
@@ -32,22 +33,22 @@ export default function Header() {
   const userInitial = session?.user?.name?.[0]?.toUpperCase() ?? '?';
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-surface-card border-b border-line shadow-sm">
       {/* Faixa institucional — confiança e qualidade */}
-      <div className="hidden md:block bg-gray-950 text-white">
+      <div className="hidden md:block bg-navy text-on-navy">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between">
-          <p className="text-[11px] text-gray-400 font-medium tracking-wide">
+          <p className="text-[11px] text-on-navy/70 font-medium tracking-wide">
             Referência em Suplementação Alimentar · Confiança, Precisão, Excelência
           </p>
-          <div className="flex items-center gap-5 text-[11px] text-gray-500">
+          <div className="flex items-center gap-5 text-[11px] text-on-navy/60">
             <span className="flex items-center gap-1.5">
-              <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3 h-3 text-success" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               Produto lacrado · Nota fiscal
             </span>
             <span className="flex items-center gap-1.5">
-              <svg className="w-3 h-3 text-[#60a5fa]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Envio em até 2 dias úteis
@@ -60,10 +61,14 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex flex-col leading-none">
-              <span className="text-xl font-black tracking-[0.05em] text-gray-900">METALAB</span>
-              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#0f2756] leading-tight">Suplementos</span>
-            </div>
+            <Image
+              src="/brand/metalab-logo-horizontal.png"
+              alt="Metalab Suplementos"
+              width={1154}
+              height={178}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Nav desktop */}
@@ -73,19 +78,18 @@ export default function Header() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="relative text-sm font-bold px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105"
-                  style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)', color: '#fff' }}
+                  className="relative text-sm font-bold px-3.5 py-1.5 rounded-full bg-brand text-on-brand transition-all duration-200 hover:bg-brand-hover hover:scale-105"
                 >
-                  {item.label} ✦
+                  {item.label}
                 </Link>
               ) : (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="relative text-sm font-medium text-gray-600 hover:text-[#0f2756] transition-colors duration-200 group"
+                  className="relative text-sm font-medium text-ink-secondary hover:text-brand transition-colors duration-200 group"
                 >
                   {item.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#0f2756] transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full" />
                 </Link>
               )
             )}
@@ -95,33 +99,33 @@ export default function Header() {
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <div className="relative group hidden md:block">
-                <button className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-[#0f2756]/10 text-[#0f2756] text-sm font-black hover:bg-[#0f2756]/20 transition-all">
+                <button className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-brand-subtle text-navy text-sm font-black hover:bg-brand-subtle-hover transition-all">
                   {userInitial}
                 </button>
-                <div className="pointer-events-none absolute right-0 top-12 w-44 rounded-2xl border border-gray-100 bg-white shadow-xl opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all z-50 overflow-hidden">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-xs font-semibold text-gray-900 truncate">{session?.user?.name}</p>
-                    <p className="text-[11px] text-gray-400 truncate">{session?.user?.email}</p>
+                <div className="pointer-events-none absolute right-0 top-12 w-44 rounded-lg border border-line bg-surface-card shadow-lg opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-all z-50 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-line">
+                    <p className="text-xs font-semibold text-ink truncate">{session?.user?.name}</p>
+                    <p className="text-[11px] text-ink-muted truncate">{session?.user?.email}</p>
                   </div>
                   <Link href="/pedidos"
-                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-gray-600 hover:bg-gray-50 transition-colors">
+                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-ink-secondary hover:bg-surface-sunken transition-colors">
                     <Package size={14} /> Meus pedidos
                   </Link>
                   <button onClick={() => signOut({ callbackUrl: '/' })}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100">
+                    className="flex w-full items-center gap-2 px-4 py-3 text-xs text-danger hover:bg-danger-subtle transition-colors border-t border-line">
                     <LogOut size={14} /> Sair
                   </button>
                 </div>
               </div>
             ) : (
-              <Link href="/login" className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-semibold text-gray-700 hover:border-[#0f2756]/30 hover:text-[#0f2756] transition-all">
+              <Link href="/login" className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-card px-4 py-1.5 text-sm font-semibold text-ink-secondary hover:border-brand hover:text-brand transition-all">
                 <User size={14} /> Entrar
               </Link>
             )}
 
             <button
               onClick={toggleCart}
-              className="relative p-2.5 text-gray-600 hover:text-[#0f2756] transition-colors"
+              className="relative p-2.5 text-ink-secondary hover:text-brand transition-colors"
               aria-label={`Abrir carrinho com ${cartCount} itens`}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +133,7 @@ export default function Header() {
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m10 0l2-9m-12 9h16m-16 0a2 2 0 11-4 0 2 2 0 014 0zm16 0a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0f2756] px-1.5 text-[10px] font-black text-white shadow-md">
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-black text-on-brand shadow-sm">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
@@ -137,7 +141,7 @@ export default function Header() {
 
             {/* Hamburger mobile */}
             <button
-              className="md:hidden p-2.5 text-gray-600"
+              className="md:hidden p-2.5 text-ink-secondary"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={menuOpen}
@@ -164,7 +168,7 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Nav mobile */}
         {menuOpen && (
-          <div id="mobile-nav" className="md:hidden border-t border-gray-100 py-4 flex flex-col gap-4">
+          <div id="mobile-nav" className="md:hidden border-t border-line py-4 flex flex-col gap-4">
             <SearchBar compact onNavigate={() => setMenuOpen(false)} />
             {navItems.map((item) => (
               <Link
@@ -172,22 +176,22 @@ export default function Header() {
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
                 className={`text-sm font-medium transition-colors px-2 ${
-                  item.highlight ? 'text-[#0f2756] font-bold' : 'text-gray-700 hover:text-[#0f2756]'
+                  item.highlight ? 'text-brand font-bold' : 'text-ink-secondary hover:text-brand'
                 }`}
               >
-                {item.label}{item.highlight ? ' ✦' : ''}
+                {item.label}
               </Link>
             ))}
             {isLoggedIn ? (
               <>
                 <Link href="/pedidos" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0f2756] transition-all">
+                  className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium text-ink-secondary hover:bg-surface-sunken hover:text-brand transition-all">
                   <Package className="h-4 w-4" strokeWidth={1.8} />
                   Meus pedidos
                 </Link>
                 <button
                   onClick={() => { setMenuOpen(false); void signOut({ callbackUrl: '/' }); }}
-                  className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
+                  className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-medium text-danger hover:bg-danger-subtle transition-all"
                 >
                   <LogOut className="h-4 w-4" strokeWidth={1.8} />
                   Sair ({session?.user?.name?.split(' ')[0]})
@@ -195,7 +199,7 @@ export default function Header() {
               </>
             ) : (
               <Link href="/login" onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-semibold text-[#0f2756] hover:bg-blue-50 transition-all">
+                className="flex items-center gap-2 rounded-lg px-2 py-3 text-sm font-semibold text-brand hover:bg-brand-subtle transition-all">
                 <User className="h-4 w-4" strokeWidth={1.8} />
                 Entrar / Criar conta
               </Link>

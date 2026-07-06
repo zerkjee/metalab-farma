@@ -20,13 +20,13 @@ export default function CategoryMenu() {
   if (categorias.length === 0) return null;
 
   return (
-    <nav className="border-t border-gray-100">
+    <nav className="border-t border-line">
       <div className="flex gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {categorias.map((cat) => (
           <Link
             key={cat.id}
             href={`/categoria/${cat.slug}`}
-            className="flex-shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold text-gray-600 hover:text-[#0f2756] hover:bg-gray-50 transition-colors"
+            className="flex-shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold text-ink-secondary hover:text-brand hover:bg-surface-sunken transition-colors"
           >
             {cat.nome}
           </Link>

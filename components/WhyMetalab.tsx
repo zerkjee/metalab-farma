@@ -44,15 +44,15 @@ const pillars = [
 
 export default function WhyMetalab() {
   return (
-    <section className="py-24 bg-white border-t border-gray-100">
+    <section className="py-24 bg-surface-card border-t border-line">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center mb-16">
-          <p className="text-xs font-bold text-[#0f2756] uppercase tracking-[0.2em] mb-4">Nosso Diferencial</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-            Confiança, Precisão,<br className="hidden sm:block" /> Experiência, Excelência
+          <p className="text-xs font-bold text-brand uppercase tracking-[0.2em] mb-4">Nosso Diferencial</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-navy tracking-tight">
+            Confiança, precisão,<br className="hidden sm:block" /> experiência, excelência
           </h2>
-          <p className="mt-5 text-gray-500 max-w-2xl mx-auto text-base leading-relaxed">
+          <p className="mt-5 text-ink-secondary max-w-2xl mx-auto text-base leading-relaxed">
             Referência em suplementação alimentar com insumos de procedência controlada,
             processos rigorosos e compromisso com a qualidade em cada etapa.
           </p>
@@ -62,14 +62,14 @@ export default function WhyMetalab() {
           {pillars.map(({ icon, title, desc }) => (
             <div
               key={title}
-              className="group flex flex-col gap-5 p-7 bg-white rounded-xl border border-gray-200 hover:border-[#0f2756]/30 hover:shadow-lg transition-all duration-300"
+              className="group flex flex-col gap-5 p-7 bg-surface-card rounded-lg border border-line hover:border-brand shadow-sm hover:shadow-lg transition-all duration-300"
             >
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center text-[#0f2756] bg-gray-50 group-hover:bg-[#0f2756]/5 transition-colors border border-gray-100">
+              <div className="w-12 h-12 rounded-md flex items-center justify-center text-brand bg-brand-subtle group-hover:bg-brand-subtle-hover transition-colors">
                 {icon}
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-900 mb-2 tracking-tight">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="text-base font-bold text-navy mb-2 tracking-tight">{title}</h3>
+                <p className="text-sm text-ink-secondary leading-relaxed">{desc}</p>
               </div>
             </div>
           ))}
