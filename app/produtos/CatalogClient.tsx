@@ -144,24 +144,24 @@ export function CatalogClient({ produtos, categorias }: Props) {
     <div className="space-y-6">
       {/* Busca */}
       <div>
-        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+        <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2">
           Buscar
         </p>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-muted pointer-events-none" />
           <input
             type="text"
             value={busca}
             onChange={(e) => handleBusca(e.target.value)}
             placeholder="Nome, ingrediente..."
             autoComplete="off"
-            className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2756]/20 focus:border-[#0f2756] bg-white transition-colors"
+            className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-line text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-surface-card transition-colors"
             data-testid="catalog-search"
           />
           {busca && (
             <button
               onClick={() => handleBusca("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-secondary"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -172,7 +172,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
       {/* Categoria */}
       {categoriasComProdutos.length > 0 && (
         <div>
-          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+          <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2">
             Categoria
           </p>
           <div className="flex flex-col gap-0.5">
@@ -198,7 +198,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
 
       {/* Tipo */}
       <div>
-        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+        <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2">
           Tipo
         </p>
         <div className="flex flex-col gap-0.5">
@@ -224,7 +224,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
 
       {/* Faixa de preço */}
       <div>
-        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+        <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2">
           Faixa de preço
         </p>
         <div className="flex flex-col gap-0.5">
@@ -244,7 +244,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
       {/* Tags */}
       {todasTags.length > 0 && (
         <div>
-          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+          <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2">
             Tags
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -254,8 +254,8 @@ export function CatalogClient({ produtos, categorias }: Props) {
                 onClick={() => handleBusca(busca === tag ? "" : tag)}
                 className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                   busca === tag
-                    ? "bg-[#0f2756] text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-brand text-on-brand"
+                    : "bg-neutral-100 text-ink-secondary hover:bg-neutral-200"
                 }`}
               >
                 {tag}
@@ -268,7 +268,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
       {filtrosAtivos && (
         <button
           onClick={limparFiltros}
-          className="w-full py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl border border-red-100 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2.5 text-sm font-semibold text-danger hover:bg-danger-subtle rounded-full border border-danger/20 transition-colors flex items-center justify-center gap-2"
           data-testid="clear-filters"
         >
           <X className="w-4 h-4" />
@@ -284,14 +284,14 @@ export function CatalogClient({ produtos, categorias }: Props) {
       <div className="flex items-center gap-3 mb-4 lg:hidden">
         <button
           onClick={() => setFiltrosMobileAbertos(!filtrosMobileAbertos)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-line text-sm font-semibold text-ink-secondary bg-surface-card hover:bg-surface-sunken transition-colors"
           data-testid="toggle-filters-mobile"
           aria-expanded={filtrosMobileAbertos}
         >
           <SlidersHorizontal className="w-4 h-4" />
           Filtros
           {numFiltrosAtivos > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[#0f2756] text-white text-[10px] font-black flex items-center justify-center">
+            <span className="w-5 h-5 rounded-full bg-brand text-on-brand text-[10px] font-black flex items-center justify-center">
               {numFiltrosAtivos}
             </span>
           )}
@@ -305,7 +305,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
         <select
           value={ordem}
           onChange={(e) => handleOrdem(e.target.value as Ordem)}
-          className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0f2756]/20"
+          className="flex-1 px-3 py-2.5 rounded-xl border border-line text-sm font-semibold text-ink-secondary bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand/30"
           aria-label="Ordenar produtos"
           data-testid="sort-select"
         >
@@ -319,7 +319,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
 
       {/* Painel de filtros mobile colapsável */}
       {filtrosMobileAbertos && (
-        <div className="lg:hidden mb-6 p-5 rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="lg:hidden mb-6 p-5 rounded-2xl border border-line bg-surface-card shadow-sm">
           {FilterPanel}
         </div>
       )}
@@ -327,15 +327,15 @@ export function CatalogClient({ produtos, categorias }: Props) {
       <div className="flex gap-8">
         {/* Sidebar desktop */}
         <aside className="hidden lg:block w-60 flex-shrink-0">
-          <div className="sticky top-6 p-5 rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="sticky top-6 p-5 rounded-2xl border border-line bg-surface-card shadow-sm">
             <div className="flex items-center justify-between mb-5">
-              <span className="text-xs font-black text-gray-900 uppercase tracking-wider">
+              <span className="text-xs font-black text-navy uppercase tracking-wider">
                 Filtros
               </span>
               {filtrosAtivos && (
                 <button
                   onClick={limparFiltros}
-                  className="text-[11px] text-red-500 hover:underline font-semibold flex items-center gap-1"
+                  className="text-[11px] text-danger hover:underline font-semibold flex items-center gap-1"
                   data-testid="clear-filters-desktop"
                 >
                   <X className="w-3 h-3" /> Limpar
@@ -350,14 +350,14 @@ export function CatalogClient({ produtos, categorias }: Props) {
         <div className="flex-1 min-w-0">
           {/* Cabeçalho dos resultados — desktop */}
           <div className="hidden lg:flex items-center justify-between mb-5">
-            <p className="text-sm text-gray-500">
-              <span className="font-bold text-gray-900">{total}</span>{" "}
+            <p className="text-sm text-ink-secondary">
+              <span className="font-bold text-navy">{total}</span>{" "}
               {total === 1 ? "produto encontrado" : "produtos encontrados"}
             </p>
             <select
               value={ordem}
               onChange={(e) => handleOrdem(e.target.value as Ordem)}
-              className="px-3 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#0f2756]/20"
+              className="px-3 py-2 rounded-xl border border-line text-sm font-semibold text-ink-secondary bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand/30"
               aria-label="Ordenar produtos"
               data-testid="sort-select"
             >
@@ -370,8 +370,8 @@ export function CatalogClient({ produtos, categorias }: Props) {
           </div>
 
           {/* Contagem mobile */}
-          <p className="text-sm text-gray-500 mb-4 lg:hidden">
-            <span className="font-bold text-gray-900">{total}</span>{" "}
+          <p className="text-sm text-ink-secondary mb-4 lg:hidden">
+            <span className="font-bold text-navy">{total}</span>{" "}
             {total === 1 ? "produto" : "produtos"}
           </p>
 
@@ -394,7 +394,7 @@ export function CatalogClient({ produtos, categorias }: Props) {
                 <div className="flex justify-center mt-10">
                   <button
                     onClick={() => setPagina((n) => n + 1)}
-                    className="px-8 py-3 rounded-xl border-2 border-[#0f2756] text-[#0f2756] font-bold text-sm hover:bg-[#0f2756] hover:text-white transition-all duration-200"
+                    className="px-8 py-3 rounded-full border-2 border-brand text-brand font-bold text-sm hover:bg-brand hover:text-on-brand transition-all duration-200"
                     data-testid="load-more"
                   >
                     Carregar mais ({total - visiveis.length} restantes)
@@ -404,19 +404,19 @@ export function CatalogClient({ produtos, categorias }: Props) {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-24 text-center" data-testid="empty-state">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-                <Package className="w-8 h-8 text-gray-300" />
+              <div className="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center mb-4">
+                <Package className="w-8 h-8 text-ink-muted" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">
+              <h3 className="text-lg font-bold text-navy mb-1">
                 Nenhum produto encontrado
               </h3>
-              <p className="text-gray-500 text-sm max-w-xs mb-5">
+              <p className="text-ink-secondary text-sm max-w-xs mb-5">
                 Tente ajustar os filtros ou buscar por outro termo.
               </p>
               {filtrosAtivos && (
                 <button
                   onClick={limparFiltros}
-                  className="px-5 py-2.5 rounded-xl bg-[#0f2756] text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                  className="px-5 py-2.5 rounded-full bg-brand text-on-brand text-sm font-bold hover:opacity-90 transition-opacity"
                 >
                   Limpar filtros
                 </button>
@@ -443,8 +443,8 @@ function FilterBtn({ active, onClick, children, testId }: FilterBtnProps) {
       data-testid={testId}
       className={`text-left text-sm px-3 py-2 rounded-lg transition-colors w-full ${
         active
-          ? "bg-[#0f2756] text-white font-semibold"
-          : "text-gray-600 hover:bg-gray-100"
+          ? "bg-brand text-on-brand font-semibold"
+          : "text-ink-secondary hover:bg-surface-sunken"
       }`}
     >
       {children}

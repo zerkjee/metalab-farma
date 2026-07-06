@@ -120,16 +120,16 @@ export default async function ProdutosPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Header />
-      <main className="min-h-screen bg-[#fafafa]">
-        <div className="bg-white border-b border-gray-100">
+      <main className="min-h-screen bg-surface-page">
+        <div className="bg-surface-card border-b border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-            <p className="text-sm font-semibold text-[#0f2756] uppercase tracking-widest mb-2">
-              Catálogo Completo
+            <p className="text-sm font-semibold text-brand-600 uppercase tracking-widest mb-2">
+              Catálogo completo
             </p>
-            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
+            <h1 className="font-display text-3xl sm:text-4xl font-black text-navy mb-3">
               Produtos Metalab
             </h1>
-            <p className="text-gray-500 text-base max-w-2xl">
+            <p className="text-ink-secondary text-base max-w-2xl">
               Suplementos alimentares com tecnologia, cuidado e confiança em cada fórmula.
               Sem indicação terapêutica.
             </p>

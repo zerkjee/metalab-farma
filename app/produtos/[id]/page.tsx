@@ -156,7 +156,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const numericId = parseInt(produto.id.replace('local-', '')) || 0
   const detail = getProductDetail(numericId)
-  const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#0f2756'
+  const corPrincipal = produto.corPrincipal ?? detail?.cor_principal ?? '#323C64'
 
   // Inovitann: tema exclusivo por produto
   const inovitannTheme = getInovitannTheme(produto.slug)
@@ -227,7 +227,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       ) : (
         <>
           {/* ── SPLIT: descrição + ingredientes | imagem ─── */}
-          <section id="descricao" className="py-14 bg-white border-b border-gray-100">
+          <section id="descricao" className="py-14 bg-surface-card border-b border-line">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
@@ -239,10 +239,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   >
                     {produto.marca}
                   </p>
-                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-5 leading-tight">
+                  <h2 className="font-display text-2xl sm:text-3xl font-black text-navy mb-5 leading-tight">
                     {produto.nome}
                   </h2>
-                  <p className="text-gray-500 text-base sm:text-lg leading-relaxed mb-5">
+                  <p className="text-ink-secondary text-base sm:text-lg leading-relaxed mb-5">
                     {(() => {
                       const raw = produto.descricaoCurta ?? ''
                       const isTableData = /tabela nutricional|vd não|porção \d|mg =|ins \d/i.test(raw)
@@ -258,11 +258,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     if (isTableData) return null
                     return (
                       <div
-                        className="mb-7 text-sm text-gray-600 leading-relaxed
+                        className="mb-7 text-sm text-ink-secondary leading-relaxed
                           [&_ul]:pl-4 [&_ul]:space-y-2
                           [&_li]:list-none [&_li]:flex [&_li]:items-start [&_li]:gap-2
                           [&_li]:before:content-['▸'] [&_li]:before:shrink-0 [&_li]:before:mt-0.5 [&_li]:before:font-bold
-                          [&_p]:mb-2 [&_strong]:text-gray-800 [&_strong]:font-semibold"
+                          [&_p]:mb-2 [&_strong]:text-navy [&_strong]:font-semibold"
                         style={{ '--li-color': corPrincipal } as React.CSSProperties}
                         dangerouslySetInnerHTML={{ __html: produto.descricaoHtml }}
                       />
@@ -275,7 +275,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     if (chips.length === 0) return null
                     return (
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-ink-muted mb-3">
                           Ingredientes
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -321,7 +321,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <IngredientResearchCards cards={researchCards} />
 
           {/* ── COMO USAR + AVISO LEGAL ─── */}
-          <section className="py-12 bg-gray-50 border-b border-gray-100">
+          <section className="py-12 bg-surface-sunken border-b border-line">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
                 <p
@@ -330,13 +330,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 >
                   Como tomar
                 </p>
-                <p className="text-gray-700 text-sm leading-relaxed">{modoDeUsoText}</p>
+                <p className="text-ink-secondary text-sm leading-relaxed">{modoDeUsoText}</p>
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                <p className="text-[11px] font-black uppercase tracking-widest text-ink-muted mb-3">
                   Informações importantes
                 </p>
-                <ul className="space-y-1.5 text-sm text-gray-500">
+                <ul className="space-y-1.5 text-sm text-ink-secondary">
                   <li>Não é medicamento. Sem indicação terapêutica.</li>
                   <li>Leia o rótulo antes de consumir.</li>
                   <li>Manter fora do alcance de crianças.</li>
@@ -359,13 +359,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <ProductReviews productId={produto.id} color={corPrincipal} />
 
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-surface-card">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-black text-navy mb-4">
             Pronto para adicionar este produto à sua rotina?
           </h2>
-          <p className="text-gray-600 mb-8 text-lg">Complemente sua alimentação com qualidade e segurança</p>
-          <p className="text-xs text-gray-400 mt-8">
+          <p className="text-ink-secondary mb-8 text-lg">Complemente sua alimentação com qualidade e segurança</p>
+          <p className="text-xs text-ink-muted mt-8">
             Suplemento alimentar. Este produto não é medicamento. Sem indicação terapêutica. Leia o rótulo.
           </p>
         </div>
