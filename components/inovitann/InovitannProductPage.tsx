@@ -66,7 +66,7 @@ export default function InovitannProductPage({
         <div
           className="relative flex flex-col items-center justify-center py-10 px-6 sm:px-10 min-h-[500px] sm:min-h-[580px] lg:min-h-[620px]"
           style={{
-            background: `linear-gradient(150deg, ${theme.cor} 0%, ${theme.cor}cc 55%, #080c1a 100%)`,
+            background: `linear-gradient(150deg, ${theme.cor} 0%, ${theme.cor}cc 55%, #121628 100%)`,
           }}
         >
           <ThematicBackground tema={theme.temaVisual} cor={theme.corSecundaria} />
@@ -103,17 +103,17 @@ export default function InovitannProductPage({
         </div>
 
         {/* Lado direito — fundo branco para o copy */}
-        <div className="flex flex-col justify-center py-12 px-8 sm:px-12 lg:px-16 bg-white border-l border-gray-100 gap-6">
+        <div className="flex flex-col justify-center py-12 px-8 sm:px-12 lg:px-16 bg-surface-card border-l border-line gap-6">
 
           {/* Label + tagline */}
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] mb-3" style={{ color: theme.cor }}>
               {theme.nome}
             </p>
-            <h2 className="text-3xl sm:text-4xl xl:text-5xl font-black leading-tight text-gray-900 mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl xl:text-5xl font-black leading-tight text-navy mb-4">
               {theme.tagline}
             </h2>
-            <p className="text-gray-500 text-base sm:text-lg leading-relaxed">
+            <p className="text-ink-muted text-base sm:text-lg leading-relaxed">
               {theme.copyAbertura}
             </p>
           </div>
@@ -126,10 +126,10 @@ export default function InovitannProductPage({
                 className="flex flex-col items-center text-center p-3 rounded-2xl border"
                 style={{ backgroundColor: `${theme.cor}08`, borderColor: `${theme.cor}22` }}
               >
-                <span className="text-lg sm:text-xl font-black leading-tight" style={{ color: theme.cor }}>
+                <span className="font-display text-lg sm:text-xl font-black leading-tight" style={{ color: theme.cor }}>
                   {e.valor}
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500 leading-tight mt-1">{e.rotulo}</span>
+                <span className="text-[10px] sm:text-xs text-ink-muted leading-tight mt-1">{e.rotulo}</span>
               </div>
             ))}
           </div>
@@ -140,10 +140,10 @@ export default function InovitannProductPage({
             style={{ backgroundColor: `${theme.cor}07`, borderColor: `${theme.cor}20` }}
           >
             <Quote size={40} className="absolute -top-1 -right-1 opacity-[0.07]" style={{ color: theme.cor }} />
-            <p className="text-sm sm:text-base text-gray-700 leading-relaxed italic pr-4">
-              "{theme.pesquisa.destaque}"
+            <p className="text-sm sm:text-base text-ink-secondary leading-relaxed italic pr-4">
+              &quot;{theme.pesquisa.destaque}&quot;
             </p>
-            <p className="text-[11px] text-gray-400 font-semibold mt-3 not-italic">
+            <p className="text-[11px] text-ink-muted font-semibold mt-3 not-italic">
               — {theme.pesquisa.fonte}
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function InovitannProductPage({
           </div>
 
           {/* Modo de uso */}
-          <div className="flex items-start gap-3 pt-1 border-t border-gray-100">
+          <div className="flex items-start gap-3 pt-1 border-t border-line">
             <span
               className="flex items-center justify-center w-8 h-8 rounded-xl shrink-0 mt-0.5"
               style={{ backgroundColor: `${theme.cor}15` }}
@@ -170,8 +170,8 @@ export default function InovitannProductPage({
               <Clock size={15} style={{ color: theme.cor }} />
             </span>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Como tomar</p>
-              <p className="text-sm text-gray-600 leading-relaxed">{theme.modoDeUso}</p>
+              <p className="text-[11px] font-black uppercase tracking-widest text-ink-muted mb-0.5">Como tomar</p>
+              <p className="text-sm text-ink-secondary leading-relaxed">{theme.modoDeUso}</p>
             </div>
           </div>
 
@@ -179,7 +179,7 @@ export default function InovitannProductPage({
       </section>
 
       {/* ── MECANISMO ────────────────────────────────────────────────────── */}
-      <section className="py-16 bg-white border-b border-gray-100">
+      <section className="py-16 bg-surface-card border-b border-line">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedReveal animation="fadeUp">
             <div className="text-center mb-10">
@@ -189,7 +189,7 @@ export default function InovitannProductPage({
               >
                 Como funciona
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
+              <h2 className="font-display text-3xl sm:text-4xl font-black text-navy mb-3">
                 O que é e como age no organismo
               </h2>
             </div>
@@ -200,7 +200,7 @@ export default function InovitannProductPage({
               className="rounded-2xl p-8 border"
               style={{ backgroundColor: `${theme.cor}06`, borderColor: `${theme.cor}20` }}
             >
-              <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
+              <p className="text-ink-secondary text-base sm:text-lg leading-relaxed">
                 {theme.mecanismo}
               </p>
             </div>
@@ -223,7 +223,7 @@ export default function InovitannProductPage({
       </section>
 
       {/* ── BENEFÍCIOS ───────────────────────────────────────────────────── */}
-      <section className="py-16 bg-gray-50 border-b border-gray-100">
+      <section className="py-16 bg-surface-sunken border-b border-line">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedReveal animation="fadeUp">
             <div className="text-center mb-12">
@@ -233,7 +233,7 @@ export default function InovitannProductPage({
               >
                 Benefícios
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+              <h2 className="font-display text-3xl sm:text-4xl font-black text-navy">
                 Por que incluir na sua rotina
               </h2>
             </div>
@@ -243,14 +243,14 @@ export default function InovitannProductPage({
             {theme.beneficios.map((b, i) => (
               <AnimatedReveal key={b.titulo} animation="fadeUp" delay={i * 100}>
                 <div
-                  className="h-full p-6 bg-white rounded-2xl border hover:shadow-lg transition-shadow duration-300"
+                  className="h-full p-6 bg-surface-card rounded-2xl border hover:shadow-lg transition-shadow duration-300"
                   style={{ borderColor: `${theme.cor}20` }}
                 >
                   <BeneficioIcon nome={b.icone} cor={theme.cor} />
-                  <h3 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">
+                  <h3 className="font-display font-bold text-navy mb-2 text-sm sm:text-base">
                     {b.titulo}
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-ink-secondary leading-relaxed">
                     {b.descricao}
                   </p>
                 </div>
@@ -262,7 +262,7 @@ export default function InovitannProductPage({
 
       {/* ── POR QUE INOVITANN ────────────────────────────────────────────── */}
       <section
-        className="py-16 border-b border-gray-100"
+        className="py-16 border-b border-line"
         style={{ backgroundColor: `${theme.cor}07` }}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -274,7 +274,7 @@ export default function InovitannProductPage({
               >
                 Inovitann Clinical
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+              <h2 className="font-display text-3xl sm:text-4xl font-black text-navy">
                 Por que Inovitann?
               </h2>
             </div>
@@ -305,7 +305,7 @@ export default function InovitannProductPage({
               },
             ].map((item) => (
               <AnimatedReveal key={item.titulo} animation="fadeUp" delay={item.delay}>
-                <div className="flex gap-4 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm h-full">
+                <div className="flex gap-4 p-6 bg-surface-card rounded-2xl border border-line shadow-sm h-full">
                   <span
                     className="flex items-center justify-center w-11 h-11 rounded-xl shrink-0"
                     style={{ backgroundColor: `${theme.cor}15` }}
@@ -313,8 +313,8 @@ export default function InovitannProductPage({
                     {item.icone}
                   </span>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">{item.titulo}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{item.descricao}</p>
+                    <h3 className="font-display font-bold text-navy mb-1">{item.titulo}</h3>
+                    <p className="text-sm text-ink-secondary leading-relaxed">{item.descricao}</p>
                   </div>
                 </div>
               </AnimatedReveal>
@@ -322,7 +322,7 @@ export default function InovitannProductPage({
           </div>
 
           <AnimatedReveal animation="fadeUp" delay={300}>
-            <p className="text-center text-xs text-gray-400 mt-10">
+            <p className="text-center text-xs text-ink-muted mt-10">
               Suplemento alimentar. Este produto não é medicamento. Sem indicação terapêutica. Leia o rótulo antes de consumir.
             </p>
           </AnimatedReveal>

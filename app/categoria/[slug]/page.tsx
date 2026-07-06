@@ -94,17 +94,17 @@ export default async function CategoriaPage({ params }: PageProps) {
       <Header />
 
       {/* Hero da categoria */}
-      <section className="bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
+      <section className="bg-gradient-to-b from-surface-sunken to-surface-card border-b border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <nav className="mb-3 text-xs text-gray-400">
-            <Link href="/" className="hover:text-[#0f2756]">Início</Link>
+          <nav className="mb-3 text-xs text-ink-muted">
+            <Link href="/" className="hover:text-brand">Início</Link>
             <span className="mx-1.5">/</span>
-            <Link href="/produtos" className="hover:text-[#0f2756]">Produtos</Link>
+            <Link href="/produtos" className="hover:text-brand">Produtos</Link>
             <span className="mx-1.5">/</span>
-            <span className="text-gray-600 font-medium">{categoria.nome}</span>
+            <span className="text-ink-secondary font-medium">{categoria.nome}</span>
           </nav>
-          <h1 className="text-3xl sm:text-4xl font-black text-gray-900">{categoria.nome}</h1>
-          <p className="mt-2 text-gray-500">
+          <h1 className="font-display text-3xl sm:text-4xl font-black text-navy">{categoria.nome}</h1>
+          <p className="mt-2 text-ink-secondary">
             {produtos.length} {produtos.length === 1 ? 'produto disponível' : 'produtos disponíveis'} nesta categoria
           </p>
         </div>
@@ -118,21 +118,21 @@ export default async function CategoriaPage({ params }: PageProps) {
         />
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <p className="text-gray-400 text-lg">Nenhum produto disponível nesta categoria no momento.</p>
+          <p className="text-ink-muted text-lg">Nenhum produto disponível nesta categoria no momento.</p>
         </div>
       )}
 
       {/* Cross-sell: outras categorias */}
       {outras.length > 0 && (
-        <section className="border-t border-gray-100 bg-gray-50 py-12">
+        <section className="border-t border-line bg-surface-sunken py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-500">Explore outras categorias</h2>
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-ink-secondary">Explore outras categorias</h2>
             <div className="flex flex-wrap gap-2.5">
               {outras.map((c) => (
                 <Link
                   key={c.slug}
                   href={`/categoria/${c.slug}`}
-                  className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-all hover:border-[#0f2756]/30 hover:text-[#0f2756]"
+                  className="rounded-full border border-line bg-surface-card px-4 py-2 text-sm font-semibold text-ink-secondary transition-all hover:border-brand/40 hover:text-brand"
                 >
                   {c.nome}
                 </Link>

@@ -29,7 +29,7 @@ export default function ComposicaoCard({
   const iconSymbol = iconSymbols[ingrediente.icone as keyof typeof iconSymbols] || "✨";
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+    <div className="bg-surface-card rounded-2xl p-6 border border-line shadow-sm hover:shadow-md transition-shadow duration-200">
       {/* Ícone */}
       <div className="mb-4 flex items-center justify-center">
         <div
@@ -43,12 +43,12 @@ export default function ComposicaoCard({
       </div>
 
       {/* Nome do Ingrediente */}
-      <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">
+      <h3 className="font-display text-lg font-bold text-navy mb-2 text-center">
         {ingrediente.nome}
       </h3>
 
       {/* Descrição */}
-      <p className="text-sm text-gray-600 text-center leading-relaxed">
+      <p className="text-sm text-ink-secondary text-center leading-relaxed">
         {ingrediente.descricao}
       </p>
     </div>
