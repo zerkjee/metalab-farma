@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LevelBadge from '@/components/loyalty/LevelBadge';
@@ -70,16 +69,13 @@ function StatChip({
 
 export default function VipPageClient() {
   const { data: session, status: sessionStatus } = useSession();
-  const router = useRouter();
 
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
-    if (sessionStatus === 'unauthenticated') {
-      router.replace('/login');
-      return;
-    }
+    // Visitante não logado vê a página pública de benefícios (branch tratado no render,
+    // antes do loader) — não redireciona pro login e não busca stats.
     if (sessionStatus !== 'authenticated') return;
 
     let cancelled = false;
@@ -89,7 +85,138 @@ export default function VipPageClient() {
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoadingStats(false); });
     return () => { cancelled = true; };
-  }, [sessionStatus, router]);
+  }, [sessionStatus]);
+
+  // ── Visitante não logado: página pública com os benefícios do programa VIP ──
+  if (sessionStatus === 'unauthenticated') {
+    return (
+      <>
+        <Header />
+
+        {/* HERO */}
+        <section className="relative overflow-hidden bg-navy text-on-navy pt-16 pb-20">
+          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p className="text-navy-200 text-xs uppercase tracking-[0.3em] mb-3">Programa de fidelidade</p>
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl leading-tight mb-4">
+              Vantagens de ser <span className="text-brand">VIP</span> na Metalab
+            </h1>
+            <p className="text-navy-100 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+              Acumule pontos a cada compra, receba cashback e troque por cupons exclusivos.
+              Quanto mais você cuida da sua rotina, mais você ganha.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+              <Link
+                href="/registro"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-bold bg-brand text-on-brand text-sm transition-all hover:bg-brand-hover"
+              >
+                Criar conta grátis
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+              <Link
+                href="/login?callbackUrl=/vip"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-bold border border-white/25 text-on-navy text-sm transition-all hover:bg-white/10"
+              >
+                Já tenho conta · Entrar
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* COMO FUNCIONA */}
+        <section className="bg-surface-page py-16">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="font-display text-2xl text-navy text-center mb-10">Como funciona</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {[
+                { n: '1', t: 'Crie sua conta', d: 'Cadastro rápido e gratuito. Você já entra no nível inicial do programa.' },
+                { n: '2', t: 'Compre e acumule', d: 'Cada real gasto vira pontos, com multiplicador que cresce conforme seu nível.' },
+                { n: '3', t: 'Troque por recompensas', d: 'Use os pontos em cupons de desconto e aproveite o cashback nas próximas compras.' },
+              ].map((s) => (
+                <GlassCard key={s.n} className="p-6 text-center">
+                  <div className="w-11 h-11 rounded-full bg-brand text-on-brand font-display text-lg flex items-center justify-center mx-auto mb-4">
+                    {s.n}
+                  </div>
+                  <h3 className="font-display text-lg text-navy mb-2">{s.t}</h3>
+                  <p className="text-ink-muted text-sm leading-relaxed">{s.d}</p>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* BENEFÍCIOS POR NÍVEL */}
+        <section className="bg-surface-page pb-20">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="font-display text-2xl text-navy text-center mb-3">Benefícios por nível</h2>
+            <p className="text-ink-muted text-sm text-center max-w-xl mx-auto mb-10">
+              Você evolui de nível conforme suas compras no período. Cada nível desbloqueia mais cashback e mais pontos.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {levels.map((lvl) => (
+                <div key={lvl.id} className="relative rounded-2xl border border-line bg-surface-card p-6 hover:shadow-sm transition-all">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm flex-shrink-0"
+                      style={{ background: lvl.gradient }}
+                    >
+                      {lvl.emoji}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm uppercase tracking-widest" style={{ color: lvl.color }}>{lvl.name}</p>
+                      <p className="text-ink-muted text-xs">
+                        {lvl.maxPoints
+                          ? `${lvl.minPoints.toLocaleString('pt-BR')}–${lvl.maxPoints.toLocaleString('pt-BR')} pts`
+                          : `${lvl.minPoints.toLocaleString('pt-BR')}+ pts`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mb-5 grid grid-cols-2 gap-2">
+                    <div className="py-3 px-2 rounded-xl bg-surface-sunken text-center">
+                      <p className="font-display text-2xl" style={{ color: lvl.color }}>{lvl.cashbackPct}%</p>
+                      <p className="text-ink-muted text-[10px] mt-0.5">cashback</p>
+                    </div>
+                    <div className="py-3 px-2 rounded-xl bg-surface-sunken text-center">
+                      <p className="font-display text-2xl" style={{ color: lvl.color }}>{lvl.multiplier}x</p>
+                      <p className="text-ink-muted text-[10px] mt-0.5">pts por R$1</p>
+                    </div>
+                  </div>
+                  <ul className="flex flex-col gap-2">
+                    {lvl.benefits.map((b) => (
+                      <li key={b.text} className="flex items-start gap-2 text-xs">
+                        <span className="text-sm leading-none mt-0.5 flex-shrink-0">{b.icon}</span>
+                        <span className="text-ink-secondary">{b.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA final */}
+            <div className="rounded-2xl bg-navy p-8 text-center mt-12">
+              <h3 className="font-display text-2xl text-on-navy mb-2">Comece a ganhar hoje</h3>
+              <p className="text-navy-100 text-sm max-w-md mx-auto mb-6">
+                Crie sua conta gratuita e comece a acumular pontos já na primeira compra.
+              </p>
+              <Link
+                href="/registro"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-bold bg-brand text-on-brand text-sm transition-all hover:bg-brand-hover"
+              >
+                Criar conta grátis
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+      </>
+    );
+  }
 
   if (sessionStatus === 'loading' || loadingStats) {
     return (
