@@ -29,12 +29,12 @@ export default function CookieBanner() {
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-gray-950 border-t border-gray-800 px-4 py-4 sm:py-5">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-navy border-t border-navy-400 px-4 py-4 sm:py-5">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <p className="text-sm text-gray-300 flex-1 leading-relaxed">
+        <p className="text-sm text-on-navy/80 flex-1 leading-relaxed">
           Usamos cookies para melhorar sua experiência, analisar o tráfego e personalizar anúncios.
-          Ao clicar em <strong className="text-white">Aceitar todos</strong>, você concorda com nossa{' '}
-          <Link href="/politica-de-privacidade" className="underline text-[#60a5fa] hover:text-[#60a5fa]">
+          Ao clicar em <strong className="text-on-navy">Aceitar todos</strong>, você concorda com nossa{' '}
+          <Link href="/politica-de-privacidade" className="underline text-brand hover:text-brand-hover">
             Política de Privacidade
           </Link>
           .
@@ -42,13 +42,13 @@ export default function CookieBanner() {
         <div className="flex gap-3 shrink-0">
           <button
             onClick={() => accept('essential')}
-            className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:border-gray-500 hover:text-white transition-colors"
+            className="px-4 py-2 text-sm text-on-navy/70 border border-navy-400 rounded-full hover:border-navy-300 hover:text-on-navy transition-colors"
           >
             Apenas essenciais
           </button>
           <button
             onClick={() => accept('all')}
-            className="px-4 py-2 text-sm font-semibold bg-[#60a5fa] text-gray-950 rounded-lg hover:bg-blue-300 transition-colors"
+            className="px-4 py-2 text-sm font-semibold bg-brand text-on-brand rounded-full hover:bg-brand-hover transition-colors"
           >
             Aceitar todos
           </button>

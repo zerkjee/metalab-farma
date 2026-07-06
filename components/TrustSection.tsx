@@ -43,15 +43,15 @@ const cards = [
 
 export default function TrustSection() {
   return (
-    <section className="bg-gray-50 py-20 border-y border-gray-200">
+    <section className="bg-surface-sunken py-20 border-y border-line">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center mb-14">
-          <p className="text-xs font-bold text-[#0f2756] uppercase tracking-[0.2em] mb-4">Nossos Valores</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-            Análises Confiáveis e Precisas
+          <p className="text-xs font-bold text-brand uppercase tracking-[0.2em] mb-4">Nossos Valores</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-navy tracking-tight">
+            Análises confiáveis e precisas
           </h2>
-          <p className="mt-4 text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
+          <p className="mt-4 text-ink-secondary max-w-xl mx-auto text-sm leading-relaxed">
             Cada produto Metalab é desenvolvido com rigor técnico, insumos controlados e processos
             que garantem qualidade em cada etapa — da formulação à entrega.
           </p>
@@ -61,14 +61,14 @@ export default function TrustSection() {
           {cards.map(({ title, desc, icon }) => (
             <div
               key={title}
-              className="group flex flex-col gap-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-[#0f2756]/30 hover:shadow-md transition-all duration-300"
+              className="group flex flex-col gap-4 p-6 bg-surface-card rounded-lg border border-line hover:border-brand shadow-sm hover:shadow-md transition-all duration-300"
             >
-              <div className="w-11 h-11 rounded-lg flex items-center justify-center text-[#0f2756] bg-gray-50 border border-gray-100 group-hover:bg-[#0f2756]/5 transition-colors">
+              <div className="w-11 h-11 rounded-md flex items-center justify-center text-brand bg-brand-subtle group-hover:bg-brand-subtle-hover transition-colors">
                 {icon}
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1.5 tracking-tight">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+                <h3 className="font-bold text-navy text-sm mb-1.5 tracking-tight">{title}</h3>
+                <p className="text-sm text-ink-secondary leading-relaxed">{desc}</p>
               </div>
             </div>
           ))}

@@ -85,12 +85,12 @@ export default function PromoBanner() {
               <Link
                 href={slide.href}
                 aria-label={slide.label}
-                className="absolute -translate-x-1/2 -translate-y-1/2 inline-flex items-center whitespace-nowrap rounded-full text-white font-black shadow-lg transition-transform duration-200 hover:scale-105"
+                className="absolute -translate-x-1/2 -translate-y-1/2 inline-flex items-center whitespace-nowrap rounded-full text-on-brand font-bold shadow-lg transition-transform duration-200 hover:scale-105"
                 style={{
                   left: slide.cta.anchor.left,
                   top: slide.cta.anchor.top,
-                  background: 'linear-gradient(135deg, #0f2756, #1e50a8)',
-                  boxShadow: '0 8px 24px rgba(15,39,86,0.35)',
+                  background: 'var(--brand-solid)',
+                  boxShadow: 'var(--shadow-md)',
                   // Tamanho em vw/clamp (não em breakpoints fixos) pra manter a mesma
                   // proporção em relação à imagem (que preenche 100% da largura da
                   // viewport) em qualquer tamanho de tela — em telas pequenas um botão
@@ -129,7 +129,7 @@ export default function PromoBanner() {
           <button
             onClick={goPrev}
             aria-label="Slide anterior"
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 border border-[#0f2756]/15 shadow-md flex items-center justify-center text-[#0f2756] hover:bg-white hover:scale-110 transition-all duration-200 z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-surface-card/80 border border-line shadow-md flex items-center justify-center text-navy hover:bg-surface-card hover:scale-110 transition-all duration-200 z-10"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -138,7 +138,7 @@ export default function PromoBanner() {
           <button
             onClick={goNext}
             aria-label="Próximo slide"
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 border border-[#0f2756]/15 shadow-md flex items-center justify-center text-[#0f2756] hover:bg-white hover:scale-110 transition-all duration-200 z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-surface-card/80 border border-line shadow-md flex items-center justify-center text-navy hover:bg-surface-card hover:scale-110 transition-all duration-200 z-10"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

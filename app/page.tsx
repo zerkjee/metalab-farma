@@ -76,16 +76,16 @@ export default async function Home() {
 
       {/* ── LINHA INOVITANN ── */}
       {inovitannProdutos.length > 0 && (
-        <section id="inovitann" className="py-20 bg-gradient-to-b from-[#f5f3ff] to-white border-t border-gray-100">
+        <section id="inovitann" className="py-20 bg-brand-subtle border-t border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-start gap-5 mb-12">
-              <div className="w-1.5 h-16 rounded-full flex-shrink-0 bg-gradient-to-b from-[#7c3aed] to-[#4f46e5]" />
+              <div className="w-1.5 h-16 rounded-full flex-shrink-0 bg-brand" />
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#7c3aed] mb-1">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-brand mb-1">
                   Linha Exclusiva
                 </p>
-                <h2 className="text-3xl sm:text-4xl font-black text-gray-900">Linha Inovitann</h2>
-                <p className="text-gray-500 mt-2 max-w-xl">
+                <h2 className="font-display text-3xl sm:text-4xl font-semibold text-navy">Linha Inovitann</h2>
+                <p className="text-ink-secondary mt-2 max-w-xl">
                   Formulações de alta concentração com ingredientes premium — máxima eficácia e biodisponibilidade.
                 </p>
               </div>
@@ -105,12 +105,12 @@ export default async function Home() {
           title="Nossos Produtos"
           subtitle={`${outrosProdutos.length} suplementos com qualidade e procedência garantida`}
           products={outrosProdutos}
-          color="#0f2756"
+          color="var(--navy-500)"
         />
       ) : (
-        <section className="py-20 border-t border-gray-100">
+        <section className="py-20 border-t border-line">
           <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-gray-400 text-lg">Nenhum produto disponível no momento</p>
+            <p className="text-ink-muted text-lg">Nenhum produto disponível no momento</p>
           </div>
         </section>
       )}

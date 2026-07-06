@@ -86,26 +86,26 @@ export default function SearchBar({ compact = false, onNavigate }: SearchBarProp
             onFocus={() => { if (hits.length) setOpen(true); }}
             placeholder="Buscar suplementos, vitaminas, minerais..."
             aria-label="Buscar produtos"
-            className={`w-full bg-gray-100 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0f2756] ${compact ? 'px-4 py-2.5 pr-10' : 'px-5 py-2.5 pr-11'}`}
+            className={`w-full bg-surface-sunken rounded-full text-sm placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-brand ${compact ? 'px-4 py-2.5 pr-10' : 'px-5 py-2.5 pr-11'}`}
           />
           <button type="submit" aria-label="Buscar"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0f2756] transition-colors">
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-brand transition-colors">
             {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
           </button>
         </div>
       </form>
 
       {open && term.trim().length >= 2 && (
-        <div className="absolute left-0 right-0 top-full mt-2 z-[70] rounded-2xl border border-gray-100 bg-white shadow-2xl overflow-hidden">
+        <div className="absolute left-0 right-0 top-full mt-2 z-[70] rounded-lg border border-line bg-surface-card shadow-lg overflow-hidden">
           {hits.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-gray-400">
+            <p className="px-4 py-6 text-center text-sm text-ink-muted">
               {loading ? 'Buscando…' : 'Nenhum produto encontrado'}
             </p>
           ) : (
             <ul className="max-h-[70vh] overflow-y-auto py-1">
               {hits.map((p) => {
                 const semEstoque = !(p.estoque > 0);
-                const cor = p.corPrincipal ?? '#0f2756';
+                const cor = p.corPrincipal ?? 'var(--navy-500)';
                 return (
                   <li key={p.id}>
                     <button
@@ -113,33 +113,33 @@ export default function SearchBar({ compact = false, onNavigate }: SearchBarProp
                       onClick={() => go(`/produtos/${p.slug}`)}
                       className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
                         semEstoque
-                          ? 'bg-gray-100 hover:bg-gray-200/70'   /* sem estoque: box mais escuro */
-                          : 'hover:bg-gray-50'
+                          ? 'bg-surface-sunken hover:bg-neutral-100'   /* sem estoque: box mais escuro */
+                          : 'hover:bg-surface-sunken'
                       }`}
                     >
-                      <div className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50 ${semEstoque ? 'opacity-50 grayscale' : ''}`}>
+                      <div className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-line bg-surface-sunken ${semEstoque ? 'opacity-50 grayscale' : ''}`}>
                         {p.imagemUrl ? (
                           <Image src={p.imagemUrl} alt={p.nome} fill sizes="48px" className="object-contain p-1" />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-[9px] text-gray-300">sem foto</div>
+                          <div className="flex h-full items-center justify-center text-[9px] text-ink-muted">sem foto</div>
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={`truncate text-sm font-semibold ${semEstoque ? 'text-gray-400' : 'text-gray-900'}`}>
+                        <p className={`truncate text-sm font-semibold ${semEstoque ? 'text-ink-muted' : 'text-ink'}`}>
                           {p.nome}
                         </p>
                         <div className="flex items-center gap-2">
                           {p.categoria && (
-                            <span className={`text-[11px] ${semEstoque ? 'text-gray-300' : 'text-gray-400'}`}>
+                            <span className={`text-[11px] ${semEstoque ? 'text-ink-muted' : 'text-ink-muted'}`}>
                               {p.categoria.nome}
                             </span>
                           )}
                           {semEstoque && (
-                            <span className="rounded-full bg-gray-200 px-1.5 text-[10px] font-bold text-gray-500">Esgotado</span>
+                            <span className="rounded-full bg-neutral-200 px-1.5 text-[10px] font-bold text-ink-secondary">Esgotado</span>
                           )}
                         </div>
                       </div>
-                      <span className={`text-sm font-black ${semEstoque ? 'text-gray-400' : ''}`} style={semEstoque ? undefined : { color: cor }}>
+                      <span className={`text-sm font-black ${semEstoque ? 'text-ink-muted' : ''}`} style={semEstoque ? undefined : { color: cor }}>
                         {fmtCurrency(p.preco)}
                       </span>
                     </button>
@@ -151,7 +151,7 @@ export default function SearchBar({ compact = false, onNavigate }: SearchBarProp
           <Link
             href={`/produtos?busca=${encodeURIComponent(term.trim())}`}
             onClick={() => { setOpen(false); setTerm(''); onNavigate?.(); }}
-            className="block border-t border-gray-100 px-4 py-2.5 text-center text-xs font-bold text-[#0f2756] hover:bg-gray-50 transition-colors"
+            className="block border-t border-line px-4 py-2.5 text-center text-xs font-bold text-brand hover:bg-surface-sunken transition-colors"
           >
             Ver todos os resultados
           </Link>

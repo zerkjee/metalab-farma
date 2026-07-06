@@ -48,39 +48,39 @@ export default function PurchaseNotification() {
         opacity: visible ? 1 : 0,
       }}
     >
-      <div className="flex items-center gap-3 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 max-w-xs w-full">
+      <div className="flex items-center gap-3 bg-surface-card rounded-lg shadow-lg border border-line p-4 max-w-xs w-full">
         {/* Product image or color dot */}
         <div
-          className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center bg-gray-50"
+          className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center bg-surface-sunken"
           style={{ border: `2px solid ${notif.productColor}20` }}
         >
           {notif.productImage ? (
             <Image src={notif.productImage} alt={notif.productName} width={48} height={48} className="w-full h-full object-contain p-1" />
           ) : (
-            <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: notif.productColor }} />
+            <div className="w-8 h-8 rounded-md" style={{ backgroundColor: notif.productColor }} />
           )}
         </div>
 
         {/* Text */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 mb-0.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-            <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wide">Compra recente</span>
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse flex-shrink-0" />
+            <span className="text-[10px] font-semibold text-success uppercase tracking-wide">Compra recente</span>
           </div>
-          <p className="text-xs font-bold text-gray-900 truncate">
+          <p className="text-xs font-bold text-navy truncate">
             Alguém de <span style={{ color: notif.productColor }}>{notif.customerCity}</span>
           </p>
-          <p className="text-xs text-gray-500 truncate">
-            comprou <span className="font-semibold text-gray-700">{notif.productName}</span>
+          <p className="text-xs text-ink-secondary truncate">
+            comprou <span className="font-semibold text-ink">{notif.productName}</span>
           </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">{notif.timeAgo}</p>
+          <p className="text-[10px] text-ink-muted mt-0.5">{notif.timeAgo}</p>
         </div>
 
         {/* Close */}
         <button
           onClick={() => setVisible(false)}
           aria-label="Fechar notificação"
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-gray-300 hover:text-gray-500 transition-colors"
+          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-ink-muted hover:text-ink-secondary transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />

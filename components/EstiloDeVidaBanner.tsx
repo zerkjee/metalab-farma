@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function EstiloDeVidaBanner() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#eeeeee] pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pt-28">
+    <section className="relative w-full overflow-hidden bg-neutral-100 pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pt-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative">
 
@@ -33,11 +33,11 @@ export default function EstiloDeVidaBanner() {
           </div>
 
           {/* Card branco */}
-          <div className="relative bg-white rounded-[2rem] shadow-sm px-6 pt-16 pb-10 sm:px-10 sm:pt-20 sm:pb-14 lg:pt-14 lg:pb-14 lg:pr-[400px]">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f2756] uppercase leading-[1.1] max-w-lg">
+          <div className="relative bg-surface-card rounded-xl shadow-sm px-6 pt-16 pb-10 sm:px-10 sm:pt-20 sm:pb-14 lg:pt-14 lg:pb-14 lg:pr-[400px]">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-navy uppercase leading-[1.1] max-w-lg">
               A Metalab cuida de você
             </h2>
-            <p className="mt-6 text-gray-500 leading-relaxed max-w-md text-sm sm:text-base">
+            <p className="mt-6 text-ink-secondary leading-relaxed max-w-md text-sm sm:text-base">
               A Metalab tem como objetivo levar para casa de todos os seus consumidores
               produtos que entreguem os resultados desejados. A Metalab desenvolve e
               comercializa produtos para ajudar você a se cuidar e criar uma nova relação
@@ -45,8 +45,7 @@ export default function EstiloDeVidaBanner() {
             </p>
             <Link
               href="#inovitann"
-              className="mt-8 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
+              className="mt-8 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-on-brand bg-brand transition-all hover:bg-brand-hover"
             >
               Ver produtos
             </Link>
