@@ -1,10 +1,12 @@
-'use client';
+"use client";
 
-import { Eye, EyeOff, ShieldCheck, Package, Tag } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { FormEvent, useState, useCallback, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
+import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState, useCallback, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { Button } from "@/components/ui";
 
 // ── formatters ───────────────────────────────────────────────────────────────
 function toTitleCase(s: string) {
@@ -12,21 +14,25 @@ function toTitleCase(s: string) {
 }
 
 function cpfMask(v: string) {
-  return v.replace(/\D/g, '').slice(0, 11)
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  return v
+    .replace(/\D/g, "")
+    .slice(0, 11)
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
 function phoneMask(v: string) {
-  return v.replace(/\D/g, '').slice(0, 11)
-    .replace(/(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+  return v
+    .replace(/\D/g, "")
+    .slice(0, 11)
+    .replace(/(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
 }
 
 // ── CPF validator ─────────────────────────────────────────────────────────────
 function validarCPF(cpf: string): boolean {
-  const d = cpf.replace(/\D/g, '');
+  const d = cpf.replace(/\D/g, "");
   if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
   let s = 0;
   for (let i = 0; i < 9; i++) s += parseInt(d[i]) * (10 - i);
@@ -42,26 +48,55 @@ function validarCPF(cpf: string): boolean {
 
 // ── password requirements ─────────────────────────────────────────────────────
 const senhaReqs = [
-  { key: 'len',     label: 'Mínimo 8 caracteres',          test: (p: string) => p.length >= 8 },
-  { key: 'upper',   label: '1 letra maiúscula (A–Z)',       test: (p: string) => /[A-Z]/.test(p) },
-  { key: 'lower',   label: '1 letra minúscula (a–z)',       test: (p: string) => /[a-z]/.test(p) },
-  { key: 'num',     label: '1 número (0–9)',                test: (p: string) => /[0-9]/.test(p) },
-  { key: 'special', label: '1 caractere especial (!@#...)', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+  {
+    key: "len",
+    label: "Mínimo 8 caracteres",
+    test: (p: string) => p.length >= 8,
+  },
+  {
+    key: "upper",
+    label: "1 letra maiúscula (A–Z)",
+    test: (p: string) => /[A-Z]/.test(p),
+  },
+  {
+    key: "lower",
+    label: "1 letra minúscula (a–z)",
+    test: (p: string) => /[a-z]/.test(p),
+  },
+  { key: "num", label: "1 número (0–9)", test: (p: string) => /[0-9]/.test(p) },
+  {
+    key: "special",
+    label: "1 caractere especial (!@#...)",
+    test: (p: string) => /[^A-Za-z0-9]/.test(p),
+  },
 ];
 
 // ── field input ───────────────────────────────────────────────────────────────
 function Field({
-  label, error, touched, fieldId, children,
+  label,
+  error,
+  touched,
+  fieldId,
+  children,
 }: {
-  label: string; error?: string; touched?: boolean; fieldId?: string; children: React.ReactNode;
+  label: string;
+  error?: string;
+  touched?: boolean;
+  fieldId?: string;
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="block text-xs font-semibold text-slate-400">{label}</label>
+      <label className="block text-xs font-semibold text-ink-secondary">
+        {label}
+      </label>
       {children}
       {touched && error && (
-        <p id={fieldId ? `error-${fieldId}` : undefined} className="flex items-center gap-1 text-xs text-red-400">
-          <span className="inline-block w-1 h-1 rounded-full bg-red-400 flex-shrink-0" />
+        <p
+          id={fieldId ? `error-${fieldId}` : undefined}
+          className="flex items-center gap-1 text-xs text-danger"
+        >
+          <span className="inline-block h-1 w-1 flex-shrink-0 rounded-full bg-danger" />
           {error}
         </p>
       )}
@@ -70,23 +105,49 @@ function Field({
 }
 
 const inputCls = (hasError: boolean) =>
-  `w-full rounded-xl border bg-slate-800/60 px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none transition-all ${
+  `w-full rounded-xl border bg-surface-card px-4 py-2.5 text-sm text-ink placeholder-ink-muted outline-none transition-all ${
     hasError
-      ? 'border-red-500/60 focus:border-red-400 focus:ring-1 focus:ring-red-400/30'
-      : 'border-slate-700 focus:border-[#0f2756] focus:ring-1 focus:ring-[#0f2756]/40'
+      ? "border-danger focus:border-danger focus:ring-2 focus:ring-danger/20"
+      : "border-line-default focus:border-brand focus:ring-2 focus:ring-brand/30"
   }`;
 
 // ── main page ─────────────────────────────────────────────────────────────────
 function cepMask(v: string) {
-  return v.replace(/\D/g, '').slice(0, 8).replace(/(\d{5})(\d{1,3})$/, '$1-$2');
+  return v
+    .replace(/\D/g, "")
+    .slice(0, 8)
+    .replace(/(\d{5})(\d{1,3})$/, "$1-$2");
 }
 
-type FormKey = 'nome' | 'email' | 'cpf' | 'telefone' | 'senha' | 'confirmarSenha'
-  | 'cep' | 'logradouro' | 'numero' | 'complemento' | 'bairro' | 'cidade' | 'estado';
+type FormKey =
+  | "nome"
+  | "email"
+  | "cpf"
+  | "telefone"
+  | "senha"
+  | "confirmarSenha"
+  | "cep"
+  | "logradouro"
+  | "numero"
+  | "complemento"
+  | "bairro"
+  | "cidade"
+  | "estado";
 
 const initial = {
-  nome: '', email: '', cpf: '', telefone: '', senha: '', confirmarSenha: '',
-  cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '',
+  nome: "",
+  email: "",
+  cpf: "",
+  telefone: "",
+  senha: "",
+  confirmarSenha: "",
+  cep: "",
+  logradouro: "",
+  numero: "",
+  complemento: "",
+  bairro: "",
+  cidade: "",
+  estado: "",
 };
 
 export default function RegistroPage() {
@@ -97,12 +158,14 @@ export default function RegistroPage() {
   const [touched, setTouched] = useState<Partial<Record<FormKey, boolean>>>({});
   const [showSenha, setShowSenha] = useState(false);
   const [showConfirmar, setShowConfirmar] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [serverError, setServerError] = useState('');
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+  const [serverError, setServerError] = useState("");
 
   useEffect(() => {
-    if (sessionStatus === 'authenticated' && session) {
-      router.replace('/');
+    if (sessionStatus === "authenticated" && session) {
+      router.replace("/");
     }
   }, [sessionStatus, session, router]);
 
@@ -111,17 +174,20 @@ export default function RegistroPage() {
   }, []);
 
   const lookupCep = useCallback(async (raw: string) => {
-    const digits = raw.replace(/\D/g, '');
+    const digits = raw.replace(/\D/g, "");
     if (digits.length !== 8) return;
     try {
       const res = await fetch(`/api/cep?cep=${digits}`);
       if (!res.ok) return;
       const data = await res.json();
-      if (data.logradouro) setForm((p) => ({ ...p, logradouro: data.logradouro }));
-      if (data.bairro)     setForm((p) => ({ ...p, bairro: data.bairro }));
-      if (data.cidade)     setForm((p) => ({ ...p, cidade: data.cidade }));
-      if (data.estado)     setForm((p) => ({ ...p, estado: data.estado }));
-    } catch { /* ignore */ }
+      if (data.logradouro)
+        setForm((p) => ({ ...p, logradouro: data.logradouro }));
+      if (data.bairro) setForm((p) => ({ ...p, bairro: data.bairro }));
+      if (data.cidade) setForm((p) => ({ ...p, cidade: data.cidade }));
+      if (data.estado) setForm((p) => ({ ...p, estado: data.estado }));
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const touch = useCallback((field: FormKey) => {
@@ -130,47 +196,63 @@ export default function RegistroPage() {
 
   // ── inline validation ──
   const errors: Partial<Record<FormKey, string>> = {};
-  if (!form.nome.trim() || form.nome.trim().length < 2) errors.nome = 'Nome deve ter ao menos 2 caracteres.';
-  if (!form.email) errors.email = 'Email é obrigatório.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = 'Email inválido.';
-  const cpfRaw = form.cpf.replace(/\D/g, '');
-  if (!cpfRaw) errors.cpf = 'CPF é obrigatório.';
-  else if (cpfRaw.length !== 11) errors.cpf = 'CPF incompleto.';
-  else if (!validarCPF(cpfRaw)) errors.cpf = 'CPF inválido.';
-  if (!form.senha) errors.senha = 'Senha é obrigatória.';
-  else if (senhaReqs.some((r) => !r.test(form.senha))) errors.senha = 'A senha não atende todos os requisitos.';
-  if (!form.confirmarSenha) errors.confirmarSenha = 'Confirme a senha.';
-  else if (form.senha !== form.confirmarSenha) errors.confirmarSenha = 'As senhas não conferem.';
-  const cepRaw = form.cep.replace(/\D/g, '');
-  if (!cepRaw || cepRaw.length !== 8) errors.cep = 'CEP inválido.';
-  if (!form.logradouro.trim()) errors.logradouro = 'Endereço é obrigatório.';
-  if (!form.numero.trim()) errors.numero = 'Número é obrigatório.';
-  if (!form.bairro.trim()) errors.bairro = 'Bairro é obrigatório.';
-  if (!form.cidade.trim()) errors.cidade = 'Cidade é obrigatória.';
-  if (!form.estado.trim() || form.estado.length !== 2) errors.estado = 'UF inválida.';
+  if (!form.nome.trim() || form.nome.trim().length < 2)
+    errors.nome = "Nome deve ter ao menos 2 caracteres.";
+  if (!form.email) errors.email = "Email é obrigatório.";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+    errors.email = "Email inválido.";
+  const cpfRaw = form.cpf.replace(/\D/g, "");
+  if (!cpfRaw) errors.cpf = "CPF é obrigatório.";
+  else if (cpfRaw.length !== 11) errors.cpf = "CPF incompleto.";
+  else if (!validarCPF(cpfRaw)) errors.cpf = "CPF inválido.";
+  if (!form.senha) errors.senha = "Senha é obrigatória.";
+  else if (senhaReqs.some((r) => !r.test(form.senha)))
+    errors.senha = "A senha não atende todos os requisitos.";
+  if (!form.confirmarSenha) errors.confirmarSenha = "Confirme a senha.";
+  else if (form.senha !== form.confirmarSenha)
+    errors.confirmarSenha = "As senhas não conferem.";
+  const cepRaw = form.cep.replace(/\D/g, "");
+  if (!cepRaw || cepRaw.length !== 8) errors.cep = "CEP inválido.";
+  if (!form.logradouro.trim()) errors.logradouro = "Endereço é obrigatório.";
+  if (!form.numero.trim()) errors.numero = "Número é obrigatório.";
+  if (!form.bairro.trim()) errors.bairro = "Bairro é obrigatório.";
+  if (!form.cidade.trim()) errors.cidade = "Cidade é obrigatória.";
+  if (!form.estado.trim() || form.estado.length !== 2)
+    errors.estado = "UF inválida.";
 
   const isValid = Object.keys(errors).length === 0;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setTouched({
-      nome: true, email: true, cpf: true, senha: true, confirmarSenha: true,
-      cep: true, logradouro: true, numero: true, bairro: true, cidade: true, estado: true,
+      nome: true,
+      email: true,
+      cpf: true,
+      senha: true,
+      confirmarSenha: true,
+      cep: true,
+      logradouro: true,
+      numero: true,
+      bairro: true,
+      cidade: true,
+      estado: true,
     });
     if (!isValid) return;
 
-    setSubmitStatus('loading');
-    setServerError('');
+    setSubmitStatus("loading");
+    setServerError("");
 
     try {
-      const res = await fetch('/api/auth/registro', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nome: form.nome.trim(),
           email: form.email,
           cpf: cpfRaw,
-          telefone: form.telefone ? form.telefone.replace(/\D/g, '') : undefined,
+          telefone: form.telefone
+            ? form.telefone.replace(/\D/g, "")
+            : undefined,
           senha: form.senha,
           confirmarSenha: form.confirmarSenha,
           endereco: {
@@ -187,360 +269,449 @@ export default function RegistroPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setSubmitStatus('error');
-        setServerError(data.erro ?? 'Erro ao criar conta. Tente novamente.');
+        setSubmitStatus("error");
+        setServerError(data.erro ?? "Erro ao criar conta. Tente novamente.");
         return;
       }
 
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         email: form.email,
         senha: form.senha,
         redirect: false,
       });
 
-      if (result?.error) { router.replace('/login'); return; }
-      router.replace('/');
+      if (result?.error) {
+        router.replace("/login");
+        return;
+      }
+      router.replace("/");
       router.refresh();
     } catch {
-      setSubmitStatus('error');
-      setServerError('Erro de conexão. Tente novamente.');
+      setSubmitStatus("error");
+      setServerError("Erro de conexão. Tente novamente.");
     }
   }
 
-  const loading = submitStatus === 'loading';
+  const loading = submitStatus === "loading";
 
-  if (sessionStatus === 'authenticated') return null;
+  if (sessionStatus === "authenticated") return null;
 
   return (
-    <main
-      className="min-h-screen overflow-hidden px-5 py-8 text-white"
-      style={{ background: 'radial-gradient(circle at 18% 10%, #312e81 0%, #111827 34%, #020617 78%)' }}
-    >
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center justify-center py-12">
-        <section className="grid w-full overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-black/40 backdrop-blur lg:grid-cols-[1fr_460px]">
+    <main className="min-h-screen bg-surface-page px-5 py-12">
+      <div className="mx-auto w-full max-w-md">
+        <div className="mb-7 text-center">
+          <Link href="/" className="inline-block">
+            <Image
+              src="/brand/metalab-mark.png"
+              alt="MetaLab"
+              width={48}
+              height={48}
+              className="mx-auto mb-3 h-12 w-12"
+            />
+          </Link>
+          <h1 className="font-display text-2xl text-navy">Criar sua conta</h1>
+        </div>
 
-          {/* ── left panel ── */}
-          <div className="hidden min-h-[680px] flex-col justify-between border-r border-white/10 p-10 lg:flex">
-            <div>
-              <Link href="/" className="flex items-center gap-3">
-                <div
-                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
-                  style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
+        <div className="rounded-2xl border border-line bg-surface-card p-6 shadow-sm sm:p-8">
+          <p className="mb-5 text-xs text-ink-muted">
+            Preencha os dados abaixo para se cadastrar
+          </p>
+
+          {serverError && (
+            <div className="mb-4 rounded-xl border border-danger/20 bg-danger-subtle px-4 py-3 text-xs text-danger">
+              {serverError}
+            </div>
+          )}
+
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+            className="flex flex-col gap-3.5"
+          >
+            <Field
+              label="Nome completo"
+              error={errors.nome}
+              touched={touched.nome}
+              fieldId="nome"
+            >
+              <input
+                type="text"
+                value={form.nome}
+                onChange={(e) => set("nome", toTitleCase(e.target.value))}
+                onBlur={() => touch("nome")}
+                autoFocus
+                placeholder="Seu nome completo"
+                aria-invalid={!!(touched.nome && errors.nome) || undefined}
+                aria-describedby={
+                  touched.nome && errors.nome ? "error-nome" : undefined
+                }
+                className={inputCls(!!(touched.nome && errors.nome))}
+              />
+            </Field>
+
+            <Field
+              label="Email"
+              error={errors.email}
+              touched={touched.email}
+              fieldId="email"
+            >
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => set("email", e.target.value)}
+                onBlur={() => touch("email")}
+                placeholder="seu@email.com"
+                aria-invalid={!!(touched.email && errors.email) || undefined}
+                aria-describedby={
+                  touched.email && errors.email ? "error-email" : undefined
+                }
+                className={inputCls(!!(touched.email && errors.email))}
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field
+                label="CPF"
+                error={errors.cpf}
+                touched={touched.cpf}
+                fieldId="cpf"
+              >
+                <input
+                  type="text"
+                  value={form.cpf}
+                  onChange={(e) => set("cpf", cpfMask(e.target.value))}
+                  onBlur={() => touch("cpf")}
+                  placeholder="000.000.000-00"
+                  inputMode="numeric"
+                  aria-invalid={!!(touched.cpf && errors.cpf) || undefined}
+                  aria-describedby={
+                    touched.cpf && errors.cpf ? "error-cpf" : undefined
+                  }
+                  className={inputCls(!!(touched.cpf && errors.cpf))}
+                />
+              </Field>
+              <Field label="Telefone (opcional)">
+                <input
+                  type="tel"
+                  value={form.telefone}
+                  onChange={(e) => set("telefone", phoneMask(e.target.value))}
+                  placeholder="(11) 99999-0000"
+                  inputMode="numeric"
+                  className={inputCls(false)}
+                />
+              </Field>
+            </div>
+
+            {/* ── Endereço ── */}
+            <div className="border-t border-line pt-3.5 mt-0.5">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-700 mb-3">
+                Endereço
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field
+                  label="CEP"
+                  error={errors.cep}
+                  touched={touched.cep}
+                  fieldId="cep"
                 >
-                  M
-                </div>
-                <div>
-                  <p className="text-lg font-black tracking-tight">METALAB</p>
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Suplementos</p>
-                </div>
-              </Link>
+                  <input
+                    type="text"
+                    value={form.cep}
+                    onChange={(e) => {
+                      const masked = cepMask(e.target.value);
+                      set("cep", masked);
+                      if (masked.replace(/\D/g, "").length === 8)
+                        lookupCep(masked);
+                    }}
+                    onBlur={() => touch("cep")}
+                    placeholder="00000-000"
+                    inputMode="numeric"
+                    aria-invalid={!!(touched.cep && errors.cep) || undefined}
+                    aria-describedby={
+                      touched.cep && errors.cep ? "error-cep" : undefined
+                    }
+                    className={inputCls(!!(touched.cep && errors.cep))}
+                  />
+                </Field>
+                <Field
+                  label="Número"
+                  error={errors.numero}
+                  touched={touched.numero}
+                  fieldId="numero"
+                >
+                  <input
+                    type="text"
+                    value={form.numero}
+                    onChange={(e) => set("numero", e.target.value)}
+                    onBlur={() => touch("numero")}
+                    placeholder="120"
+                    aria-invalid={
+                      !!(touched.numero && errors.numero) || undefined
+                    }
+                    aria-describedby={
+                      touched.numero && errors.numero
+                        ? "error-numero"
+                        : undefined
+                    }
+                    className={inputCls(!!(touched.numero && errors.numero))}
+                  />
+                </Field>
+              </div>
+              <div className="mt-3">
+                <Field
+                  label="Endereço"
+                  error={errors.logradouro}
+                  touched={touched.logradouro}
+                  fieldId="logradouro"
+                >
+                  <input
+                    type="text"
+                    value={form.logradouro}
+                    onChange={(e) => set("logradouro", e.target.value)}
+                    onBlur={() => touch("logradouro")}
+                    placeholder="Rua das Flores"
+                    aria-invalid={
+                      !!(touched.logradouro && errors.logradouro) || undefined
+                    }
+                    aria-describedby={
+                      touched.logradouro && errors.logradouro
+                        ? "error-logradouro"
+                        : undefined
+                    }
+                    className={inputCls(
+                      !!(touched.logradouro && errors.logradouro),
+                    )}
+                  />
+                </Field>
+              </div>
+              <div className="mt-3">
+                <Field label="Complemento (opcional)">
+                  <input
+                    type="text"
+                    value={form.complemento}
+                    onChange={(e) => set("complemento", e.target.value)}
+                    placeholder="Apto 402"
+                    className={inputCls(false)}
+                  />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <Field
+                  label="Bairro"
+                  error={errors.bairro}
+                  touched={touched.bairro}
+                  fieldId="bairro"
+                >
+                  <input
+                    type="text"
+                    value={form.bairro}
+                    onChange={(e) => set("bairro", e.target.value)}
+                    onBlur={() => touch("bairro")}
+                    placeholder="Centro"
+                    aria-invalid={
+                      !!(touched.bairro && errors.bairro) || undefined
+                    }
+                    aria-describedby={
+                      touched.bairro && errors.bairro
+                        ? "error-bairro"
+                        : undefined
+                    }
+                    className={inputCls(!!(touched.bairro && errors.bairro))}
+                  />
+                </Field>
+                <Field
+                  label="Estado"
+                  error={errors.estado}
+                  touched={touched.estado}
+                  fieldId="estado"
+                >
+                  <input
+                    type="text"
+                    value={form.estado}
+                    onChange={(e) =>
+                      set("estado", e.target.value.toUpperCase().slice(0, 2))
+                    }
+                    onBlur={() => touch("estado")}
+                    placeholder="MG"
+                    maxLength={2}
+                    aria-invalid={
+                      !!(touched.estado && errors.estado) || undefined
+                    }
+                    aria-describedby={
+                      touched.estado && errors.estado
+                        ? "error-estado"
+                        : undefined
+                    }
+                    className={inputCls(!!(touched.estado && errors.estado))}
+                  />
+                </Field>
+              </div>
+              <div className="mt-3">
+                <Field
+                  label="Cidade"
+                  error={errors.cidade}
+                  touched={touched.cidade}
+                  fieldId="cidade"
+                >
+                  <input
+                    type="text"
+                    value={form.cidade}
+                    onChange={(e) => set("cidade", e.target.value)}
+                    onBlur={() => touch("cidade")}
+                    placeholder="Belo Horizonte"
+                    aria-invalid={
+                      !!(touched.cidade && errors.cidade) || undefined
+                    }
+                    aria-describedby={
+                      touched.cidade && errors.cidade
+                        ? "error-cidade"
+                        : undefined
+                    }
+                    className={inputCls(!!(touched.cidade && errors.cidade))}
+                  />
+                </Field>
+              </div>
+            </div>
 
-              <div className="mt-20 max-w-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Novo cliente</p>
-                <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight">
-                  Crie sua conta e comece a transformar seu desempenho.
-                </h1>
-                <p className="mt-4 text-sm leading-7 text-slate-400">
-                  Cadastro rápido e seguro. Acompanhe pedidos, acumule pontos no programa VIP e acesse promoções exclusivas.
+            <Field
+              label="Senha"
+              error={errors.senha}
+              touched={touched.senha}
+              fieldId="senha"
+            >
+              <div className="relative">
+                <input
+                  type={showSenha ? "text" : "password"}
+                  value={form.senha}
+                  onChange={(e) => set("senha", e.target.value)}
+                  onBlur={() => touch("senha")}
+                  placeholder="Mínimo 8 caracteres"
+                  aria-invalid={!!(touched.senha && errors.senha) || undefined}
+                  aria-describedby={
+                    touched.senha && errors.senha ? "error-senha" : undefined
+                  }
+                  className={`${inputCls(!!(touched.senha && errors.senha))} pr-11`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSenha((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-secondary transition-colors"
+                  aria-label={showSenha ? "Ocultar senha" : "Mostrar senha"}
+                  tabIndex={-1}
+                >
+                  {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {/* Requisitos de senha */}
+              {form.senha.length > 0 && (
+                <ul className="mt-2 flex flex-col gap-1">
+                  {senhaReqs.map((r) => {
+                    const ok = r.test(form.senha);
+                    return (
+                      <li
+                        key={r.key}
+                        className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${ok ? "text-success" : "text-ink-muted"}`}
+                      >
+                        <span
+                          className={`flex-shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${ok ? "bg-success-subtle text-success" : "bg-neutral-100 text-neutral-400"}`}
+                        >
+                          {ok ? "✓" : "×"}
+                        </span>
+                        {r.label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Field>
+
+            <Field
+              label="Confirmar senha"
+              error={errors.confirmarSenha}
+              touched={touched.confirmarSenha}
+              fieldId="confirmarSenha"
+            >
+              <div className="relative">
+                <input
+                  type={showConfirmar ? "text" : "password"}
+                  value={form.confirmarSenha}
+                  onChange={(e) => set("confirmarSenha", e.target.value)}
+                  onBlur={() => touch("confirmarSenha")}
+                  placeholder="Repita a senha"
+                  aria-invalid={
+                    !!(touched.confirmarSenha && errors.confirmarSenha) ||
+                    undefined
+                  }
+                  aria-describedby={
+                    touched.confirmarSenha && errors.confirmarSenha
+                      ? "error-confirmarSenha"
+                      : undefined
+                  }
+                  className={`${inputCls(!!(touched.confirmarSenha && errors.confirmarSenha))} pr-11`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmar((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-secondary transition-colors"
+                  aria-label={showConfirmar ? "Ocultar senha" : "Mostrar senha"}
+                  tabIndex={-1}
+                >
+                  {showConfirmar ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {/* Match indicator */}
+              {form.confirmarSenha.length > 0 && !errors.confirmarSenha && (
+                <p className="text-[11px] font-semibold text-success mt-0.5">
+                  ✓ Senhas coincidem
                 </p>
-              </div>
-            </div>
+              )}
+            </Field>
 
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: <ShieldCheck size={16} strokeWidth={1.8} />, label: 'Dados protegidos' },
-                { icon: <Package size={16} strokeWidth={1.8} />, label: 'Rastreio de pedidos' },
-                { icon: <Tag size={16} strokeWidth={1.8} />, label: 'Ofertas exclusivas' },
-              ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="mb-3 block text-[#60a5fa]">{item.icon}</span>
-                  <p className="text-xs font-semibold text-slate-300">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── right panel — form ── */}
-          <div className="flex min-h-[680px] items-center justify-center p-6 sm:p-10">
-            <div className="w-full max-w-sm">
-
-              {/* Mobile logo */}
-              <div className="mb-7 lg:hidden text-center">
-                <Link href="/">
-                  <div
-                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
-                    style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
+            <Button
+              type="submit"
+              disabled={loading}
+              size="lg"
+              style={{ width: "100%", marginTop: 4 }}
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="h-4 w-4 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
                   >
-                    M
-                  </div>
-                </Link>
-                <p className="text-xl font-black tracking-tight">METALAB</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#60a5fa]">Suplementos</p>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl">
-                <h2 className="text-lg font-black text-white mb-0.5">Criar conta</h2>
-                <p className="text-xs text-slate-500 mb-5">Preencha os dados abaixo para se cadastrar</p>
-
-                {serverError && (
-                  <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
-                    {serverError}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5">
-
-                  <Field label="Nome completo" error={errors.nome} touched={touched.nome} fieldId="nome">
-                    <input
-                      type="text"
-                      value={form.nome}
-                      onChange={(e) => set('nome', toTitleCase(e.target.value))}
-                      onBlur={() => touch('nome')}
-                      autoFocus
-                      placeholder="Seu nome completo"
-                      aria-invalid={!!(touched.nome && errors.nome) || undefined}
-                      aria-describedby={touched.nome && errors.nome ? 'error-nome' : undefined}
-                      className={inputCls(!!(touched.nome && errors.nome))}
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
                     />
-                  </Field>
-
-                  <Field label="Email" error={errors.email} touched={touched.email} fieldId="email">
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => set('email', e.target.value)}
-                      onBlur={() => touch('email')}
-                      placeholder="seu@email.com"
-                      aria-invalid={!!(touched.email && errors.email) || undefined}
-                      aria-describedby={touched.email && errors.email ? 'error-email' : undefined}
-                      className={inputCls(!!(touched.email && errors.email))}
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                     />
-                  </Field>
+                  </svg>
+                  Criando conta...
+                </>
+              ) : (
+                "Criar conta"
+              )}
+            </Button>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="CPF" error={errors.cpf} touched={touched.cpf} fieldId="cpf">
-                      <input
-                        type="text"
-                        value={form.cpf}
-                        onChange={(e) => set('cpf', cpfMask(e.target.value))}
-                        onBlur={() => touch('cpf')}
-                        placeholder="000.000.000-00"
-                        inputMode="numeric"
-                        aria-invalid={!!(touched.cpf && errors.cpf) || undefined}
-                        aria-describedby={touched.cpf && errors.cpf ? 'error-cpf' : undefined}
-                        className={inputCls(!!(touched.cpf && errors.cpf))}
-                      />
-                    </Field>
-                    <Field label="Telefone (opcional)">
-                      <input
-                        type="tel"
-                        value={form.telefone}
-                        onChange={(e) => set('telefone', phoneMask(e.target.value))}
-                        placeholder="(11) 99999-0000"
-                        inputMode="numeric"
-                        className={inputCls(false)}
-                      />
-                    </Field>
-                  </div>
-
-                  {/* ── Endereço ── */}
-                  <div className="border-t border-white/10 pt-3.5 mt-0.5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#60a5fa] mb-3">Endereço</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Field label="CEP" error={errors.cep} touched={touched.cep} fieldId="cep">
-                        <input
-                          type="text"
-                          value={form.cep}
-                          onChange={(e) => {
-                            const masked = cepMask(e.target.value);
-                            set('cep', masked);
-                            if (masked.replace(/\D/g, '').length === 8) lookupCep(masked);
-                          }}
-                          onBlur={() => touch('cep')}
-                          placeholder="00000-000"
-                          inputMode="numeric"
-                          aria-invalid={!!(touched.cep && errors.cep) || undefined}
-                          aria-describedby={touched.cep && errors.cep ? 'error-cep' : undefined}
-                          className={inputCls(!!(touched.cep && errors.cep))}
-                        />
-                      </Field>
-                      <Field label="Número" error={errors.numero} touched={touched.numero} fieldId="numero">
-                        <input
-                          type="text"
-                          value={form.numero}
-                          onChange={(e) => set('numero', e.target.value)}
-                          onBlur={() => touch('numero')}
-                          placeholder="120"
-                          aria-invalid={!!(touched.numero && errors.numero) || undefined}
-                          aria-describedby={touched.numero && errors.numero ? 'error-numero' : undefined}
-                          className={inputCls(!!(touched.numero && errors.numero))}
-                        />
-                      </Field>
-                    </div>
-                    <div className="mt-3">
-                      <Field label="Endereço" error={errors.logradouro} touched={touched.logradouro} fieldId="logradouro">
-                        <input
-                          type="text"
-                          value={form.logradouro}
-                          onChange={(e) => set('logradouro', e.target.value)}
-                          onBlur={() => touch('logradouro')}
-                          placeholder="Rua das Flores"
-                          aria-invalid={!!(touched.logradouro && errors.logradouro) || undefined}
-                          aria-describedby={touched.logradouro && errors.logradouro ? 'error-logradouro' : undefined}
-                          className={inputCls(!!(touched.logradouro && errors.logradouro))}
-                        />
-                      </Field>
-                    </div>
-                    <div className="mt-3">
-                      <Field label="Complemento (opcional)">
-                        <input
-                          type="text"
-                          value={form.complemento}
-                          onChange={(e) => set('complemento', e.target.value)}
-                          placeholder="Apto 402"
-                          className={inputCls(false)}
-                        />
-                      </Field>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 mt-3">
-                      <Field label="Bairro" error={errors.bairro} touched={touched.bairro} fieldId="bairro">
-                        <input
-                          type="text"
-                          value={form.bairro}
-                          onChange={(e) => set('bairro', e.target.value)}
-                          onBlur={() => touch('bairro')}
-                          placeholder="Centro"
-                          aria-invalid={!!(touched.bairro && errors.bairro) || undefined}
-                          aria-describedby={touched.bairro && errors.bairro ? 'error-bairro' : undefined}
-                          className={inputCls(!!(touched.bairro && errors.bairro))}
-                        />
-                      </Field>
-                      <Field label="Estado" error={errors.estado} touched={touched.estado} fieldId="estado">
-                        <input
-                          type="text"
-                          value={form.estado}
-                          onChange={(e) => set('estado', e.target.value.toUpperCase().slice(0, 2))}
-                          onBlur={() => touch('estado')}
-                          placeholder="MG"
-                          maxLength={2}
-                          aria-invalid={!!(touched.estado && errors.estado) || undefined}
-                          aria-describedby={touched.estado && errors.estado ? 'error-estado' : undefined}
-                          className={inputCls(!!(touched.estado && errors.estado))}
-                        />
-                      </Field>
-                    </div>
-                    <div className="mt-3">
-                      <Field label="Cidade" error={errors.cidade} touched={touched.cidade} fieldId="cidade">
-                        <input
-                          type="text"
-                          value={form.cidade}
-                          onChange={(e) => set('cidade', e.target.value)}
-                          onBlur={() => touch('cidade')}
-                          placeholder="Belo Horizonte"
-                          aria-invalid={!!(touched.cidade && errors.cidade) || undefined}
-                          aria-describedby={touched.cidade && errors.cidade ? 'error-cidade' : undefined}
-                          className={inputCls(!!(touched.cidade && errors.cidade))}
-                        />
-                      </Field>
-                    </div>
-                  </div>
-
-                  <Field label="Senha" error={errors.senha} touched={touched.senha} fieldId="senha">
-                    <div className="relative">
-                      <input
-                        type={showSenha ? 'text' : 'password'}
-                        value={form.senha}
-                        onChange={(e) => set('senha', e.target.value)}
-                        onBlur={() => touch('senha')}
-                        placeholder="Mínimo 8 caracteres"
-                        aria-invalid={!!(touched.senha && errors.senha) || undefined}
-                        aria-describedby={touched.senha && errors.senha ? 'error-senha' : undefined}
-                        className={`${inputCls(!!(touched.senha && errors.senha))} pr-11`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowSenha((v) => !v)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                        tabIndex={-1}
-                      >
-                        {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                    {/* Requisitos de senha */}
-                    {form.senha.length > 0 && (
-                      <ul className="mt-2 flex flex-col gap-1">
-                        {senhaReqs.map((r) => {
-                          const ok = r.test(form.senha);
-                          return (
-                            <li key={r.key} className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${ok ? 'text-emerald-400' : 'text-slate-500'}`}>
-                              <span className={`flex-shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${ok ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-600'}`}>
-                                {ok ? '✓' : '×'}
-                              </span>
-                              {r.label}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </Field>
-
-                  <Field label="Confirmar senha" error={errors.confirmarSenha} touched={touched.confirmarSenha} fieldId="confirmarSenha">
-                    <div className="relative">
-                      <input
-                        type={showConfirmar ? 'text' : 'password'}
-                        value={form.confirmarSenha}
-                        onChange={(e) => set('confirmarSenha', e.target.value)}
-                        onBlur={() => touch('confirmarSenha')}
-                        placeholder="Repita a senha"
-                        aria-invalid={!!(touched.confirmarSenha && errors.confirmarSenha) || undefined}
-                        aria-describedby={touched.confirmarSenha && errors.confirmarSenha ? 'error-confirmarSenha' : undefined}
-                        className={`${inputCls(!!(touched.confirmarSenha && errors.confirmarSenha))} pr-11`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmar((v) => !v)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                        tabIndex={-1}
-                      >
-                        {showConfirmar ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                    {/* Match indicator */}
-                    {form.confirmarSenha.length > 0 && !errors.confirmarSenha && (
-                      <p className="text-[11px] font-semibold text-emerald-400 mt-0.5">✓ Senhas coincidem</p>
-                    )}
-                  </Field>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full rounded-xl py-3 text-sm font-bold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1 flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
-                  >
-                    {loading ? (
-                      <>
-                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Criando conta...
-                      </>
-                    ) : 'Criar conta'}
-                  </button>
-
-                  <p className="text-center text-xs text-slate-500">
-                    Já tem conta?{' '}
-                    <Link href="/login" className="text-[#60a5fa] hover:text-[#60a5fa] font-semibold">
-                      Entrar
-                    </Link>
-                  </p>
-
-                </form>
-              </div>
-            </div>
-          </div>
-
-        </section>
+            <p className="text-center text-xs text-ink-muted">
+              Já tem conta?{" "}
+              <Link
+                href="/login"
+                className="text-link font-semibold hover:underline"
+              >
+                Entrar
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
     </main>
   );

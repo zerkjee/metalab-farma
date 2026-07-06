@@ -10,28 +10,28 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <body className="min-h-screen flex items-center justify-center bg-surface-page px-4">
         <div className="mx-auto max-w-md text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-red-50 text-4xl">
-            ⚠️
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-danger-subtle text-2xl font-bold text-danger">
+            !
           </div>
-          <h1 className="text-2xl font-black text-gray-950">Algo deu errado</h1>
-          <p className="mt-3 text-sm leading-6 text-gray-500">
+          <h1 className="font-display text-2xl text-navy">Algo deu errado</h1>
+          <p className="mt-3 text-sm leading-6 text-ink-secondary">
             Ocorreu um erro inesperado. Você pode tentar novamente ou voltar para a loja.
           </p>
           {error.digest && (
-            <p className="mt-2 font-mono text-xs text-gray-400">#{error.digest}</p>
+            <p className="mt-2 font-mono text-xs text-ink-muted">#{error.digest}</p>
           )}
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button
               onClick={reset}
-              className="rounded-xl bg-[#0f2756] px-6 py-3 text-sm font-black text-white transition-all hover:opacity-90"
+              className="rounded-full bg-brand px-6 py-3 text-sm font-bold text-on-brand transition-all hover:bg-brand-hover"
             >
               Tentar novamente
             </button>
             <Link
               href="/"
-              className="rounded-xl border border-gray-200 px-6 py-3 text-sm font-bold text-gray-600 transition-all hover:border-[#0f2756]/30 hover:text-[#0f2756]"
+              className="rounded-full border border-line-default px-6 py-3 text-sm font-bold text-ink-secondary transition-all hover:border-brand hover:text-navy"
             >
               Voltar para a loja
             </Link>

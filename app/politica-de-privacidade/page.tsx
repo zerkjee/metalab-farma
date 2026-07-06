@@ -12,15 +12,15 @@ export default function PoliticaDePrivacidade() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#fafafa]">
+      <main className="min-h-screen bg-surface-page">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h1 className="text-3xl font-black text-gray-900 mb-2">Política de Privacidade</h1>
-          <p className="text-sm text-gray-500 mb-10">Última atualização: 20 de maio de 2026</p>
+          <h1 className="font-display text-3xl text-navy mb-2">Política de Privacidade</h1>
+          <p className="text-sm text-ink-muted mb-10">Última atualização: 20 de maio de 2026</p>
 
-          <div className="prose prose-gray max-w-none space-y-8 text-gray-700 leading-relaxed">
+          <div className="prose max-w-none space-y-8 text-ink-secondary leading-relaxed">
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">1. Quem somos</h2>
+              <h2 className="font-display text-xl text-navy mb-3">1. Quem somos</h2>
               <p>
                 A <strong>Metalab Store</strong> é uma loja virtual de suplementos alimentares operada por Metalab
                 (e-mail: mlmetalab@gmail.com). Esta Política descreve como tratamos seus dados pessoais em
@@ -29,7 +29,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">2. Dados que coletamos</h2>
+              <h2 className="font-display text-xl text-navy mb-3">2. Dados que coletamos</h2>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Cadastro:</strong> nome completo, e-mail, CPF, telefone e senha (armazenada com hash seguro).</li>
                 <li><strong>Endereço:</strong> CEP, logradouro, número, complemento, bairro, cidade e estado — para cálculo de frete e entrega.</li>
@@ -40,7 +40,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">3. Para que usamos seus dados</h2>
+              <h2 className="font-display text-xl text-navy mb-3">3. Para que usamos seus dados</h2>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Processar e entregar seus pedidos.</li>
                 <li>Enviar confirmações de compra e atualizações de entrega por e-mail.</li>
@@ -52,7 +52,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">4. Base legal do tratamento</h2>
+              <h2 className="font-display text-xl text-navy mb-3">4. Base legal do tratamento</h2>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Execução de contrato</strong> — para processar pedidos e enviar produtos (art. 7º, V, LGPD).</li>
                 <li><strong>Obrigação legal</strong> — emissão de notas fiscais, cumprimento de obrigações tributárias (art. 7º, II).</li>
@@ -62,7 +62,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">5. Compartilhamento de dados</h2>
+              <h2 className="font-display text-xl text-navy mb-3">5. Compartilhamento de dados</h2>
               <p>Compartilhamos seus dados apenas com:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Mercado Pago</strong> — processamento de pagamento PIX.</li>
@@ -75,7 +75,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">6. Por quanto tempo guardamos seus dados</h2>
+              <h2 className="font-display text-xl text-navy mb-3">6. Por quanto tempo guardamos seus dados</h2>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Dados de pedidos: 5 anos (obrigação fiscal e CDC).</li>
                 <li>Dados de conta: enquanto a conta estiver ativa + 1 ano após exclusão.</li>
@@ -85,7 +85,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">7. Seus direitos (LGPD)</h2>
+              <h2 className="font-display text-xl text-navy mb-3">7. Seus direitos (LGPD)</h2>
               <p>Você pode, a qualquer momento:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Confirmar a existência de tratamento dos seus dados.</li>
@@ -97,7 +97,7 @@ export default function PoliticaDePrivacidade() {
               </ul>
               <p className="mt-2">
                 Para exercer qualquer direito, envie um e-mail para{' '}
-                <a href="mailto:mlmetalab@gmail.com" className="text-[#60a5fa] hover:underline">
+                <a href="mailto:mlmetalab@gmail.com" className="text-link hover:underline">
                   mlmetalab@gmail.com
                 </a>
                 . Responderemos em até 15 dias úteis.
@@ -105,7 +105,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">8. Cookies</h2>
+              <h2 className="font-display text-xl text-navy mb-3">8. Cookies</h2>
               <p>Utilizamos três categorias de cookies:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Essenciais:</strong> autenticação e carrinho — necessários para o funcionamento do site.</li>
@@ -118,7 +118,7 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">9. Segurança</h2>
+              <h2 className="font-display text-xl text-navy mb-3">9. Segurança</h2>
               <p>
                 Adotamos medidas técnicas como HTTPS, hash de senhas (bcrypt), criptografia em trânsito,
                 rate limiting e monitoramento de erros (Sentry) para proteger seus dados.
@@ -126,10 +126,10 @@ export default function PoliticaDePrivacidade() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-3">10. Contato</h2>
+              <h2 className="font-display text-xl text-navy mb-3">10. Contato</h2>
               <p>
                 Dúvidas sobre esta política:{' '}
-                <a href="mailto:mlmetalab@gmail.com" className="text-[#60a5fa] hover:underline">
+                <a href="mailto:mlmetalab@gmail.com" className="text-link hover:underline">
                   mlmetalab@gmail.com
                 </a>
               </p>
