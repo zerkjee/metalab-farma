@@ -1,61 +1,77 @@
-'use client';
+"use client";
 
-import { Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, Suspense, useState, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
+import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { Button } from "@/components/ui";
+
+const fieldCls = (hasError: boolean) =>
+  `w-full rounded-xl border bg-surface-card px-4 py-3 text-sm text-ink placeholder-ink-muted outline-none transition-all ${
+    hasError
+      ? "border-danger focus:border-danger focus:ring-2 focus:ring-danger/20"
+      : "border-line-default focus:border-brand focus:ring-2 focus:ring-brand/30"
+  }`;
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawCallback = searchParams.get('callbackUrl') ?? '/'
+  const rawCallback = searchParams.get("callbackUrl") ?? "/";
   // Bloqueia open redirect: só aceita paths relativos que começam com /
-  const callbackUrl = rawCallback.startsWith('/') && !rawCallback.startsWith('//') ? rawCallback : '/';
+  const callbackUrl =
+    rawCallback.startsWith("/") && !rawCallback.startsWith("//")
+      ? rawCallback
+      : "/";
   const { data: session, status: sessionStatus } = useSession();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (sessionStatus === 'authenticated' && session) {
+    if (sessionStatus === "authenticated" && session) {
       router.replace(callbackUrl);
     }
   }, [sessionStatus, session, router, callbackUrl]);
 
-  if (sessionStatus === 'authenticated') return null;
+  if (sessionStatus === "authenticated") return null;
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus('loading');
-    setErrorMsg('');
+    setStatus("loading");
+    setErrorMsg("");
 
-    const result = await signIn('credentials', {
+    const result = await signIn("credentials", {
       email,
       senha: password,
       redirect: false,
     });
 
     if (result?.error) {
-      setStatus('error');
-      setErrorMsg('Email ou senha inválidos. Verifique e tente novamente.');
+      setStatus("error");
+      setErrorMsg("Email ou senha inválidos. Verifique e tente novamente.");
       return;
     }
 
-    setStatus('success');
+    setStatus("success");
     router.replace(callbackUrl);
     router.refresh();
   }
 
-  const loading = status === 'loading';
+  const loading = status === "loading";
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1.5">Email</label>
+        <label className="mb-1.5 block text-xs font-semibold text-ink-secondary">
+          Email
+        </label>
         <input
           type="email"
           value={email}
@@ -63,53 +79,63 @@ function LoginForm() {
           required
           autoFocus
           placeholder="seu@email.com"
-          aria-invalid={status === 'error' || undefined}
-          aria-describedby={status === 'error' ? 'login-error' : undefined}
-          className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-[#0f2756] focus:ring-1 focus:ring-[#0f2756]/40 transition-all"
+          aria-invalid={status === "error" || undefined}
+          aria-describedby={status === "error" ? "login-error" : undefined}
+          className={fieldCls(status === "error")}
         />
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1.5">Senha</label>
+        <label className="mb-1.5 block text-xs font-semibold text-ink-secondary">
+          Senha
+        </label>
         <div className="relative">
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="Mínimo 6 caracteres"
-            aria-invalid={status === 'error' || undefined}
-            aria-describedby={status === 'error' ? 'login-error' : undefined}
-            className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 pr-11 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-[#0f2756] focus:ring-1 focus:ring-[#0f2756]/40 transition-all"
+            aria-invalid={status === "error" || undefined}
+            aria-describedby={status === "error" ? "login-error" : undefined}
+            className={`${fieldCls(status === "error")} pr-11`}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted transition-colors hover:text-ink-secondary"
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            tabIndex={-1}
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
       </div>
 
-      {status === 'error' && (
-        <div id="login-error" className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
+      {status === "error" && (
+        <div
+          id="login-error"
+          className="rounded-xl border border-danger/20 bg-danger-subtle px-4 py-3 text-xs text-danger"
+        >
           {errorMsg}
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl py-3 text-sm font-bold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-        style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
+        size="lg"
+        style={{ width: "100%" }}
       >
-        {loading ? 'Entrando...' : 'Entrar'}
-      </button>
+        {loading ? "Entrando..." : "Entrar"}
+      </Button>
 
-      <p className="text-center text-xs text-slate-500">
-        Não tem conta?{' '}
-        <Link href="/registro" className="text-[#60a5fa] hover:text-[#60a5fa] font-semibold">
+      <p className="text-center text-xs text-ink-muted">
+        Não tem conta?{" "}
+        <Link
+          href="/registro"
+          className="font-semibold text-link hover:underline"
+        >
           Criar conta grátis
         </Link>
       </p>
@@ -119,82 +145,28 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main
-      className="min-h-screen overflow-hidden px-5 py-8 text-white"
-      style={{ background: 'radial-gradient(circle at 18% 10%, #312e81 0%, #111827 34%, #020617 78%)' }}
-    >
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center justify-center">
-        <section className="grid w-full overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-black/40 backdrop-blur lg:grid-cols-[1fr_420px]">
+    <main className="flex min-h-screen items-center justify-center bg-surface-page px-5 py-12">
+      <div className="w-full max-w-sm">
+        <div className="mb-7 text-center">
+          <Link href="/" className="inline-block">
+            <Image
+              src="/brand/metalab-mark.png"
+              alt="MetaLab"
+              width={48}
+              height={48}
+              className="mx-auto mb-3 h-12 w-12"
+            />
+          </Link>
+          <h1 className="font-display text-2xl text-navy">
+            Entrar na sua conta
+          </h1>
+        </div>
 
-          {/* Left panel */}
-          <div className="hidden min-h-[580px] flex-col justify-between border-r border-white/10 p-10 lg:flex">
-            <div>
-              <Link href="/" className="flex items-center gap-3">
-                <div
-                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
-                  style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
-                >
-                  M
-                </div>
-                <div>
-                  <p className="text-lg font-black tracking-tight">METALAB</p>
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Suplementos</p>
-                </div>
-              </Link>
-
-              <div className="mt-20 max-w-xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#60a5fa]">Sua conta</p>
-                <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight">
-                  Acesse e aproveite benefícios exclusivos.
-                </h1>
-                <p className="mt-4 text-sm leading-7 text-slate-300">
-                  Acompanhe seus pedidos, gerencie endereços e acesse ofertas especiais para clientes Metalab.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: <ShieldCheck size={16} strokeWidth={1.8} />, label: 'Compra segura' },
-                { icon: <Zap size={16} strokeWidth={1.8} />, label: 'Entrega rápida' },
-                { icon: <ShieldCheck size={16} strokeWidth={1.8} />, label: 'PIX com desconto' },
-              ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <span className="mb-3 block text-[#60a5fa]">{item.icon}</span>
-                  <p className="text-xs font-semibold text-slate-300">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right panel — form */}
-          <div className="flex min-h-[580px] items-center justify-center p-6 sm:p-10">
-            <div className="w-full max-w-sm">
-              <div className="mb-7 lg:hidden text-center">
-                <Link href="/">
-                  <div
-                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black shadow-lg shadow-[#0f2756]/20"
-                    style={{ background: 'linear-gradient(135deg, #0f2756, #1e50a8)' }}
-                  >
-                    M
-                  </div>
-                </Link>
-                <p className="text-xl font-black tracking-tight">METALAB</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#60a5fa]">Suplementos</p>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl">
-                <h2 className="text-lg font-black text-white mb-1">Entrar na conta</h2>
-                <p className="text-xs text-slate-500 mb-6">Use seu email e senha cadastrados</p>
-
-                <Suspense fallback={null}>
-                  <LoginForm />
-                </Suspense>
-              </div>
-            </div>
-          </div>
-
-        </section>
+        <div className="rounded-2xl border border-line bg-surface-card p-6 shadow-sm sm:p-8">
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
+        </div>
       </div>
     </main>
   );
