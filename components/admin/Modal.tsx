@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 interface ModalProps {
   open: boolean;
@@ -24,23 +25,21 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'max-
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-navy-900/48 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Panel */}
       <div role="dialog" aria-modal="true" aria-label={title}
-        className={`relative w-full ${maxWidth} rounded-2xl border border-slate-700 shadow-2xl overflow-hidden`}
-        style={{ background: '#1e293b' }}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
-          <h2 className="text-white font-bold text-base">{title}</h2>
+        className={`relative w-full ${maxWidth} rounded-2xl border border-line bg-surface-card shadow-md overflow-hidden`}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-line">
+          <h2 className="text-navy font-display text-base">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-ink-muted hover:text-navy hover:bg-surface-sunken transition-all"
+            aria-label="Fechar"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-4 h-4" strokeWidth={2} />
           </button>
         </div>
         <div className="px-6 py-5">{children}</div>

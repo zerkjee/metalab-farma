@@ -41,11 +41,14 @@ const initialForm: BannerForm = {
   campanha: 'Campanha',
 };
 
+// BannerPreview é uma prévia FIEL do banner exibido na loja (conteúdo real da
+// campanha, com o próprio fundo/gradiente escolhido). Mantemos o visual do
+// banner tal como aparece no site — só o chrome do admin usa o design system.
 function BannerPreview({ banner, compact = false }: { banner: BannerForm | ApiBanner; compact?: boolean }) {
   const accent = banner.accent ?? '#c084fc';
   const bg = banner.bg ?? gradientOptions[0].value;
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl ${compact ? 'min-h-[170px]' : 'min-h-[260px]'}`} style={{ background: bg }}>
+    <div className={`relative overflow-hidden rounded-2xl border border-white/10 shadow-md ${compact ? 'min-h-[170px]' : 'min-h-[260px]'}`} style={{ background: bg }}>
       <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
       <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-20 blur-sm" style={{ backgroundColor: accent }} />
       <div className={`relative z-10 grid h-full gap-4 p-5 ${compact ? 'grid-cols-[1fr_96px]' : 'grid-cols-1 sm:grid-cols-[1fr_180px] sm:p-7'}`}>
@@ -220,86 +223,86 @@ export default function AdminBanners() {
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400">Campanhas visuais</p>
-          <h2 className="mt-1 text-xl font-black text-white">Banners da Home</h2>
-          <p className="mt-1 text-xs text-slate-500">{activeCount} ativos de {sortedBanners.length} banners</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-700">Campanhas visuais</p>
+          <h2 className="mt-1 text-xl font-display text-navy">Banners da home</h2>
+          <p className="mt-1 text-xs text-ink-muted">{activeCount} ativos de {sortedBanners.length} banners</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <a href="/" target="_blank" className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:bg-slate-700">
+          <a href="/" target="_blank" className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-card px-4 py-2.5 text-sm font-semibold text-ink-secondary transition-all hover:bg-surface-sunken">
             <Eye className="h-4 w-4" strokeWidth={1.8} />
             Ver home
           </a>
-          <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-purple-950/20 transition-all hover:brightness-110 active:scale-[0.99]" style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}>
+          <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-on-brand shadow-sm transition-all hover:bg-brand-hover active:scale-[0.99]">
             <Plus className="h-4 w-4" strokeWidth={1.9} />
             Novo banner
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-purple-700/30 bg-purple-600/10 px-5 py-3">
-        <p className="text-xs leading-5 text-purple-300">
+      <div className="rounded-2xl border border-line bg-brand-50 px-5 py-3">
+        <p className="text-xs leading-5 text-brand-700">
           Quando há banners aqui, eles substituem o carrossel padrão da home. Sem nenhum banner, a home volta ao carrossel original.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-slate-400 text-center py-12">Carregando banners...</p>
+        <p className="text-ink-secondary text-center py-12">Carregando banners...</p>
       ) : sortedBanners.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-700 p-12 text-center">
-          <p className="text-slate-400 mb-2">Nenhum banner cadastrado.</p>
-          <p className="text-slate-500 text-sm">A home está usando o carrossel padrão.</p>
+        <div className="rounded-2xl border border-dashed border-line-default p-12 text-center">
+          <p className="text-ink-secondary mb-2">Nenhum banner cadastrado.</p>
+          <p className="text-ink-muted text-sm">A home está usando o carrossel padrão.</p>
         </div>
       ) : (
         <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
           <div className="flex flex-col gap-4">
             {sortedBanners.map((banner, index) => (
-              <article key={banner.id} className={`grid gap-4 rounded-2xl border p-4 transition-all lg:grid-cols-[260px_1fr_auto] ${banner.ativo ? 'border-slate-700/60 bg-slate-900/80' : 'border-slate-800/70 bg-slate-900/40 opacity-70'}`}>
+              <article key={banner.id} className={`grid gap-4 rounded-2xl border p-4 transition-all lg:grid-cols-[260px_1fr_auto] ${banner.ativo ? 'border-line bg-surface-card shadow-sm' : 'border-line bg-surface-sunken opacity-70'}`}>
                 <BannerPreview banner={banner} compact />
                 <div className="min-w-0">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <StatusBadge label={banner.ativo ? 'Ativo' : 'Inativo'} color={banner.ativo ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-600/30 text-slate-500'} />
-                    <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-400">Ordem {banner.ordem}</span>
-                    {banner.campanha && <span className="rounded-full bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-300">{banner.campanha}</span>}
+                    <StatusBadge label={banner.ativo ? 'Ativo' : 'Inativo'} color={banner.ativo ? 'bg-success-subtle text-success' : 'bg-surface-sunken text-ink-muted'} />
+                    <span className="rounded-full bg-surface-sunken px-2.5 py-1 text-xs font-semibold text-ink-secondary">Ordem {banner.ordem}</span>
+                    {banner.campanha && <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">{banner.campanha}</span>}
                   </div>
-                  <h3 className="text-base font-black text-white">{banner.titulo}</h3>
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">{banner.subtitulo}</p>
+                  <h3 className="text-base font-display text-navy">{banner.titulo}</h3>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-secondary">{banner.subtitulo}</p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    <div className="rounded-xl bg-slate-950/50 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">CTA</p>
-                      <p className="mt-1 truncate text-xs font-semibold text-slate-200">{banner.cta ?? '—'}</p>
+                    <div className="rounded-xl bg-surface-sunken p-3">
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-ink-muted">CTA</p>
+                      <p className="mt-1 truncate text-xs font-semibold text-ink">{banner.cta ?? '—'}</p>
                     </div>
-                    <div className="rounded-xl bg-slate-950/50 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Link</p>
-                      <p className="mt-1 truncate text-xs font-semibold text-slate-200">{banner.linkUrl ?? '—'}</p>
+                    <div className="rounded-xl bg-surface-sunken p-3">
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-ink-muted">Link</p>
+                      <p className="mt-1 truncate text-xs font-semibold text-ink">{banner.linkUrl ?? '—'}</p>
                     </div>
-                    <div className="rounded-xl bg-slate-950/50 p-3">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Imagem</p>
-                      <p className="mt-1 truncate text-xs font-semibold text-slate-200">{banner.imagemUrl}</p>
+                    <div className="rounded-xl bg-surface-sunken p-3">
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-ink-muted">Imagem</p>
+                      <p className="mt-1 truncate text-xs font-semibold text-ink">{banner.imagemUrl}</p>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 lg:flex-col lg:items-stretch">
-                  <button onClick={() => changeOrder(banner, -1)} disabled={index === 0} className="inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-800 disabled:opacity-30">↑</button>
-                  <button onClick={() => changeOrder(banner, 1)} disabled={index === sortedBanners.length - 1} className="inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-800 disabled:opacity-30">↓</button>
-                  <button onClick={() => openEdit(banner)} className="inline-flex h-9 items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold text-purple-300 transition-all hover:bg-purple-600/10 hover:text-purple-200">
+                  <button onClick={() => changeOrder(banner, -1)} disabled={index === 0} className="inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold text-ink-secondary transition-all hover:bg-surface-sunken disabled:opacity-30">↑</button>
+                  <button onClick={() => changeOrder(banner, 1)} disabled={index === sortedBanners.length - 1} className="inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold text-ink-secondary transition-all hover:bg-surface-sunken disabled:opacity-30">↓</button>
+                  <button onClick={() => openEdit(banner)} className="inline-flex h-9 items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-brand-700 transition-all hover:bg-brand-50">
                     <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
                     Editar
                   </button>
-                  <button onClick={() => toggleActive(banner)} className={`inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-semibold transition-all ${banner.ativo ? 'text-red-300 hover:bg-red-600/10 hover:text-red-200' : 'text-emerald-300 hover:bg-emerald-600/10 hover:text-emerald-200'}`}>
+                  <button onClick={() => toggleActive(banner)} className={`inline-flex h-9 items-center justify-center rounded-full px-3 text-xs font-semibold transition-all ${banner.ativo ? 'text-danger hover:bg-danger-subtle' : 'text-success hover:bg-success-subtle'}`}>
                     {banner.ativo ? 'Desativar' : 'Ativar'}
                   </button>
-                  <button onClick={() => deleteBanner(banner.id)} className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-red-600/10 hover:text-red-300" title="Excluir banner">
+                  <button onClick={() => deleteBanner(banner.id)} className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-all hover:bg-danger-subtle hover:text-danger" title="Excluir banner">
                     <Trash2 className="h-4 w-4" strokeWidth={1.8} />
                   </button>
                 </div>
               </article>
             ))}
           </div>
-          <aside className="h-fit rounded-2xl border border-slate-800 bg-slate-900/70 p-4 xl:sticky xl:top-20">
+          <aside className="h-fit rounded-2xl border border-line bg-surface-card shadow-sm p-4 xl:sticky xl:top-20">
             <div className="mb-4 flex items-center gap-2">
-              <ImagePlus className="h-4 w-4 text-purple-300" strokeWidth={1.8} />
-              <h3 className="text-sm font-black text-white">Preview prioritário</h3>
+              <ImagePlus className="h-4 w-4 text-brand-700" strokeWidth={1.8} />
+              <h3 className="text-sm font-display text-navy">Preview prioritário</h3>
             </div>
             {sortedBanners[0] && <BannerPreview banner={sortedBanners[0]} />}
           </aside>
@@ -311,36 +314,36 @@ export default function AdminBanners() {
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Título</label>
-                <input value={form.titulo ?? ''} onChange={(e) => updateField('titulo', e.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500" placeholder="Título da campanha" required />
+                <label className="mb-1 block text-xs text-ink-secondary">Título</label>
+                <input value={form.titulo ?? ''} onChange={(e) => updateField('titulo', e.target.value)} className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand" placeholder="Título da campanha" required />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Campanha</label>
-                <input value={form.campanha ?? ''} onChange={(e) => updateField('campanha', e.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500" placeholder="Ex: Promoção" />
+                <label className="mb-1 block text-xs text-ink-secondary">Campanha</label>
+                <input value={form.campanha ?? ''} onChange={(e) => updateField('campanha', e.target.value)} className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand" placeholder="Ex: Promoção" />
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-xs text-slate-400">Subtítulo</label>
-              <textarea value={form.subtitulo ?? ''} onChange={(e) => updateField('subtitulo', e.target.value)} className="min-h-24 w-full resize-none rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500" placeholder="Descrição curta do banner" />
+              <label className="mb-1 block text-xs text-ink-secondary">Subtítulo</label>
+              <textarea value={form.subtitulo ?? ''} onChange={(e) => updateField('subtitulo', e.target.value)} className="min-h-24 w-full resize-none rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand" placeholder="Descrição curta do banner" />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Texto do botão</label>
-                <input value={form.cta ?? ''} onChange={(e) => updateField('cta', e.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500" placeholder="Ver Produtos" />
+                <label className="mb-1 block text-xs text-ink-secondary">Texto do botão</label>
+                <input value={form.cta ?? ''} onChange={(e) => updateField('cta', e.target.value)} className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand" placeholder="Ver Produtos" />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Link do botão</label>
-                <input value={form.linkUrl ?? ''} onChange={(e) => updateField('linkUrl', e.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500" placeholder="/produtos" />
+                <label className="mb-1 block text-xs text-ink-secondary">Link do botão</label>
+                <input value={form.linkUrl ?? ''} onChange={(e) => updateField('linkUrl', e.target.value)} className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand" placeholder="/produtos" />
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-xs text-slate-400">Imagem (URL)</label>
+              <label className="mb-1 block text-xs text-ink-secondary">Imagem (URL)</label>
               <div className="flex gap-2">
-                <input value={form.imagemUrl} onChange={(e) => updateField('imagemUrl', e.target.value)} className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500" placeholder="https://res.cloudinary.com/..." required />
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-2.5 text-xs font-bold text-purple-300 transition-all hover:bg-purple-500/20">
+                <input value={form.imagemUrl} onChange={(e) => updateField('imagemUrl', e.target.value)} className="flex-1 rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand" placeholder="https://res.cloudinary.com/..." required />
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2.5 text-xs font-bold text-brand-700 transition-all hover:bg-brand-100">
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleImageUpload(f); }} />
                   {uploading ? 'Enviando...' : 'Upload'}
                 </label>
@@ -349,18 +352,18 @@ export default function AdminBanners() {
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Gradiente</label>
-                <select value={selectedGradient.value} onChange={(e) => handleGradientChange(e.target.value)} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500">
+                <label className="mb-1 block text-xs text-ink-secondary">Gradiente</label>
+                <select value={selectedGradient.value} onChange={(e) => handleGradientChange(e.target.value)} className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand">
                   {gradientOptions.map((o) => <option key={o.label} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Ordem</label>
-                <input type="number" min={0} value={form.ordem} onChange={(e) => updateField('ordem', Number(e.target.value))} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500" />
+                <label className="mb-1 block text-xs text-ink-secondary">Ordem</label>
+                <input type="number" min={0} value={form.ordem} onChange={(e) => updateField('ordem', Number(e.target.value))} className="w-full rounded-xl border border-line-default bg-surface-card px-3 py-2.5 text-sm text-ink outline-none focus:border-brand" />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-400">Status</label>
-                <button type="button" onClick={() => updateField('ativo', !form.ativo)} className={`flex h-[42px] w-full items-center justify-center rounded-xl border text-sm font-semibold transition-all ${form.ativo ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-slate-600 bg-slate-800 text-slate-400'}`}>
+                <label className="mb-1 block text-xs text-ink-secondary">Status</label>
+                <button type="button" onClick={() => updateField('ativo', !form.ativo)} className={`flex h-[42px] w-full items-center justify-center rounded-xl border text-sm font-semibold transition-all ${form.ativo ? 'border-success/30 bg-success-subtle text-success' : 'border-line-default bg-surface-card text-ink-muted'}`}>
                   {form.ativo ? 'Ativo' : 'Inativo'}
                 </button>
               </div>
@@ -369,13 +372,13 @@ export default function AdminBanners() {
 
           <div className="flex flex-col gap-4">
             <div>
-              <label className="mb-2 block text-xs text-slate-400">Preview da home</label>
+              <label className="mb-2 block text-xs text-ink-secondary">Preview da home</label>
               <BannerPreview banner={form} />
             </div>
 
             <div className="flex justify-end gap-3 pt-1">
-              <button type="button" onClick={closeModal} className="rounded-xl px-4 py-2 text-sm text-slate-400 transition-all hover:bg-slate-700 hover:text-slate-200">Cancelar</button>
-              <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}>
+              <button type="button" onClick={closeModal} className="rounded-full px-4 py-2 text-sm text-ink-muted transition-all hover:bg-surface-sunken hover:text-navy">Cancelar</button>
+              <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-all hover:bg-brand-hover disabled:opacity-50">
                 <Save className="h-4 w-4" strokeWidth={1.9} />
                 {saving ? 'Salvando...' : 'Salvar banner'}
               </button>

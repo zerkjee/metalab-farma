@@ -93,9 +93,9 @@ export default function CriarAdminPage() {
   if (!isSuperAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
-        <ShieldCheck className="w-14 h-14 text-red-400 mb-4" strokeWidth={1.5} />
-        <h2 className="text-xl font-black text-white mb-2">Acesso Restrito</h2>
-        <p className="text-slate-400 text-sm max-w-sm">
+        <ShieldCheck className="w-14 h-14 text-danger mb-4" strokeWidth={1.5} />
+        <h2 className="text-xl font-display text-navy mb-2">Acesso restrito</h2>
+        <p className="text-ink-secondary text-sm max-w-sm">
           Apenas Super Admins podem gerenciar outros administradores.
         </p>
       </div>
@@ -103,10 +103,10 @@ export default function CriarAdminPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-black text-white">Gerenciar Administradores</h1>
-        <p className="text-slate-400 text-sm mt-1">
+        <h1 className="text-2xl font-display text-navy">Gerenciar administradores</h1>
+        <p className="text-ink-secondary text-sm mt-1">
           Crie e gerencie contas de acesso ao painel administrativo.
         </p>
       </div>
@@ -114,26 +114,26 @@ export default function CriarAdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* Form */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-white font-black text-lg mb-5 flex items-center gap-2">
-            <Plus className="w-5 h-5 text-purple-400" strokeWidth={2} />
-            Novo Administrador
+        <div className="bg-surface-card border border-line shadow-sm rounded-2xl p-6">
+          <h2 className="text-navy font-display text-lg mb-5 flex items-center gap-2">
+            <Plus className="w-5 h-5 text-brand-700" strokeWidth={2} />
+            Novo administrador
           </h2>
 
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="mb-4 rounded-xl border border-danger/30 bg-danger-subtle px-4 py-3 text-sm text-danger">
               {error}
             </div>
           )}
           {success && (
-            <div className="mb-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+            <div className="mb-4 rounded-xl border border-success/30 bg-success-subtle px-4 py-3 text-sm text-success">
               {success}
             </div>
           )}
 
           <form onSubmit={handleCreate} className="flex flex-col gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Nome completo</label>
+              <label className="block text-xs font-semibold text-ink-secondary mb-1.5">Nome completo</label>
               <input
                 type="text"
                 value={form.nome}
@@ -141,24 +141,24 @@ export default function CriarAdminPage() {
                 required
                 minLength={2}
                 placeholder="Nome do administrador"
-                className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
+                className="w-full rounded-xl border border-line-default bg-surface-card px-4 py-2.5 text-sm text-ink placeholder-ink-muted outline-none focus:border-brand focus:ring-1 focus:ring-brand/40 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Email</label>
+              <label className="block text-xs font-semibold text-ink-secondary mb-1.5">Email</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((v) => ({ ...v, email: e.target.value }))}
                 required
                 placeholder="admin@metalab.com.br"
-                className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
+                className="w-full rounded-xl border border-line-default bg-surface-card px-4 py-2.5 text-sm text-ink placeholder-ink-muted outline-none focus:border-brand focus:ring-1 focus:ring-brand/40 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Senha</label>
+              <label className="block text-xs font-semibold text-ink-secondary mb-1.5">Senha</label>
               <div className="relative">
                 <input
                   type={showSenha ? 'text' : 'password'}
@@ -166,12 +166,12 @@ export default function CriarAdminPage() {
                   onChange={(e) => setForm((v) => ({ ...v, senha: e.target.value }))}
                   required
                   placeholder="Senha segura"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2.5 pr-11 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
+                  className="w-full rounded-xl border border-line-default bg-surface-card px-4 py-2.5 pr-11 text-sm text-ink placeholder-ink-muted outline-none focus:border-brand focus:ring-1 focus:ring-brand/40 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowSenha((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-navy transition-colors"
                 >
                   {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -181,8 +181,8 @@ export default function CriarAdminPage() {
                   {senhaReqs.map((r) => {
                     const ok = r.test(form.senha);
                     return (
-                      <li key={r.key} className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${ok ? 'text-emerald-400' : 'text-slate-500'}`}>
-                        <span className={`flex-shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${ok ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-600'}`}>
+                      <li key={r.key} className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${ok ? 'text-success' : 'text-ink-muted'}`}>
+                        <span className={`flex-shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${ok ? 'bg-success-subtle text-success' : 'bg-surface-sunken text-ink-muted'}`}>
                           {ok ? '✓' : '×'}
                         </span>
                         {r.label}
@@ -194,17 +194,17 @@ export default function CriarAdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Papel</label>
+              <label className="block text-xs font-semibold text-ink-secondary mb-1.5">Papel</label>
               <select
                 value={form.papel}
                 onChange={(e) => setForm((v) => ({ ...v, papel: e.target.value as 'ADMIN' | 'SUPER_ADMIN' }))}
-                className="w-full rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-sm text-slate-200 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 transition-all"
+                className="w-full rounded-xl border border-line-default bg-surface-card px-4 py-2.5 text-sm text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand/40 transition-all"
               >
                 <option value="ADMIN">Admin — acesso ao painel</option>
                 <option value="SUPER_ADMIN">Super Admin — controle total</option>
               </select>
               {form.papel === 'SUPER_ADMIN' && (
-                <p className="mt-2 text-[11px] text-amber-400/80">
+                <p className="mt-2 text-[11px] text-warning">
                   Super Admins podem criar e remover outros administradores.
                 </p>
               )}
@@ -213,8 +213,7 @@ export default function CriarAdminPage() {
             <button
               type="submit"
               disabled={saving || !senhaValida}
-              className="w-full rounded-xl py-2.5 text-sm font-bold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
+              className="w-full rounded-full bg-brand py-2.5 text-sm font-bold text-on-brand transition-all hover:bg-brand-hover disabled:opacity-60 disabled:cursor-not-allowed mt-1 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>
@@ -231,53 +230,50 @@ export default function CriarAdminPage() {
 
         {/* List */}
         <div>
-          <h2 className="text-white font-black text-lg mb-4">Administradores</h2>
+          <h2 className="text-navy font-display text-lg mb-4">Administradores</h2>
 
           {loadingList ? (
             <div className="flex flex-col gap-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 rounded-2xl bg-slate-800/50 animate-pulse" />
+                <div key={i} className="h-16 rounded-2xl bg-surface-sunken animate-pulse" />
               ))}
             </div>
           ) : admins.length === 0 ? (
-            <p className="text-slate-500 text-sm">Nenhum administrador encontrado.</p>
+            <p className="text-ink-muted text-sm">Nenhum administrador encontrado.</p>
           ) : (
             <div className="flex flex-col gap-3">
               {admins.map((admin) => (
                 <div
                   key={admin.id}
-                  className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3"
+                  className="flex items-center gap-3 rounded-2xl border border-line bg-surface-card shadow-sm px-4 py-3"
                 >
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black text-white flex-shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
-                  >
+                  <div className="w-9 h-9 rounded-full bg-brand flex items-center justify-center text-xs font-display text-on-brand flex-shrink-0">
                     {admin.nome.charAt(0).toUpperCase()}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-bold truncate">{admin.nome}</p>
-                    <p className="text-slate-500 text-xs truncate">{admin.email}</p>
+                    <p className="text-navy text-sm font-bold truncate">{admin.nome}</p>
+                    <p className="text-ink-muted text-xs truncate">{admin.email}</p>
                   </div>
 
                   <div className="text-right flex-shrink-0">
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         admin.papel === 'SUPER_ADMIN'
-                          ? 'bg-amber-500/15 text-amber-400'
-                          : 'bg-purple-500/15 text-purple-400'
+                          ? 'bg-gold-50 text-gold-600'
+                          : 'bg-brand-50 text-brand-700'
                       }`}
                     >
                       {admin.papel === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}
                     </span>
-                    <p className="text-slate-600 text-[10px] mt-0.5">{formatDate(admin.criadoEm)}</p>
+                    <p className="text-ink-muted text-[10px] mt-0.5">{formatDate(admin.criadoEm)}</p>
                   </div>
 
                   {admin.id !== session?.user?.id && (
                     <button
                       onClick={() => handleDelete(admin.id, admin.nome)}
                       disabled={deletingId === admin.id}
-                      className="ml-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-red-500/10 hover:text-red-400 transition-all disabled:opacity-40"
+                      className="ml-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-ink-muted hover:bg-danger-subtle hover:text-danger transition-all disabled:opacity-40"
                       title="Desativar admin"
                     >
                       <Trash2 size={14} />

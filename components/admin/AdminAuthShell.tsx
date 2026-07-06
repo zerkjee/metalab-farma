@@ -43,24 +43,18 @@ export default function AdminAuthShell({ children }: { children: React.ReactNode
 
   if (status === 'loading' || status === 'unauthenticated') {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-6"
-        style={{ background: 'radial-gradient(circle at top, #1e1b4b 0%, #020617 42%, #020617 100%)' }}
-      >
-        <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-950/80 p-8 text-center shadow-2xl backdrop-blur">
-          <div
-            className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg shadow-purple-950/40"
-            style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
-          >
+      <div className="min-h-screen flex items-center justify-center px-6 bg-surface-page">
+        <div className="w-full max-w-md rounded-3xl border border-line bg-surface-card p-8 text-center shadow-md">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-navy text-on-navy shadow-sm">
             <ShieldCheck className="h-7 w-7" strokeWidth={1.8} />
           </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-300">Acesso protegido</p>
-          <h1 className="mt-3 text-2xl font-black text-white">Verificando sessão administrativa</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-600">Acesso protegido</p>
+          <h1 className="mt-3 text-2xl font-display text-navy">Verificando sessão administrativa</h1>
+          <p className="mt-3 text-sm leading-6 text-ink-muted">
             Autenticando sua sessão no painel Metalab.
           </p>
-          <div className="mt-7 h-1.5 overflow-hidden rounded-full bg-slate-800">
-            <div className="h-full w-1/2 animate-pulse rounded-full bg-purple-500" />
+          <div className="mt-7 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-brand" />
           </div>
         </div>
       </div>
@@ -68,7 +62,7 @@ export default function AdminAuthShell({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="flex" style={{ background: '#020617', minHeight: '100vh' }}>
+    <div className="flex bg-surface-page" style={{ minHeight: '100vh' }}>
       <AdminSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex flex-col flex-1 min-w-0">
         <AdminTopbar onMenuToggle={() => setMobileOpen((v) => !v)} />

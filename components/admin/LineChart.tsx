@@ -18,7 +18,7 @@ interface LineChartProps {
 export default function LineChart({
   data,
   height = 190,
-  color = '#7c3aed',
+  color = '#79BDE3',
   showDots = true,
   formatValue,
 }: LineChartProps) {
@@ -89,7 +89,7 @@ export default function LineChart({
         className="grid min-w-0 grid-cols-[52px_minmax(0,1fr)] gap-3"
         style={{ height: `${height}px` }}
       >
-        <div className="flex flex-col justify-between py-2 text-right text-[11px] font-medium tabular-nums text-slate-500">
+        <div className="flex flex-col justify-between py-2 text-right text-[11px] font-medium tabular-nums text-ink-muted">
           {ticks.map((tick) => (
             <span key={tick}>{formattedValue(tick)}</span>
           ))}
@@ -125,7 +125,7 @@ export default function LineChart({
                 y1={toY(tick)}
                 x2={pad.left + innerW}
                 y2={toY(tick)}
-                stroke="#334155"
+                stroke="#E1E1DE"
                 strokeWidth="0.45"
                 strokeDasharray="2 2"
                 vectorEffect="non-scaling-stroke"
@@ -152,7 +152,7 @@ export default function LineChart({
                   cy={toY(d.value)}
                   r={activeIndex === i ? 1.9 : 1.25}
                   fill={color}
-                  stroke="#1e293b"
+                  stroke="#FFFFFF"
                   strokeWidth="0.8"
                   vectorEffect="non-scaling-stroke"
                 />
@@ -164,7 +164,7 @@ export default function LineChart({
                 y1={pad.top}
                 x2={activeX}
                 y2={bottomY}
-                stroke="#cbd5e1"
+                stroke="#323C64"
                 strokeOpacity="0.28"
                 strokeWidth="1"
                 vectorEffect="non-scaling-stroke"
@@ -187,15 +187,15 @@ export default function LineChart({
 
           {activePoint && (
             <div
-              className="pointer-events-none absolute z-10 min-w-28 rounded-lg border border-slate-700 bg-slate-950/95 px-3 py-2 text-xs shadow-xl shadow-slate-950/30"
+              className="pointer-events-none absolute z-10 min-w-28 rounded-lg border border-line bg-surface-card px-3 py-2 text-xs shadow-md"
               style={{
                 left: `${activeX}%`,
                 top: `${activeY}%`,
                 transform: `translate(${activeX > 78 ? '-100%' : '-50%'}, -115%)`,
               }}
             >
-              <p className="font-semibold text-slate-300">{activePoint.label}</p>
-              <p className="mt-0.5 font-black text-white">{formattedValue(activePoint.value)}</p>
+              <p className="font-semibold text-ink-secondary">{activePoint.label}</p>
+              <p className="mt-0.5 font-display text-navy">{formattedValue(activePoint.value)}</p>
             </div>
           )}
         </div>
@@ -203,7 +203,7 @@ export default function LineChart({
 
       <div className="mt-2 grid grid-cols-[52px_minmax(0,1fr)] gap-3">
         <div />
-        <div className="relative h-5 min-w-0 text-[11px] font-medium text-slate-500">
+        <div className="relative h-5 min-w-0 text-[11px] font-medium text-ink-muted">
           {xLabels.map((item) => (
             <span
               key={`${item.label}-${item.index}`}

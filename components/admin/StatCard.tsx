@@ -28,8 +28,7 @@ export default function StatCard({ label, value, change, icon, sparkline }: Stat
   }
 
   return (
-    <div className="rounded-2xl p-5 flex flex-col gap-3 border border-slate-700/50"
-      style={{ background: '#1e293b' }}>
+    <div className="rounded-2xl p-5 flex flex-col gap-3 border border-line bg-surface-card shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-2xl">{icon}</span>
         {mini && (
@@ -37,7 +36,7 @@ export default function StatCard({ label, value, change, icon, sparkline }: Stat
             <polyline
               points={polyline}
               fill="none"
-              stroke={isUp ? '#a78bfa' : '#f87171'}
+              stroke={isUp ? '#79BDE3' : '#C64B4B'}
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -47,11 +46,11 @@ export default function StatCard({ label, value, change, icon, sparkline }: Stat
       </div>
 
       <div>
-        <p className="text-2xl font-black text-white leading-none">{value}</p>
-        <p className="text-slate-400 text-xs mt-1">{label}</p>
+        <p className="font-display text-2xl text-navy leading-none">{value}</p>
+        <p className="text-ink-muted text-xs mt-1">{label}</p>
       </div>
 
-      <div className={`flex items-center gap-1 text-xs font-semibold ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
+      <div className={`flex items-center gap-1 text-xs font-semibold ${isUp ? 'text-success' : 'text-danger'}`}>
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
             d={isUp ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />

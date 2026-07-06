@@ -2,23 +2,63 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { LogOut, X, ChevronLeft, ChevronRight, Store, Wrench } from 'lucide-react';
+import {
+  LogOut,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Store,
+  Wrench,
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Users,
+  Ticket,
+  Star,
+  Image as ImageIcon,
+  BarChart3,
+  KeyRound,
+  ShieldCheck,
+} from 'lucide-react';
 
-type NavItem = { label: string; href: string; icon: string; superAdminOnly?: boolean };
+type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }>; superAdminOnly?: boolean };
 
-const nav: NavItem[] = [
-  { label: 'Dashboard',   href: '/admin',             icon: '📊' },
-  { label: 'Produtos',    href: '/admin/produtos',     icon: '📦' },
-  { label: 'Pedidos',     href: '/admin/pedidos',      icon: '🛍️' },
-  { label: 'Clientes',    href: '/admin/clientes',     icon: '👥' },
-  { label: 'Cupons',      href: '/admin/cupons',       icon: '🎫' },
-  { label: 'Avaliações',  href: '/admin/avaliacoes',   icon: '⭐' },
-  { label: 'Banners',     href: '/admin/banners',      icon: '🖼️' },
-  { label: 'Analytics',   href: '/admin/analytics',    icon: '📈' },
-  { label: 'Admins',      href: '/admin/criar-admin',  icon: '🔑', superAdminOnly: true },
-  { label: 'Auditoria',   href: '/admin/audit',        icon: '🔒', superAdminOnly: true },
+type NavSection = { section: string; items: NavItem[] };
+
+const navSections: NavSection[] = [
+  {
+    section: 'Visão geral',
+    items: [
+      { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+      { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+    ],
+  },
+  {
+    section: 'Vendas',
+    items: [
+      { label: 'Pedidos', href: '/admin/pedidos', icon: ShoppingBag },
+      { label: 'Cupons', href: '/admin/cupons', icon: Ticket },
+      { label: 'Clientes', href: '/admin/clientes', icon: Users },
+    ],
+  },
+  {
+    section: 'Catálogo',
+    items: [
+      { label: 'Produtos', href: '/admin/produtos', icon: Package },
+      { label: 'Banners', href: '/admin/banners', icon: ImageIcon },
+      { label: 'Avaliações', href: '/admin/avaliacoes', icon: Star },
+    ],
+  },
+  {
+    section: 'Sistema',
+    items: [
+      { label: 'Admins', href: '/admin/criar-admin', icon: KeyRound, superAdminOnly: true },
+      { label: 'Auditoria', href: '/admin/audit', icon: ShieldCheck, superAdminOnly: true },
+    ],
+  },
 ];
 
 interface Props {
@@ -40,7 +80,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: Props) {
       {/* Backdrop — mobile only */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          className="fixed inset-0 bg-navy-900/60 z-40 md:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -48,34 +88,31 @@ export default function AdminSidebar({ mobileOpen, onClose }: Props) {
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-800 flex-shrink-0
+          fixed inset-y-0 left-0 z-50 flex flex-col bg-navy-900 flex-shrink-0
           transition-transform duration-300 ease-in-out
           md:static md:translate-x-0 md:z-auto
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
-        style={{
-          width: collapsed ? '64px' : '220px',
-          background: '#0f172a',
-          minHeight: '100vh',
-        }}
+        style={{ width: collapsed ? '64px' : '232px', minHeight: '100vh' }}
       >
         {/* Logo + fechar */}
-        <div className="flex items-center gap-3 px-4 h-16 border-b border-slate-800 flex-shrink-0 overflow-hidden">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
-          >
-            <span className="text-white text-sm font-black">M</span>
-          </div>
+        <div className="flex items-center gap-2.5 px-4 h-16 border-b border-white/10 flex-shrink-0 overflow-hidden">
+          <Image
+            src="/brand/metalab-mark.png"
+            alt="Metalab"
+            width={28}
+            height={28}
+            className="flex-shrink-0 rounded-lg"
+          />
           {!collapsed && (
             <>
               <div className="overflow-hidden flex-1">
-                <p className="text-white font-black text-sm leading-none">METALAB</p>
-                <p className="text-purple-400 text-[10px] font-semibold uppercase tracking-widest">Admin</p>
+                <p className="text-white font-display text-sm leading-none">Metalab</p>
+                <p className="text-navy-300 text-[10px] font-semibold uppercase tracking-widest mt-0.5">Admin</p>
               </div>
               <button
                 onClick={onClose}
-                className="md:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-all flex-shrink-0"
+                className="md:hidden p-1.5 rounded-lg text-navy-300 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
                 aria-label="Fechar menu"
               >
                 <X className="w-4 h-4" />
@@ -86,18 +123,15 @@ export default function AdminSidebar({ mobileOpen, onClose }: Props) {
 
         {/* Perfil — mobile only */}
         {!collapsed && (
-          <div className="md:hidden px-4 py-4 border-b border-slate-800">
+          <div className="md:hidden px-4 py-4 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #6b21a8, #7c3aed)' }}
-              >
+              <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center text-on-brand text-sm font-display flex-shrink-0">
                 {userInitial}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-white text-sm font-bold leading-none truncate">{userName}</p>
-                <p className="text-slate-500 text-[11px] mt-0.5 truncate">{userEmail}</p>
-                <span className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-600/20 text-purple-300">
+                <p className="text-white text-sm font-semibold leading-none truncate">{userName}</p>
+                <p className="text-navy-300 text-[11px] mt-0.5 truncate">{userEmail}</p>
+                <span className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300">
                   {isSuperAdmin ? 'Super Admin' : 'Admin'}
                 </span>
               </div>
@@ -107,43 +141,54 @@ export default function AdminSidebar({ mobileOpen, onClose }: Props) {
 
         {/* Nav */}
         <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
-          {nav.filter((item) => !item.superAdminOnly || isSuperAdmin).map((item) => {
-            const active =
-              item.href === '/admin'
-                ? pathname === '/admin'
-                : pathname.startsWith(item.href);
+          {navSections.map((sec) => {
+            const items = sec.items.filter((item) => !item.superAdminOnly || isSuperAdmin);
+            if (items.length === 0) return null;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                title={collapsed ? item.label : undefined}
-                className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-200 mb-0.5 group relative ${
-                  active
-                    ? 'bg-purple-600/20 text-purple-300'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                }`}
-              >
-                {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-purple-500 rounded-r-full" />
-                )}
-                <span className="text-base flex-shrink-0">{item.icon}</span>
+              <div key={sec.section} className="mb-3">
                 {!collapsed && (
-                  <span className="text-sm font-medium whitespace-nowrap overflow-hidden">{item.label}</span>
+                  <div className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-widest text-navy-400">
+                    {sec.section}
+                  </div>
                 )}
-              </Link>
+                {items.map((item) => {
+                  const active =
+                    item.href === '/admin'
+                      ? pathname === '/admin'
+                      : pathname.startsWith(item.href);
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      title={collapsed ? item.label : undefined}
+                      className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-xl transition-all duration-200 mb-0.5 ${
+                        active
+                          ? 'bg-white/10 text-white'
+                          : 'text-navy-300 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      {!collapsed && (
+                        <span className="text-sm font-medium whitespace-nowrap overflow-hidden">{item.label}</span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-slate-800 p-3 space-y-1">
+        <div className="border-t border-white/10 p-3 space-y-1">
           {!collapsed && (
             <>
               <Link
                 href="/"
                 onClick={onClose}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-all text-xs"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-navy-300 hover:text-white hover:bg-white/5 transition-all text-xs"
               >
                 <Store className="w-3.5 h-3.5" />
                 <span>Ver loja pública</span>
@@ -152,7 +197,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: Props) {
                 <Link
                   href="/dev"
                   onClick={onClose}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-all text-xs"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-navy-400 hover:text-white hover:bg-white/5 transition-all text-xs"
                 >
                   <Wrench className="w-3.5 h-3.5" />
                   <span>Painel Dev</span>
@@ -161,7 +206,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: Props) {
               {/* Sair — mobile only */}
               <button
                 onClick={() => { onClose(); void signOut({ callbackUrl: '/admin/login' }); }}
-                className="md:hidden w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all text-xs"
+                className="md:hidden w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-danger hover:bg-danger-subtle transition-all text-xs"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sair do painel</span>
@@ -172,7 +217,7 @@ export default function AdminSidebar({ mobileOpen, onClose }: Props) {
           {/* Collapse — desktop only */}
           <button
             onClick={() => setCollapsed((v) => !v)}
-            className="hidden md:flex w-full items-center justify-center p-2 rounded-xl text-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-all"
+            className="hidden md:flex w-full items-center justify-center p-2 rounded-xl text-navy-400 hover:text-white hover:bg-white/5 transition-all"
             title={collapsed ? 'Expandir' : 'Recolher'}
           >
             {collapsed ? (
