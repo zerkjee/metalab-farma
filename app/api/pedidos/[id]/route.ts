@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
-import { CUSTOMER_ORDER_SELECT } from "@/lib/orderSelect"
+import { ADMIN_ORDER_SELECT, CUSTOMER_ORDER_SELECT } from "@/lib/orderSelect"
 import { isAdminRole, requireAdmin } from "@/lib/adminGuard"
 
 const patchSchema = z.object({
@@ -19,9 +19,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const session = await auth()
     const { id } = await params
 
+    // Admin recebe os campos de plumbing Tiny (ADMIN_ORDER_SELECT); o cliente dono
+    // do pedido recebe apenas CUSTOMER_ORDER_SELECT (sem vazar dados internos do ERP).
+    const isAdmin = isAdminRole(session?.user?.role)
+
     const pedido = await prisma.pedido.findUnique({
       where: { id },
-      select: CUSTOMER_ORDER_SELECT,
+      select: isAdmin ? ADMIN_ORDER_SELECT : CUSTOMER_ORDER_SELECT,
     })
 
     if (!pedido) {
@@ -29,7 +33,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 
     // Cliente só vê o próprio pedido
-    const isAdmin = isAdminRole(session?.user?.role)
     if (!isAdmin && pedido.usuarioId !== session?.user?.id) {
       return NextResponse.json({ erro: "Não autorizado" }, { status: 401 })
     }

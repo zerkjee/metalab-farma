@@ -26,6 +26,7 @@ import {
   mapApiOrder,
   orderStatusFlow,
   orderStatusMeta,
+  tinyBadgeMeta,
 } from '@/utils/adminOrders';
 
 // Estilo visual (badge) por status — aplica as cores do design system sobre o
@@ -88,15 +89,6 @@ const statusToApi: Record<AdminOrderStatus, string> = {
   entregue: 'ENTREGUE',
   cancelado: 'CANCELADO',
 };
-
-function tinyBadgeMeta(status: string | null): { cls: string; label: string; spinner: boolean } {
-  if (status === 'PENDENTE') return { cls: 'bg-warning-subtle text-warning', label: 'Pendente', spinner: false };
-  if (status === 'PROCESSANDO') return { cls: 'bg-brand-50 text-brand-700', label: 'Processando', spinner: true };
-  if (status === 'ENVIADO') return { cls: 'bg-success-subtle text-success', label: 'Sincronizado', spinner: false };
-  if (status === 'ERRO') return { cls: 'bg-danger-subtle text-danger', label: 'Erro no sync', spinner: false };
-  if (status !== null) return { cls: 'bg-surface-sunken text-ink-muted', label: status, spinner: false };
-  return { cls: 'bg-surface-sunken text-ink-muted', label: 'Não iniciado', spinner: false };
-}
 
 export default function AdminPedidoDetalhe() {
   const params = useParams<{ id: string }>();
@@ -436,23 +428,51 @@ export default function AdminPedidoDetalhe() {
                       <span className="text-xs text-ink-muted">Pedido #{order.tinyPedidoId}</span>
                     )}
                   </div>
+                  {order.tinyNumero && (
+                    <p className="mt-1.5 text-xs text-ink-muted">Nº Tiny: {order.tinyNumero}</p>
+                  )}
                 </div>
                 <div className="rounded-xl bg-surface-sunken p-3">
-                  <p className="text-xs text-ink-muted">Nota fiscal</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-ink-muted">Nota fiscal</p>
+                    {order.nfStatus && (
+                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700">
+                        {order.nfStatus}
+                      </span>
+                    )}
+                  </div>
                   {order.nfNumero ? (
-                    <div className="mt-1 flex items-center gap-2">
-                      <p className="text-xs font-bold text-ink">NF-e #{order.nfNumero}</p>
-                      {order.nfUrl && (
-                        <a
-                          href={order.nfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-brand-700 transition-colors hover:text-brand-800"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
-                        </a>
+                    <>
+                      <div className="mt-1 flex items-center gap-2">
+                        <p className="text-xs font-bold text-ink">NF-e #{order.nfNumero}</p>
+                        {order.nfUrl && (
+                          <a
+                            href={order.nfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="DANFE (PDF)"
+                            className="text-brand-700 transition-colors hover:text-brand-800"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          </a>
+                        )}
+                        {order.nfXmlUrl && (
+                          <a
+                            href={order.nfXmlUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-semibold text-brand-700 underline transition-colors hover:text-brand-800"
+                          >
+                            XML
+                          </a>
+                        )}
+                      </div>
+                      {order.nfEmitidaEm && (
+                        <p className="mt-1 text-[11px] text-ink-muted">
+                          Emitida em {formatOrderDate(order.nfEmitidaEm)}
+                        </p>
                       )}
-                    </div>
+                    </>
                   ) : (
                     <p className="mt-1 text-xs text-ink-muted">Não emitida</p>
                   )}

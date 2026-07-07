@@ -271,6 +271,12 @@ model Pedido {
   tinyPayload        String?          @db.Text  // Payload bruto da última resposta Tiny
   tinyLastWebhookAt  DateTime?        // Último webhook recebido do Tiny
 
+  // ─── Reconciliação (Agente 2, docs/tiny-architecture.md §4) ───────────────
+  tinyNumero         String?          // spec tinyOrderNumber — nº do pedido gerado pelo Tiny (≠ numero interno, ≠ tinyPedidoId)
+  nfStatus           String?          // spec invoiceStatus — situação da NF-e (ex.: "emitida", "autorizada")
+  nfXmlUrl           String?          // spec tinyInvoiceXmlUrl — URL do XML da NF-e
+  nfEmitidaEm        DateTime?        // spec invoiceIssuedAt — data/hora de emissão da NF-e
+
   @@index([usuarioId, criadoEm])
   @@index([pagamentoId])
   @@index([compradorEmail])

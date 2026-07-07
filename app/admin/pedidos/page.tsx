@@ -26,6 +26,7 @@ import {
   mapApiOrder,
   orderStatusFlow,
   orderStatusMeta,
+  tinyBadgeMeta,
 } from '@/utils/adminOrders';
 
 const pageSize = 5;
@@ -114,7 +115,7 @@ export default function AdminPedidos() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/pedidos')
+    fetch('/api/admin/pedidos')
       .then((r) => r.json())
       .then((data: unknown) => {
         if (cancelled || !Array.isArray(data)) return;
@@ -370,6 +371,18 @@ export default function AdminPedidos() {
                       </td>
                       <td className="px-5 py-4 text-center">
                         <StatusBadge label={status.label} color={statusPillClasses[order.status]} />
+                        {(() => {
+                          const b = tinyBadgeMeta(order.tinySyncStatus);
+                          return (
+                            <span
+                              title="Sincronização Tiny/ERP"
+                              className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${b.cls}`}
+                            >
+                              {b.spinner && <span className="h-2.5 w-2.5 animate-spin rounded-full border border-current border-t-transparent" />}
+                              Tiny: {b.label}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex justify-end gap-1.5">

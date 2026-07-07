@@ -56,8 +56,27 @@ export interface AdminOrderDetail {
   channel: 'Loja Online' | 'Mercado Livre' | 'Admin';
   tinySyncStatus: string | null;
   tinyPedidoId: number | null;
+  tinyNumero: string | null;
   nfNumero: string | null;
   nfUrl: string | null;
+  nfChave: string | null;
+  nfStatus: string | null;
+  nfXmlUrl: string | null;
+  nfEmitidaEm: string | null;
+}
+
+/**
+ * Metadados visuais do badge de sincronização Tiny a partir de tinySyncStatus.
+ * Centralizado aqui para reuso entre a lista e o detalhe do admin.
+ */
+export function tinyBadgeMeta(status: string | null): { cls: string; label: string; spinner: boolean } {
+  if (status === 'PENDENTE') return { cls: 'bg-warning-subtle text-warning', label: 'Pendente', spinner: false };
+  if (status === 'PROCESSANDO') return { cls: 'bg-brand-50 text-brand-700', label: 'Processando', spinner: true };
+  if (status === 'ENVIADO') return { cls: 'bg-success-subtle text-success', label: 'Sincronizado', spinner: false };
+  if (status === 'ERRO') return { cls: 'bg-danger-subtle text-danger', label: 'Erro no sync', spinner: false };
+  if (status === 'IGNORADO') return { cls: 'bg-surface-sunken text-ink-muted', label: 'Ignorado', spinner: false };
+  if (status !== null) return { cls: 'bg-surface-sunken text-ink-muted', label: status, spinner: false };
+  return { cls: 'bg-surface-sunken text-ink-muted', label: 'Não iniciado', spinner: false };
 }
 
 export const orderStatusMeta: Record<AdminOrderStatus, { label: string; bg: string; text: string; tone: string }> = {
@@ -170,7 +189,12 @@ export function mapApiOrder(p: Record<string, unknown>): AdminOrderDetail {
     channel: 'Loja Online',
     tinySyncStatus: p.tinySyncStatus != null ? String(p.tinySyncStatus) : null,
     tinyPedidoId: p.tinyPedidoId != null ? Number(p.tinyPedidoId) : null,
+    tinyNumero: p.tinyNumero != null ? String(p.tinyNumero) : null,
     nfNumero: p.nfNumero != null ? String(p.nfNumero) : null,
     nfUrl: p.nfUrl != null ? String(p.nfUrl) : null,
+    nfChave: p.nfChave != null ? String(p.nfChave) : null,
+    nfStatus: p.nfStatus != null ? String(p.nfStatus) : null,
+    nfXmlUrl: p.nfXmlUrl != null ? String(p.nfXmlUrl) : null,
+    nfEmitidaEm: p.nfEmitidaEm != null ? String(p.nfEmitidaEm) : null,
   } as AdminOrderDetail;
 }

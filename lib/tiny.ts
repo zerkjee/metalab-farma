@@ -116,6 +116,45 @@ async function tinyRequest(
   return { httpOk: res.ok, body, raw }
 }
 
+// Formato do snapshot serializado em Pedido.enderecoSnap (ver lib/validations.ts
+// enderecoSchema): { cep, logradouro, numero, complemento?, bairro, cidade, estado }.
+interface EnderecoSnap {
+  cep?: string
+  logradouro?: string
+  numero?: string
+  complemento?: string
+  bairro?: string
+  cidade?: string
+  estado?: string
+}
+
+/**
+ * Converte o `enderecoSnap` (JSON string) nos campos de endereço do nó `cliente`
+ * do payload Tiny v2 (`pedido.incluir.php`). Retorna `{}` quando o snapshot está
+ * ausente ou malformado — o pedido ainda é criado, apenas sem endereço. Corrige
+ * a pendência de docs/tiny-architecture.md §7.2 (endereço não era enviado ao Tiny).
+ */
+function mapearEnderecoTiny(enderecoSnap?: string | null): Record<string, string> {
+  if (!enderecoSnap) return {}
+  let snap: EnderecoSnap
+  try {
+    snap = JSON.parse(enderecoSnap) as EnderecoSnap
+  } catch {
+    return {}
+  }
+  if (!snap || typeof snap !== 'object') return {}
+
+  const campos: Record<string, string> = {}
+  if (snap.logradouro) campos.endereco = snap.logradouro
+  if (snap.numero) campos.numero = snap.numero
+  if (snap.complemento) campos.complemento = snap.complemento
+  if (snap.bairro) campos.bairro = snap.bairro
+  if (snap.cep) campos.cep = snap.cep
+  if (snap.cidade) campos.cidade = snap.cidade
+  if (snap.estado) campos.uf = snap.estado
+  return campos
+}
+
 function extrairErros(retorno?: TinyRetorno['retorno']): string {
   if (!retorno) return 'resposta vazia do Tiny'
   const errosTopo = (retorno.erros ?? []).map((e) => e.erro).filter(Boolean)
@@ -171,6 +210,7 @@ export async function criarOuLocalizarPedidoTiny(input: TinyPedidoInput): Promis
           cpf_cnpj: input.compradorCpf,
           email: input.compradorEmail,
           fone: input.compradorTelefone ?? '',
+          ...mapearEnderecoTiny(input.enderecoSnap),
         },
         itens: input.itens.map((it) => ({
           item: {

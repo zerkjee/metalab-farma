@@ -38,3 +38,26 @@ export const CUSTOMER_ORDER_SELECT = {
   },
   cupom: { select: { codigo: true } },
 } satisfies Prisma.PedidoSelect
+
+/**
+ * Campos do pedido para a área ADMIN. Estende o select do cliente com os campos
+ * de plumbing da integração Tiny/ERP (sincronização, id do pedido no Tiny, NF-e
+ * e campos de reconciliação). Esses campos NUNCA devem ser expostos ao cliente
+ * dono do pedido — use este select apenas em rotas protegidas por requireAdmin /
+ * isAdminRole. Corrige o gap de leitura descrito em docs/tiny-architecture.md §7.1
+ * (o badge Tiny da tela de detalhe sempre renderizava "Não iniciado" porque o
+ * endpoint devolvia o CUSTOMER_ORDER_SELECT, que omite estes campos).
+ */
+export const ADMIN_ORDER_SELECT = {
+  ...CUSTOMER_ORDER_SELECT,
+  tinyPedidoId: true,
+  tinyStatus: true,
+  tinySyncStatus: true,
+  tinySyncAt: true,
+  tinyErro: true,
+  tinyLastWebhookAt: true,
+  tinyNumero: true,
+  nfStatus: true,
+  nfXmlUrl: true,
+  nfEmitidaEm: true,
+} satisfies Prisma.PedidoSelect
