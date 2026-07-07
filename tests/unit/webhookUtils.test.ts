@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import crypto from 'crypto'
-import { verifyMPSignature } from '@/lib/webhookUtils'
+import { verifyMPSignature, verifyTinyWebhook } from '@/lib/webhookUtils'
 
 const SECRET = 'test-secret-key'
 const PAYMENT_ID = 'PAY123456'
@@ -125,6 +125,72 @@ describe('verifyMPSignature — sem segredo configurado', () => {
 
   it('permite em dev com MP_WEBHOOK_SKIP_VERIFY=1', () => {
     const result = verifyMPSignature(validInput({ secret: undefined, isProd: false, skipVerify: true }))
+    expect(result.valid).toBe(true)
+  })
+})
+
+// ─── Webhook Tiny (entrada) ───────────────────────────────────────────────────
+
+const TINY_BODY = JSON.stringify({ dados: { idPedido: '98765', situacao: 'faturado' } })
+
+function tinySig(body: string, secret: string) {
+  return crypto.createHmac('sha256', secret).update(body).digest('hex')
+}
+
+function tinyInput(overrides: Partial<Parameters<typeof verifyTinyWebhook>[0]> = {}) {
+  return {
+    rawBody: TINY_BODY,
+    signature: tinySig(TINY_BODY, SECRET),
+    secret: SECRET,
+    isProd: false,
+    skipVerify: false,
+    ...overrides,
+  }
+}
+
+describe('verifyTinyWebhook — assinatura', () => {
+  it('aceita HMAC correto sobre o corpo bruto', () => {
+    expect(verifyTinyWebhook(tinyInput())).toEqual({ valid: true })
+  })
+
+  it('rejeita HMAC com segredo errado', () => {
+    const result = verifyTinyWebhook(tinyInput({ signature: tinySig(TINY_BODY, 'outro') }))
+    expect(result.valid).toBe(false)
+    expect((result as { reason: string }).reason).toMatch(/HMAC/)
+  })
+
+  it('rejeita quando o corpo foi adulterado (assinatura não bate)', () => {
+    const result = verifyTinyWebhook(tinyInput({ rawBody: TINY_BODY + ' ' }))
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejeita assinatura ausente', () => {
+    const result = verifyTinyWebhook(tinyInput({ signature: null }))
+    expect(result.valid).toBe(false)
+    expect((result as { httpStatus: number }).httpStatus).toBe(401)
+  })
+
+  it('rejeita assinatura não-hex', () => {
+    const result = verifyTinyWebhook(tinyInput({ signature: 'zzz-nao-hex' }))
+    expect(result.valid).toBe(false)
+  })
+})
+
+describe('verifyTinyWebhook — sem segredo', () => {
+  it('fail-closed (503) em produção sem TINY_WEBHOOK_SECRET', () => {
+    const result = verifyTinyWebhook(tinyInput({ secret: undefined, isProd: true }))
+    expect(result.valid).toBe(false)
+    expect((result as { httpStatus: number }).httpStatus).toBe(503)
+  })
+
+  it('rejeita (503) em dev sem segredo e sem skipVerify', () => {
+    const result = verifyTinyWebhook(tinyInput({ secret: undefined, isProd: false, skipVerify: false }))
+    expect(result.valid).toBe(false)
+    expect((result as { httpStatus: number }).httpStatus).toBe(503)
+  })
+
+  it('permite em dev com TINY_WEBHOOK_SKIP_VERIFY=1', () => {
+    const result = verifyTinyWebhook(tinyInput({ secret: undefined, isProd: false, skipVerify: true }))
     expect(result.valid).toBe(true)
   })
 })

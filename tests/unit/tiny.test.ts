@@ -152,6 +152,66 @@ describe('lib/tiny', () => {
     })
   })
 
+  describe('criarOuLocalizarPedidoTiny — mapeamento de endereço (enderecoSnap → cliente)', () => {
+    // Extrai o objeto `pedido` enviado na chamada de inclusão (2ª chamada ao fetch).
+    function pedidoEnviado(fetchSpy: ReturnType<typeof vi.fn>) {
+      const body = String((fetchSpy.mock.calls[1][1] as { body: string }).body)
+      const pedidoJson = new URLSearchParams(body).get('pedido')
+      return JSON.parse(pedidoJson ?? '{}').pedido
+    }
+
+    function mockCriacaoOk() {
+      return vi
+        .fn()
+        .mockResolvedValueOnce(fakeResponse({ retorno: { status: 'OK', pedidos: [] } }))
+        .mockResolvedValueOnce(
+          fakeResponse({ retorno: { status: 'OK', registros: [{ registro: { id: 1, numero: PEDIDO_BASE.numero } }] } }),
+        )
+    }
+
+    it('inclui os campos de endereço no cliente quando enderecoSnap é válido', async () => {
+      const fetchSpy = mockCriacaoOk()
+      vi.stubGlobal('fetch', fetchSpy)
+
+      const enderecoSnap = JSON.stringify({
+        cep: '01310100', logradouro: 'Av Paulista', numero: '1000',
+        complemento: 'Sala 5', bairro: 'Bela Vista', cidade: 'São Paulo', estado: 'SP',
+      })
+      await criarOuLocalizarPedidoTiny({ ...PEDIDO_BASE, enderecoSnap })
+
+      const cliente = pedidoEnviado(fetchSpy).cliente
+      expect(cliente.endereco).toBe('Av Paulista')
+      expect(cliente.numero).toBe('1000')
+      expect(cliente.complemento).toBe('Sala 5')
+      expect(cliente.bairro).toBe('Bela Vista')
+      expect(cliente.cep).toBe('01310100')
+      expect(cliente.cidade).toBe('São Paulo')
+      expect(cliente.uf).toBe('SP')
+    })
+
+    it('não adiciona campos de endereço quando enderecoSnap é null', async () => {
+      const fetchSpy = mockCriacaoOk()
+      vi.stubGlobal('fetch', fetchSpy)
+
+      await criarOuLocalizarPedidoTiny({ ...PEDIDO_BASE, enderecoSnap: null })
+
+      const cliente = pedidoEnviado(fetchSpy).cliente
+      expect(cliente.endereco).toBeUndefined()
+      expect(cliente.uf).toBeUndefined()
+    })
+
+    it('cria o pedido normalmente (sem endereço) quando enderecoSnap é JSON malformado', async () => {
+      const fetchSpy = mockCriacaoOk()
+      vi.stubGlobal('fetch', fetchSpy)
+
+      const result = await criarOuLocalizarPedidoTiny({ ...PEDIDO_BASE, enderecoSnap: '{ nao é json' })
+
+      expect(result.ok).toBe(true)
+      const cliente = pedidoEnviado(fetchSpy).cliente
+      expect(cliente.endereco).toBeUndefined()
+    })
+  })
+
   describe('localizarPedidoTiny', () => {
     it('retorna null quando o número não bate', async () => {
       const fetchSpy = vi.fn().mockResolvedValueOnce(
