@@ -10,7 +10,7 @@ import { publicStock } from '@/lib/publicProduct'
 
 export const revalidate = 60
 
-const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
+const BASE = process.env.NEXT_PUBLIC_URL || 'https://metalab-farma.vercel.app'
 
 interface PageProps {
   params: Promise<{ slug: string }>

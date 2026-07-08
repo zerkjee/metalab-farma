@@ -9,7 +9,7 @@ import { products as localProducts } from "@/data/products"
 
 export const revalidate = 60
 
-const BASE_URL = process.env.NEXT_PUBLIC_URL ?? "https://metalab-farma.vercel.app"
+const BASE_URL = process.env.NEXT_PUBLIC_URL || "https://metalab-farma.vercel.app"
 
 export const metadata: Metadata = {
   title: "Produtos | Metalab Store",

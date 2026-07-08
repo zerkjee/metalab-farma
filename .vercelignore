@@ -1,0 +1,13 @@
+.next/
+.turbo/
+node_modules/
+coverage/
+e2e/report/
+test-results/
+playwright-report/
+.env*
+.claude/
+CLAUDE.md
+.design-preview/
+MetaLab Design System*.zip
+data/imports/

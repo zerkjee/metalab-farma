@@ -25,7 +25,7 @@ const nunitoSans = Nunito_Sans({
   display: "swap",
 });
 
-const BASE = process.env.NEXT_PUBLIC_URL ?? "https://metalab-farma.vercel.app";
+const BASE = process.env.NEXT_PUBLIC_URL || "https://metalab-farma.vercel.app";
 
 export const viewport: Viewport = {
   width: "device-width",

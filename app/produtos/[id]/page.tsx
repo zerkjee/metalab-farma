@@ -114,7 +114,7 @@ async function getRelacionados(categoriaId: string | null | undefined, excluirId
   }
 }
 
-const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
+const BASE = process.env.NEXT_PUBLIC_URL || 'https://metalab-farma.vercel.app'
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const { id: idParam } = await params

@@ -112,6 +112,8 @@ export default function AdminPedidos() {
   const [trackingInput, setTrackingInput] = useState('');
   const [trackingSaving, setTrackingSaving] = useState(false);
   const [trackingSaved, setTrackingSaved] = useState(false);
+  const [tinyTesting, setTinyTesting] = useState(false);
+  const [tinyTestMsg, setTinyTestMsg] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -224,6 +226,23 @@ export default function AdminPedidos() {
     window.print();
   }
 
+  async function testTinyConnection() {
+    if (tinyTesting) return;
+    setTinyTesting(true);
+    setTinyTestMsg(null);
+    try {
+      const res = await fetch('/api/admin/tiny/test-connection', { method: 'POST' });
+      const data: unknown = await res.json().catch(() => null);
+      const message = data && typeof data === 'object' && 'message' in data
+        ? String((data as { message?: unknown }).message)
+        : res.ok ? 'Conexão Tiny validada.' : 'Falha ao testar conexão Tiny.';
+      setTinyTestMsg(message);
+    } catch {
+      setTinyTestMsg('Erro de conexão ao testar Tiny.');
+    }
+    setTinyTesting(false);
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -231,14 +250,27 @@ export default function AdminPedidos() {
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-700">Operação e logística</p>
           <h2 className="mt-1 text-xl font-display text-navy">Pedidos</h2>
           <p className="mt-1 text-xs text-ink-muted">{orders.length} pedidos no painel</p>
+          {tinyTestMsg && (
+            <p className="mt-2 text-xs font-semibold text-ink-secondary">{tinyTestMsg}</p>
+          )}
         </div>
-        <button
-          onClick={printOrder}
-          className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-card px-4 py-2.5 text-sm font-semibold text-ink-secondary transition-all hover:bg-surface-sunken"
-        >
-          <Printer className="h-4 w-4" strokeWidth={1.8} />
-          Imprimir lista
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => void testTinyConnection()}
+            disabled={tinyTesting}
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-card px-4 py-2.5 text-sm font-semibold text-ink-secondary transition-all hover:bg-surface-sunken disabled:opacity-50"
+          >
+            <CheckCircle2 className={`h-4 w-4 ${tinyTesting ? 'animate-pulse' : ''}`} strokeWidth={1.8} />
+            {tinyTesting ? 'Testando Tiny' : 'Testar Tiny'}
+          </button>
+          <button
+            onClick={printOrder}
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-card px-4 py-2.5 text-sm font-semibold text-ink-secondary transition-all hover:bg-surface-sunken"
+          >
+            <Printer className="h-4 w-4" strokeWidth={1.8} />
+            Imprimir lista
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-4">
@@ -383,6 +415,12 @@ export default function AdminPedidos() {
                             </span>
                           );
                         })()}
+                        <span
+                          title="Status da NF-e"
+                          className="mt-1.5 inline-flex rounded-full bg-surface-sunken px-2 py-0.5 text-[10px] font-bold text-ink-muted"
+                        >
+                          NF-e: {order.nfStatus ?? (order.nfNumero ? 'Emitida' : 'Pendente')}
+                        </span>
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex justify-end gap-1.5">

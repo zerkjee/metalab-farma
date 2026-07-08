@@ -70,6 +70,7 @@ metalab-backup-*
 # ...mas migrations do Prisma SÃO .sql legítimos e precisam ser versionados
 !prisma/migrations/**/*.sql
 .env*
+!.env.example
 .design-preview/
 MetaLab Design System.zip
 MetaLab Design System (1).zip

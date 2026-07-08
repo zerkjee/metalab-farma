@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger'
 
 export const revalidate = 3600
 
-const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
+const BASE = process.env.NEXT_PUBLIC_URL || 'https://metalab-farma.vercel.app'
 
 const staticUrls: MetadataRoute.Sitemap = [
   { url: BASE,                     lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },

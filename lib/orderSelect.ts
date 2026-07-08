@@ -57,7 +57,10 @@ export const ADMIN_ORDER_SELECT = {
   tinyErro: true,
   tinyLastWebhookAt: true,
   tinyNumero: true,
+  nfTinyId: true,
+  nfSerie: true,
   nfStatus: true,
   nfXmlUrl: true,
+  nfErro: true,
   nfEmitidaEm: true,
 } satisfies Prisma.PedidoSelect

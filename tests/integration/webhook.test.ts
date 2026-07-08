@@ -70,6 +70,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   process.env.MP_WEBHOOK_SECRET        = TEST_SECRET
   process.env.MERCADOPAGO_ACCESS_TOKEN = TEST_TOKEN
+  process.env.TINY_AUTO_SEND_ORDERS    = 'false'
 
   // $transaction: array (webhook cancel) ou callback (não usado aqui)
   mockPrisma.$transaction.mockImplementation(async (fnOrArray: unknown) => {
@@ -175,6 +176,19 @@ describe('POST /api/pagamento/webhook — payment approved', () => {
     await Promise.resolve()
     expect(mockEnqueue).toHaveBeenCalledOnce()
     expect(mockEnqueue.mock.calls[0]?.[0]?.numero).toBe('MTL-2026-XYZ')
+  })
+
+  it('não envia automaticamente ao Tiny quando a flag está false', async () => {
+    await POST(buildSignedRequest(paymentBody(PAY_ID), PAY_ID))
+    await Promise.resolve()
+    expect(mockEnqueueTiny).not.toHaveBeenCalled()
+  })
+
+  it('enfileira Tiny quando TINY_AUTO_SEND_ORDERS=true', async () => {
+    process.env.TINY_AUTO_SEND_ORDERS = 'true'
+    await POST(buildSignedRequest(paymentBody(PAY_ID), PAY_ID))
+    await Promise.resolve()
+    expect(mockEnqueueTiny).toHaveBeenCalledWith('order-uuid')
   })
 
   it('idempotência: não envia e-mail se pedido já estava pago (count=0)', async () => {

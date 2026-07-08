@@ -17,6 +17,7 @@ vi.mock('@/lib/tiny', () => ({
   TINY_DISABLED: 'TINY_DISABLED',
 }))
 vi.mock('@/lib/audit', () => ({ logAudit: vi.fn() }))
+vi.mock('@/lib/qstashAuth', () => ({ verifyQStashRequest: vi.fn().mockResolvedValue({ valid: true }) }))
 
 import { POST } from '@/app/api/jobs/tiny-sync-pedido/route'
 import { prisma } from '@/lib/prisma'

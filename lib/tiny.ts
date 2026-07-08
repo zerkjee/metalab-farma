@@ -15,7 +15,12 @@
 
 import { logger } from '@/lib/logger'
 
-const TINY_API_BASE = 'https://api.tiny.com.br/api2'
+const DEFAULT_TINY_API_BASE = 'https://api.tiny.com.br/api2'
+const TINY_REQUEST_TIMEOUT_MS = 15000
+
+function tinyApiBase(): string {
+  return (process.env.TINY_API_BASE_URL || DEFAULT_TINY_API_BASE).replace(/\/+$/, '')
+}
 
 // ─── Tipos de entrada ─────────────────────────────────────────────────────────
 
@@ -43,12 +48,50 @@ export interface TinyPedidoInput {
 // ─── Tipos de saída ─────────────────────────────────────────────────────────
 
 export type TinyOutcome =
-  | { ok: true; tinyPedidoId: string; jaExistia: boolean; raw: string }
+  | { ok: true; tinyPedidoId: string; tinyNumero?: string; jaExistia: boolean; raw: string }
   | { ok: false; erro: string; codigoErro?: string; raw: string }
 
 export interface TinyConsultaOutcome {
   ok: boolean
   tinyStatus?: string
+  tinyNumero?: string
+  erro?: string
+  raw: string
+}
+
+export interface TinyTestConnectionResult {
+  ok: boolean
+  message: string
+  raw?: string
+}
+
+export interface TinyNotaFiscalResumo {
+  id: string
+  numero?: string
+  numeroEcommerce?: string
+  chaveAcesso?: string
+  situacao?: string
+  descricaoSituacao?: string
+  dataEmissao?: string
+}
+
+export interface TinyNotaFiscalOutcome {
+  ok: boolean
+  nota?: TinyNotaFiscalResumo
+  erro?: string
+  raw: string
+}
+
+export interface TinyNotaFiscalLinkOutcome {
+  ok: boolean
+  link?: string
+  erro?: string
+  raw: string
+}
+
+export interface TinyNotaFiscalXmlOutcome {
+  ok: boolean
+  xml?: string
   erro?: string
   raw: string
 }
@@ -80,7 +123,12 @@ interface TinyRetorno {
     codigo_erro?: string | number
     erros?: Array<{ erro?: string }>
     registros?: TinyRetornoRegistro[]
-    pedidos?: Array<{ pedido?: { id?: string | number; numero?: string; situacao?: string } }>
+    pedidos?: Array<{ pedido?: { id?: string | number; numero?: string; numero_ecommerce?: string; situacao?: string } }>
+    notas_fiscais?: Array<{ nota_fiscal?: Record<string, unknown> }>
+    nota_fiscal?: Record<string, unknown>
+    link_nfe?: string
+    xml_nfe?: string
+    xml_cancelamento?: string
   }
 }
 
@@ -99,21 +147,28 @@ async function tinyRequest(
   }
 
   const form = new URLSearchParams({ token, formato: 'json', ...params })
-  const res = await fetch(`${TINY_API_BASE}/${recurso}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: form.toString(),
-  })
-
-  const raw = await res.text()
-  let body: TinyRetorno = {}
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), TINY_REQUEST_TIMEOUT_MS)
   try {
-    body = JSON.parse(raw) as TinyRetorno
-  } catch {
-    // Tiny devolveu algo não-JSON — tratado como erro de negócio pelo chamador.
-    body = {}
+    const res = await fetch(`${tinyApiBase()}/${recurso}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form.toString(),
+      signal: controller.signal,
+    })
+
+    const raw = await res.text()
+    let body: TinyRetorno = {}
+    try {
+      body = JSON.parse(raw) as TinyRetorno
+    } catch {
+      // Tiny devolveu algo não-JSON — tratado como erro de negócio pelo chamador.
+      body = {}
+    }
+    return { httpOk: res.ok, body, raw }
+  } finally {
+    clearTimeout(timeout)
   }
-  return { httpOk: res.ok, body, raw }
 }
 
 // Formato do snapshot serializado em Pedido.enderecoSnap (ver lib/validations.ts
@@ -166,6 +221,30 @@ function extrairErros(retorno?: TinyRetorno['retorno']): string {
   return todos.length > 0 ? todos.join('; ') : 'erro não especificado pelo Tiny'
 }
 
+function pickString(obj: Record<string, unknown> | undefined, keys: string[]): string | undefined {
+  if (!obj) return undefined
+  for (const key of keys) {
+    const value = obj[key]
+    if (value != null && String(value).trim() !== '') return String(value)
+  }
+  return undefined
+}
+
+function normalizarNotaFiscal(nota: Record<string, unknown> | undefined): TinyNotaFiscalResumo | null {
+  const id = pickString(nota, ['id'])
+  if (!id) return null
+
+  return {
+    id,
+    numero: pickString(nota, ['numero']),
+    numeroEcommerce: pickString(nota, ['numero_ecommerce', 'numeroEcommerce']),
+    chaveAcesso: pickString(nota, ['chave_acesso', 'chaveAcesso']),
+    situacao: pickString(nota, ['situacao']),
+    descricaoSituacao: pickString(nota, ['descricao_situacao', 'descricaoSituacao']),
+    dataEmissao: pickString(nota, ['data_emissao', 'dataEmissao']),
+  }
+}
+
 // ─── Funções públicas ──────────────────────────────────────────────────────────
 
 /**
@@ -176,7 +255,7 @@ export async function localizarPedidoTiny(numero: string): Promise<string | null
   const { body } = await tinyRequest('pedidos.pesquisa.php', { pesquisa: numero })
   const lista = body.retorno?.pedidos ?? []
   for (const item of lista) {
-    if (item.pedido?.numero === numero && item.pedido?.id != null) {
+    if ((item.pedido?.numero === numero || item.pedido?.numero_ecommerce === numero) && item.pedido?.id != null) {
       return String(item.pedido.id)
     }
   }
@@ -244,7 +323,8 @@ export async function criarOuLocalizarPedidoTiny(input: TinyPedidoInput): Promis
       return { ok: false, erro: 'Tiny retornou OK sem id de pedido', raw }
     }
 
-    return { ok: true, tinyPedidoId: String(idCriado), jaExistia: false, raw }
+    const tinyNumero = retorno.registros?.[0]?.registro?.numero
+    return { ok: true, tinyPedidoId: String(idCriado), tinyNumero, jaExistia: false, raw }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     logger.error('Tiny: falha de transporte ao criar pedido', { numero: input.numero, err: msg })
@@ -265,9 +345,116 @@ export async function consultarPedidoTiny(tinyPedidoId: string): Promise<TinyCon
       return { ok: false, erro: extrairErros(retorno), raw }
     }
     const situacao = retorno.registros?.[0]?.registro?.status
-    return { ok: true, tinyStatus: situacao, raw }
+    const tinyNumero = retorno.registros?.[0]?.registro?.numero
+    return { ok: true, tinyStatus: situacao, tinyNumero, raw }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     return { ok: false, erro: msg, raw: '' }
+  }
+}
+
+/** Testa token/base URL com uma pesquisa inofensiva de pedidos. */
+export async function testarConexaoTiny(): Promise<TinyTestConnectionResult> {
+  if (!tinyConfigurado()) {
+    return { ok: false, message: 'TINY_API_TOKEN não configurado.' }
+  }
+
+  try {
+    const hoje = new Date()
+    const dd = String(hoje.getDate()).padStart(2, '0')
+    const mm = String(hoje.getMonth() + 1).padStart(2, '0')
+    const yyyy = hoje.getFullYear()
+    const data = `${dd}/${mm}/${yyyy}`
+    const { body, raw } = await tinyRequest('pedidos.pesquisa.php', { dataInicial: data, dataFinal: data, pagina: '1' })
+    const retorno = body.retorno
+
+    if (retorno?.status !== 'OK') {
+      return { ok: false, message: extrairErros(retorno), raw }
+    }
+
+    return { ok: true, message: 'Conexão com o Tiny validada com sucesso.', raw }
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/** Pesquisa NF-e de saída vinculada ao número interno do pedido da loja. */
+export async function pesquisarNotaFiscalTiny(numeroEcommerce: string): Promise<TinyNotaFiscalOutcome> {
+  if (!tinyConfigurado()) {
+    return { ok: false, erro: TINY_DISABLED, raw: '' }
+  }
+
+  try {
+    const { body, raw } = await tinyRequest('notas.fiscais.pesquisa.php', {
+      tipoNota: 'S',
+      numeroEcommerce,
+      pagina: '1',
+    })
+    const retorno = body.retorno
+    if (retorno?.status !== 'OK') {
+      return { ok: false, erro: extrairErros(retorno), raw }
+    }
+
+    const nota = (retorno.notas_fiscais ?? [])
+      .map((item) => normalizarNotaFiscal(item.nota_fiscal))
+      .find((item): item is TinyNotaFiscalResumo => !!item)
+
+    return { ok: true, nota, raw }
+  } catch (err) {
+    return { ok: false, erro: err instanceof Error ? err.message : String(err), raw: '' }
+  }
+}
+
+export async function obterNotaFiscalTiny(id: string): Promise<TinyNotaFiscalOutcome> {
+  if (!tinyConfigurado()) {
+    return { ok: false, erro: TINY_DISABLED, raw: '' }
+  }
+
+  try {
+    const { body, raw } = await tinyRequest('nota.fiscal.obter.php', { id })
+    const retorno = body.retorno
+    if (retorno?.status !== 'OK') {
+      return { ok: false, erro: extrairErros(retorno), raw }
+    }
+
+    return { ok: true, nota: normalizarNotaFiscal(retorno?.nota_fiscal) ?? undefined, raw }
+  } catch (err) {
+    return { ok: false, erro: err instanceof Error ? err.message : String(err), raw: '' }
+  }
+}
+
+export async function obterLinkNotaFiscalTiny(id: string): Promise<TinyNotaFiscalLinkOutcome> {
+  if (!tinyConfigurado()) {
+    return { ok: false, erro: TINY_DISABLED, raw: '' }
+  }
+
+  try {
+    const { body, raw } = await tinyRequest('nota.fiscal.obter.link.php', { id })
+    const retorno = body.retorno
+    if (retorno?.status !== 'OK') {
+      return { ok: false, erro: extrairErros(retorno), raw }
+    }
+
+    return { ok: true, link: retorno?.link_nfe, raw }
+  } catch (err) {
+    return { ok: false, erro: err instanceof Error ? err.message : String(err), raw: '' }
+  }
+}
+
+export async function obterXmlNotaFiscalTiny(id: string): Promise<TinyNotaFiscalXmlOutcome> {
+  if (!tinyConfigurado()) {
+    return { ok: false, erro: TINY_DISABLED, raw: '' }
+  }
+
+  try {
+    const { body, raw } = await tinyRequest('nota.fiscal.obter.xml.php', { id })
+    const retorno = body.retorno
+    if (retorno?.status !== 'OK') {
+      return { ok: false, erro: extrairErros(retorno), raw }
+    }
+
+    return { ok: true, xml: retorno?.xml_nfe ?? retorno?.xml_cancelamento, raw }
+  } catch (err) {
+    return { ok: false, erro: err instanceof Error ? err.message : String(err), raw: '' }
   }
 }

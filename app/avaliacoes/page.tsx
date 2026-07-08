@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import AvaliacoesPageClient from './AvaliacoesPageClient'
 
-const BASE = process.env.NEXT_PUBLIC_URL ?? 'https://metalab-farma.vercel.app'
+const BASE = process.env.NEXT_PUBLIC_URL || 'https://metalab-farma.vercel.app'
 
 export const metadata: Metadata = {
   title: 'Avaliações dos Clientes — Metalab Store',

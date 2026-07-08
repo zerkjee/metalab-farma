@@ -4,11 +4,9 @@ import {
   ArrowLeft,
   Ban,
   Copy,
-  ExternalLink,
   FileText,
   PackageCheck,
   Printer,
-  RefreshCw,
   Save,
   Send,
   Truck,
@@ -17,6 +15,8 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import StatusBadge from '@/components/admin/StatusBadge';
+import TinyInvoiceActions from '@/components/admin/tiny/TinyInvoiceActions';
+import TinyOrderActions from '@/components/admin/tiny/TinyOrderActions';
 import { fmtCurrency } from '@/data/admin';
 import {
   AdminOrderDetail,
@@ -26,7 +26,6 @@ import {
   mapApiOrder,
   orderStatusFlow,
   orderStatusMeta,
-  tinyBadgeMeta,
 } from '@/utils/adminOrders';
 
 // Estilo visual (badge) por status — aplica as cores do design system sobre o
@@ -99,8 +98,10 @@ export default function AdminPedidoDetalhe() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [resyncing, setResyncing] = useState(false);
-  const [resyncMsg, setResyncMsg] = useState<string | null>(null);
+  const [tinySending, setTinySending] = useState(false);
+  const [invoiceSyncing, setInvoiceSyncing] = useState(false);
+  const [tinyMsg, setTinyMsg] = useState<string | null>(null);
+  const [invoiceMsg, setInvoiceMsg] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -200,25 +201,66 @@ export default function AdminPedidoDetalhe() {
     window.print();
   }
 
-  async function handleResync() {
-    if (!order || resyncing) return;
-    setResyncing(true);
-    setResyncMsg(null);
+  async function refreshOrder() {
+    const res = await fetch(`/api/pedidos/${params.id}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    setOrder(mapApiOrder(data as Record<string, unknown>));
+  }
+
+  function tinyErrorMessage(data: unknown, fallback: string) {
+    if (!data || typeof data !== 'object') return fallback;
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.errors) && obj.errors.length > 0) return obj.errors.map(String).join(' ');
+    if (typeof obj.message === 'string') return obj.message;
+    if (typeof obj.erro === 'string') return obj.erro;
+    return fallback;
+  }
+
+  async function handleTinySend() {
+    if (!order || tinySending) return;
+    setTinySending(true);
+    setTinyMsg(null);
     try {
-      const res = await fetch(`/api/admin/pedidos/${order.id}/resync`, {
+      const res = await fetch('/api/admin/tiny/orders/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id }),
       });
+      const data: unknown = await res.json().catch(() => null);
       if (res.ok) {
-        setOrder({ ...order, tinySyncStatus: 'PENDENTE' });
-        setResyncMsg('Re-sincronização iniciada com sucesso.');
+        await refreshOrder();
+        setTinyMsg('Pedido enviado ao Tiny com sucesso.');
       } else {
-        setResyncMsg('Erro ao iniciar sincronização. Tente novamente.');
+        setTinyMsg(tinyErrorMessage(data, 'Erro ao enviar pedido ao Tiny.'));
       }
     } catch {
-      setResyncMsg('Erro de conexão. Tente novamente.');
+      setTinyMsg('Erro de conexão. Tente novamente.');
     }
-    setResyncing(false);
+    setTinySending(false);
+  }
+
+  async function handleInvoiceSync() {
+    if (!order || invoiceSyncing) return;
+    setInvoiceSyncing(true);
+    setInvoiceMsg(null);
+    try {
+      const res = await fetch('/api/admin/tiny/invoices/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      const data: unknown = await res.json().catch(() => null);
+      if (res.ok) {
+        await refreshOrder();
+        setInvoiceMsg(tinyErrorMessage(data, 'NF-e sincronizada com sucesso.'));
+      } else {
+        setInvoiceMsg(tinyErrorMessage(data, 'Erro ao sincronizar NF-e.'));
+      }
+    } catch {
+      setInvoiceMsg('Erro de conexão. Tente novamente.');
+    }
+    setInvoiceSyncing(false);
   }
 
   return (
@@ -412,90 +454,18 @@ export default function AdminPedidoDetalhe() {
 
               <div className="space-y-2 border-t border-line pt-3">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink-muted">Tiny ERP</p>
-                <div className="rounded-xl bg-surface-sunken p-3">
-                  <p className="text-xs text-ink-muted">Sincronização</p>
-                  <div className="mt-1.5 flex items-center gap-2">
-                    {(() => {
-                      const b = tinyBadgeMeta(order.tinySyncStatus);
-                      return (
-                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-bold ${b.cls}`}>
-                          {b.spinner && <span className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />}
-                          {b.label}
-                        </span>
-                      );
-                    })()}
-                    {order.tinyPedidoId != null && (
-                      <span className="text-xs text-ink-muted">Pedido #{order.tinyPedidoId}</span>
-                    )}
-                  </div>
-                  {order.tinyNumero && (
-                    <p className="mt-1.5 text-xs text-ink-muted">Nº Tiny: {order.tinyNumero}</p>
-                  )}
-                </div>
-                <div className="rounded-xl bg-surface-sunken p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs text-ink-muted">Nota fiscal</p>
-                    {order.nfStatus && (
-                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700">
-                        {order.nfStatus}
-                      </span>
-                    )}
-                  </div>
-                  {order.nfNumero ? (
-                    <>
-                      <div className="mt-1 flex items-center gap-2">
-                        <p className="text-xs font-bold text-ink">NF-e #{order.nfNumero}</p>
-                        {order.nfUrl && (
-                          <a
-                            href={order.nfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="DANFE (PDF)"
-                            className="text-brand-700 transition-colors hover:text-brand-800"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.8} />
-                          </a>
-                        )}
-                        {order.nfXmlUrl && (
-                          <a
-                            href={order.nfXmlUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] font-semibold text-brand-700 underline transition-colors hover:text-brand-800"
-                          >
-                            XML
-                          </a>
-                        )}
-                      </div>
-                      {order.nfEmitidaEm && (
-                        <p className="mt-1 text-[11px] text-ink-muted">
-                          Emitida em {formatOrderDate(order.nfEmitidaEm)}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p className="mt-1 text-xs text-ink-muted">Não emitida</p>
-                  )}
-                </div>
-                {(order.tinySyncStatus === 'ERRO' || order.tinySyncStatus === null) && order.status !== 'aguardando_pagamento' && (
-                  <div>
-                    <button
-                      onClick={() => void handleResync()}
-                      disabled={resyncing}
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-brand-50 px-3 py-2.5 text-xs font-semibold text-brand-700 transition-all hover:bg-brand-100 disabled:opacity-50"
-                    >
-                      <RefreshCw className={`h-3.5 w-3.5 ${resyncing ? 'animate-spin' : ''}`} strokeWidth={1.8} />
-                      {resyncing ? 'Sincronizando...' : 'Re-sincronizar'}
-                    </button>
-                    {resyncMsg && (
-                      <p className={`mt-2 rounded-xl px-3 py-2 text-xs font-semibold ${
-                        resyncMsg.startsWith('Erro') ? 'border border-danger/30 bg-danger-subtle text-danger' : 'border border-success/30 bg-success-subtle text-success'
-                      }`}>
-                        {resyncMsg}
-                      </p>
-                    )}
-                  </div>
-                )}
+                <TinyOrderActions
+                  order={order}
+                  sending={tinySending}
+                  message={tinyMsg}
+                  onSend={() => void handleTinySend()}
+                />
+                <TinyInvoiceActions
+                  order={order}
+                  syncing={invoiceSyncing}
+                  message={invoiceMsg}
+                  onSync={() => void handleInvoiceSync()}
+                />
               </div>
             </div>
           </div>

@@ -20,6 +20,7 @@ import {
   Star,
   Image as ImageIcon,
   BarChart3,
+  Cable,
   KeyRound,
   ShieldCheck,
 } from 'lucide-react';
@@ -40,6 +41,7 @@ const navSections: NavSection[] = [
     section: 'Vendas',
     items: [
       { label: 'Pedidos', href: '/admin/pedidos', icon: ShoppingBag },
+      { label: 'Tiny ERP', href: '/admin/tiny', icon: Cable },
       { label: 'Cupons', href: '/admin/cupons', icon: Ticket },
       { label: 'Clientes', href: '/admin/clientes', icon: Users },
     ],

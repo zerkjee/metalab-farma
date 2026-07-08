@@ -91,7 +91,9 @@ export async function POST(request: NextRequest) {
             precoUnit: Number(item.precoUnit),
           })),
         })
-        void enqueueTinySync(pedido.id)
+        if (process.env.TINY_AUTO_SEND_ORDERS === "true") {
+          void enqueueTinySync(pedido.id)
+        }
       }
     }
 

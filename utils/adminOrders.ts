@@ -55,13 +55,18 @@ export interface AdminOrderDetail {
   trackingCode: string;
   channel: 'Loja Online' | 'Mercado Livre' | 'Admin';
   tinySyncStatus: string | null;
-  tinyPedidoId: number | null;
+  tinySyncAt: string | null;
+  tinyErro: string | null;
+  tinyPedidoId: string | null;
   tinyNumero: string | null;
   nfNumero: string | null;
+  nfTinyId: string | null;
+  nfSerie: string | null;
   nfUrl: string | null;
   nfChave: string | null;
   nfStatus: string | null;
   nfXmlUrl: string | null;
+  nfErro: string | null;
   nfEmitidaEm: string | null;
 }
 
@@ -70,6 +75,16 @@ export interface AdminOrderDetail {
  * Centralizado aqui para reuso entre a lista e o detalhe do admin.
  */
 export function tinyBadgeMeta(status: string | null): { cls: string; label: string; spinner: boolean } {
+  if (status === 'NOT_SENT_TO_TINY') return { cls: 'bg-surface-sunken text-ink-muted', label: 'Não enviado', spinner: false };
+  if (status === 'VALIDATION_ERROR') return { cls: 'bg-danger-subtle text-danger', label: 'Erro de validação', spinner: false };
+  if (status === 'SENDING_TO_TINY') return { cls: 'bg-brand-50 text-brand-700', label: 'Enviando', spinner: true };
+  if (status === 'TINY_ORDER_CREATED') return { cls: 'bg-success-subtle text-success', label: 'Enviado', spinner: false };
+  if (status === 'SYNC_ERROR') return { cls: 'bg-danger-subtle text-danger', label: 'Erro de sincronização', spinner: false };
+  if (status === 'INVOICE_PENDING') return { cls: 'bg-warning-subtle text-warning', label: 'NF-e pendente', spinner: false };
+  if (status === 'INVOICE_FOUND') return { cls: 'bg-brand-50 text-brand-700', label: 'NF-e encontrada', spinner: false };
+  if (status === 'INVOICE_ISSUED') return { cls: 'bg-success-subtle text-success', label: 'NF-e emitida', spinner: false };
+  if (status === 'INVOICE_REJECTED') return { cls: 'bg-danger-subtle text-danger', label: 'NF-e rejeitada', spinner: false };
+  if (status === 'INVOICE_CANCELLED') return { cls: 'bg-surface-sunken text-ink-muted', label: 'NF-e cancelada', spinner: false };
   if (status === 'PENDENTE') return { cls: 'bg-warning-subtle text-warning', label: 'Pendente', spinner: false };
   if (status === 'PROCESSANDO') return { cls: 'bg-brand-50 text-brand-700', label: 'Processando', spinner: true };
   if (status === 'ENVIADO') return { cls: 'bg-success-subtle text-success', label: 'Sincronizado', spinner: false };
@@ -188,13 +203,18 @@ export function mapApiOrder(p: Record<string, unknown>): AdminOrderDetail {
     trackingCode: String(p.codigoRastreio ?? ''),
     channel: 'Loja Online',
     tinySyncStatus: p.tinySyncStatus != null ? String(p.tinySyncStatus) : null,
-    tinyPedidoId: p.tinyPedidoId != null ? Number(p.tinyPedidoId) : null,
+    tinySyncAt: p.tinySyncAt != null ? String(p.tinySyncAt) : null,
+    tinyErro: p.tinyErro != null ? String(p.tinyErro) : null,
+    tinyPedidoId: p.tinyPedidoId != null ? String(p.tinyPedidoId) : null,
     tinyNumero: p.tinyNumero != null ? String(p.tinyNumero) : null,
+    nfTinyId: p.nfTinyId != null ? String(p.nfTinyId) : null,
     nfNumero: p.nfNumero != null ? String(p.nfNumero) : null,
+    nfSerie: p.nfSerie != null ? String(p.nfSerie) : null,
     nfUrl: p.nfUrl != null ? String(p.nfUrl) : null,
     nfChave: p.nfChave != null ? String(p.nfChave) : null,
     nfStatus: p.nfStatus != null ? String(p.nfStatus) : null,
     nfXmlUrl: p.nfXmlUrl != null ? String(p.nfXmlUrl) : null,
+    nfErro: p.nfErro != null ? String(p.nfErro) : null,
     nfEmitidaEm: p.nfEmitidaEm != null ? String(p.nfEmitidaEm) : null,
   } as AdminOrderDetail;
 }
