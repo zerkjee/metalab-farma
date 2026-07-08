@@ -122,7 +122,7 @@ interface TinyRetorno {
     status?: 'OK' | 'Erro'
     codigo_erro?: string | number
     erros?: Array<{ erro?: string }>
-    registros?: TinyRetornoRegistro[]
+    registros?: TinyRetornoRegistro[] | TinyRetornoRegistro
     pedidos?: Array<{ pedido?: { id?: string | number; numero?: string; numero_ecommerce?: string; situacao?: string } }>
     notas_fiscais?: Array<{ nota_fiscal?: Record<string, unknown> }>
     nota_fiscal?: Record<string, unknown>
@@ -130,6 +130,11 @@ interface TinyRetorno {
     xml_nfe?: string
     xml_cancelamento?: string
   }
+}
+
+function normalizarRegistros(registros?: TinyRetornoRegistro[] | TinyRetornoRegistro): TinyRetornoRegistro[] {
+  if (!registros) return []
+  return Array.isArray(registros) ? registros : [registros]
 }
 
 /**
@@ -213,7 +218,7 @@ function mapearEnderecoTiny(enderecoSnap?: string | null): Record<string, string
 function extrairErros(retorno?: TinyRetorno['retorno']): string {
   if (!retorno) return 'resposta vazia do Tiny'
   const errosTopo = (retorno.erros ?? []).map((e) => e.erro).filter(Boolean)
-  const errosRegistro = (retorno.registros ?? [])
+  const errosRegistro = normalizarRegistros(retorno.registros)
     .flatMap((r) => r.registro?.erros ?? [])
     .map((e) => e.erro)
     .filter(Boolean)
@@ -318,12 +323,13 @@ export async function criarOuLocalizarPedidoTiny(input: TinyPedidoInput): Promis
       }
     }
 
-    const idCriado = retorno.registros?.[0]?.registro?.id
+    const registroCriado = normalizarRegistros(retorno.registros).find((item) => item.registro?.id != null)?.registro
+    const idCriado = registroCriado?.id
     if (idCriado == null) {
       return { ok: false, erro: 'Tiny retornou OK sem id de pedido', raw }
     }
 
-    const tinyNumero = retorno.registros?.[0]?.registro?.numero
+    const tinyNumero = registroCriado?.numero
     return { ok: true, tinyPedidoId: String(idCriado), tinyNumero, jaExistia: false, raw }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
@@ -344,8 +350,9 @@ export async function consultarPedidoTiny(tinyPedidoId: string): Promise<TinyCon
     if (retorno?.status !== 'OK') {
       return { ok: false, erro: extrairErros(retorno), raw }
     }
-    const situacao = retorno.registros?.[0]?.registro?.status
-    const tinyNumero = retorno.registros?.[0]?.registro?.numero
+    const registro = normalizarRegistros(retorno.registros)[0]?.registro
+    const situacao = registro?.status
+    const tinyNumero = registro?.numero
     return { ok: true, tinyStatus: situacao, tinyNumero, raw }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)

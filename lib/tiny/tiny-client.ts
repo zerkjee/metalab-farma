@@ -11,18 +11,22 @@ import type {
 const DEFAULT_TINY_API_BASE = 'https://api.tiny.com.br/api2'
 const TINY_REQUEST_TIMEOUT_MS = 15000
 
+type TinyRetornoRegistro = {
+  registro?: {
+    id?: string | number
+    numero?: string | number
+    erros?: Array<{ erro?: string }>
+  }
+}
+
+type TinyRetornoRegistros = TinyRetornoRegistro[] | TinyRetornoRegistro
+
 type TinyRetorno = {
   retorno?: {
     status?: 'OK' | 'Erro'
     codigo_erro?: string | number
     erros?: Array<{ erro?: string }>
-    registros?: Array<{
-      registro?: {
-        id?: string | number
-        numero?: string | number
-            erros?: Array<{ erro?: string }>
-          }
-        }>
+    registros?: TinyRetornoRegistros
     notas_fiscais?: Array<{ nota_fiscal?: Record<string, unknown> }>
     nota_fiscal?: Record<string, unknown>
     link_nfe?: string
@@ -49,11 +53,16 @@ function tinyApiBase(): string {
   return (process.env.TINY_API_BASE_URL || DEFAULT_TINY_API_BASE).replace(/\/+$/, '')
 }
 
+function normalizeRegistros(registros?: TinyRetornoRegistros): TinyRetornoRegistro[] {
+  if (!registros) return []
+  return Array.isArray(registros) ? registros : [registros]
+}
+
 function extractTinyErrors(retorno?: TinyRetorno['retorno']): string {
   if (!retorno) return 'Resposta vazia do Tiny.'
 
   const topLevel = (retorno.erros ?? []).map((item) => item.erro).filter(Boolean)
-  const recordLevel = (retorno.registros ?? [])
+  const recordLevel = normalizeRegistros(retorno.registros)
     .flatMap((item) => item.registro?.erros ?? [])
     .map((item) => item.erro)
     .filter(Boolean)
@@ -175,7 +184,7 @@ function normalizeCreateOrderResponse(rawBody: TinyRetorno, raw: unknown): TinyC
     })
   }
 
-  const registro = retorno.registros?.[0]?.registro
+  const registro = normalizeRegistros(retorno.registros).find((item) => item.registro?.id != null)?.registro
   const id = registro?.id
   if (id == null) {
     throw new TinyApiError('Tiny retornou OK sem id de pedido.', { raw })

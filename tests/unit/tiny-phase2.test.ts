@@ -133,6 +133,29 @@ describe('TinyClient.createOrder', () => {
     expect(body.get('token')).toBe('token-secreto')
   })
 
+  it('normaliza sucesso quando Tiny retorna registros como objeto unico', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(fakeResponse({
+      retorno: {
+        status_processamento: '3',
+        status: 'OK',
+        registros: {
+          registro: {
+            sequencia: '1',
+            status: 'OK',
+            id: 363983355,
+            numero: '2274',
+          },
+        },
+      },
+    })))
+
+    const result = await new TinyClient().createOrder(mapOrderToTinyPayload(ORDER))
+
+    expect(result.success).toBe(true)
+    expect(result.tinyOrderId).toBe('363983355')
+    expect(result.tinyOrderNumber).toBe('2274')
+  })
+
   it('lança TinyApiError em erro de negócio do Tiny', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(fakeResponse({
       retorno: {
