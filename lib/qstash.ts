@@ -24,7 +24,15 @@ export async function enqueueJob(
 
 // Publica o envio de e-mail como job assíncrono no QStash.
 // Fallback síncrono quando QSTASH_TOKEN não está configurado (dev/test).
-export async function enqueueOrderEmail(data: OrderEmailData): Promise<void> {
+//
+// `idempotencyKey` (opcional, backward-compatible): quando presente, é anexado
+// ao corpo publicado para que o consumidor (/api/jobs/email-pedido) deduplique
+// reentregas do QStash. Sem chave, o corpo é EXATAMENTE `data` — comportamento
+// legado inalterado.
+export async function enqueueOrderEmail(
+  data: OrderEmailData,
+  idempotencyKey?: string,
+): Promise<void> {
   const token = process.env.QSTASH_TOKEN
   if (!token) {
     const { sendOrderConfirmationEmail } = await import('@/lib/resend')
@@ -32,7 +40,8 @@ export async function enqueueOrderEmail(data: OrderEmailData): Promise<void> {
     return
   }
 
-  await enqueueJob('/api/jobs/email-pedido', data, 2)
+  const body = idempotencyKey ? { ...data, idempotencyKey } : data
+  await enqueueJob('/api/jobs/email-pedido', body, 2)
 }
 
 // ─── Integração ERP Tiny (Wave 2A) ─────────────────────────────────────────────

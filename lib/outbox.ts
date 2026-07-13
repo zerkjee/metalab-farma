@@ -2,6 +2,17 @@ import type { Prisma } from '@prisma/client'
 import type { DomainEvent } from '@/lib/contracts'
 
 /**
+ * Feature flag do outbox no fluxo de aprovação de pagamento.
+ *
+ * Default OFF: quando `ORDER_OUTBOX_ENABLED !== 'true'`, o webhook mantém o
+ * caminho legado EXATO (sem transação interativa, sem gravação no outbox). A
+ * gravação durável só entra quando explicitamente ligada por env.
+ */
+export function orderOutboxEnabled(): boolean {
+  return process.env.ORDER_OUTBOX_ENABLED === 'true'
+}
+
+/**
  * Strangler-Fig FOUNDATION — transactional outbox.
  *
  * ADDITIVE ONLY. Nada aqui está ligado a rotas/jobs existentes. `writeOutbox` é
@@ -27,8 +38,8 @@ import type { DomainEvent } from '@/lib/contracts'
 export async function writeOutbox(
   tx: Prisma.TransactionClient,
   event: DomainEvent<unknown>,
-): Promise<void> {
-  await tx.outboxEvent.create({
+): Promise<string> {
+  const created = await tx.outboxEvent.create({
     data: {
       eventId: event.eventId,
       eventType: event.eventType,
@@ -42,6 +53,7 @@ export async function writeOutbox(
       occurredAt: new Date(event.occurredAt),
     },
   })
+  return created.id
 }
 
 /**

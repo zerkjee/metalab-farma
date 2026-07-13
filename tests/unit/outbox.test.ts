@@ -15,7 +15,7 @@ const payload: OrderPaidV1Payload = {
 }
 
 function makeTx() {
-  const create = vi.fn().mockResolvedValue(undefined)
+  const create = vi.fn().mockResolvedValue({ id: 'outbox_row_1' })
   const tx = { outboxEvent: { create } } as unknown as Prisma.TransactionClient
   return { tx, create }
 }

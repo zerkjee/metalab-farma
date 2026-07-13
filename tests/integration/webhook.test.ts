@@ -12,6 +12,8 @@ const { mockPrisma } = vi.hoisted(() => {
   const mockPrisma = {
     pedido:  { findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     produto: { update: vi.fn() },
+    outboxEvent: { create: vi.fn(), update: vi.fn() },
+    inboxEvent:  { create: vi.fn(), update: vi.fn() },
     $transaction: vi.fn(),
   }
   return { mockPrisma }
@@ -71,6 +73,12 @@ beforeEach(() => {
   process.env.MP_WEBHOOK_SECRET        = TEST_SECRET
   process.env.MERCADOPAGO_ACCESS_TOKEN = TEST_TOKEN
   process.env.TINY_AUTO_SEND_ORDERS    = 'false'
+  delete process.env.ORDER_OUTBOX_ENABLED // default OFF salvo teste explícito
+
+  mockPrisma.outboxEvent.create.mockResolvedValue({ id: 'outbox-row-1' })
+  mockPrisma.outboxEvent.update.mockResolvedValue({})
+  mockPrisma.inboxEvent.create.mockResolvedValue({})
+  mockPrisma.inboxEvent.update.mockResolvedValue({})
 
   // $transaction: array (webhook cancel) ou callback (não usado aqui)
   mockPrisma.$transaction.mockImplementation(async (fnOrArray: unknown) => {
@@ -195,6 +203,72 @@ describe('POST /api/pagamento/webhook — payment approved', () => {
     mockPrisma.pedido.updateMany.mockResolvedValue({ count: 0 })
     await POST(buildSignedRequest(paymentBody(PAY_ID), PAY_ID))
     await Promise.resolve()
+    expect(mockEnqueue).not.toHaveBeenCalled()
+  })
+
+  it('flag OFF: não abre transação interativa nem grava no outbox', async () => {
+    await POST(buildSignedRequest(paymentBody(PAY_ID), PAY_ID))
+    await Promise.resolve()
+    // Caminho legado usa updateMany/findFirst diretos no prisma (sem $transaction callback)
+    expect(mockPrisma.$transaction).not.toHaveBeenCalled()
+    expect(mockPrisma.outboxEvent.create).not.toHaveBeenCalled()
+    // Enqueue legado — sem idempotencyKey (1 único argumento)
+    expect(mockEnqueue.mock.calls[0]).toHaveLength(1)
+  })
+})
+
+// ─── Payment approved — outbox habilitado (flag ON) ───────────────────────────
+
+describe('POST /api/pagamento/webhook — payment approved (ORDER_OUTBOX_ENABLED=true)', () => {
+  const PAY_ID = 'PAY-APPROVED-OUTBOX'
+
+  beforeEach(() => {
+    process.env.ORDER_OUTBOX_ENABLED = 'true'
+    mockPaymentGet.mockResolvedValue({ id: PAY_ID, status: 'approved' })
+    mockPrisma.pedido.updateMany.mockResolvedValue({ count: 1 })
+    mockPrisma.pedido.findFirst.mockResolvedValue({
+      id: 'order-uuid', numero: 'MTL-2026-XYZ',
+      compradorNome: 'Pedro', compradorEmail: 'pedro@test.com',
+      total: 110, metodoPagamento: 'PIX', pagamentoId: PAY_ID,
+      itens: [{ produtoNome: 'Whey', quantidade: 1, precoUnit: 100 }],
+    })
+  })
+
+  it('grava uma linha no outbox DENTRO da transação com key estável e eventType corretos', async () => {
+    const res = await POST(buildSignedRequest(paymentBody(PAY_ID), PAY_ID))
+    expect(res.status).toBe(200)
+
+    // Transação interativa (callback) foi usada
+    expect(mockPrisma.$transaction).toHaveBeenCalledOnce()
+    expect(typeof mockPrisma.$transaction.mock.calls[0]?.[0]).toBe('function')
+
+    // Outbox gravado com envelope order.paid.v1 e idempotencyKey estável
+    expect(mockPrisma.outboxEvent.create).toHaveBeenCalledOnce()
+    const data = mockPrisma.outboxEvent.create.mock.calls[0]?.[0]?.data
+    expect(data.eventType).toBe('order.paid.v1')
+    expect(data.idempotencyKey).toBe('order.paid:order-uuid')
+    expect(data.status).toBe('PENDING')
+    expect(data.producer).toBe('storefront')
+    expect(data.payload.pedidoId).toBe('order-uuid')
+  })
+
+  it('passa a idempotencyKey estável para enqueueOrderEmail e marca o outbox publicado', async () => {
+    await POST(buildSignedRequest(paymentBody(PAY_ID), PAY_ID))
+    await Promise.resolve()
+    expect(mockEnqueue).toHaveBeenCalledOnce()
+    expect(mockEnqueue.mock.calls[0]?.[1]).toBe('order.paid:order-uuid')
+    // markPublished best-effort
+    expect(mockPrisma.outboxEvent.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'outbox-row-1' } }),
+    )
+  })
+
+  it('idempotência (flag ON): count=0 não grava outbox nem envia e-mail', async () => {
+    mockPrisma.pedido.updateMany.mockResolvedValue({ count: 0 })
+    const res = await POST(buildSignedRequest(paymentBody(PAY_ID), PAY_ID))
+    expect(res.status).toBe(200)
+    await Promise.resolve()
+    expect(mockPrisma.outboxEvent.create).not.toHaveBeenCalled()
     expect(mockEnqueue).not.toHaveBeenCalled()
   })
 })
