@@ -139,9 +139,9 @@ export async function POST(request: NextRequest) {
           // Marca o outbox como publicado — BEST-EFFORT. Falha aqui NÃO pode
           // lançar: a garantia de processamento único vem do updateMany
           // (pago:false); a linha do outbox permanece PENDING e seria
-          // recuperada por reconciliação. TODO(relay): recuperação de linhas
-          // PENDING órfãs (crash antes do enqueue/markPublished) ainda não
-          // está implementada — fica para o PR do relay.
+          // recuperada pelo relay: linhas PENDING órfãs (crash antes do
+          // enqueue/markPublished) são republicadas por
+          // app/api/jobs/outbox-relay (§6.2); a reentrega é no-op via dedup no inbox.
           if (result.outboxId) {
             try {
               await markPublished(prisma, result.outboxId)
