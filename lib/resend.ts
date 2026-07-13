@@ -1,3 +1,5 @@
+import { withTimeout } from "@/lib/withTimeout"
+
 export interface OrderEmailData {
   numero: string
   compradorNome: string
@@ -120,12 +122,12 @@ export async function sendPixExpiryEmail(data: PixExpiryData) {
   try {
     const { Resend } = await import('resend')
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
+    await withTimeout(resend.emails.send({
       from,
       to: data.compradorEmail,
       subject: `PIX expirado — Pedido ${data.numero} aguarda seu pagamento`,
       html,
-    })
+    }), 10000, 'resend')
   } catch (error) {
     const { logger } = await import('@/lib/logger')
     logger.warn('Falha enviando email PIX expirado (não crítico)', { pedidoNumero: data.numero, error })
@@ -187,14 +189,14 @@ export async function sendAbandonedCartEmail(data: AbandonedCartData) {
   try {
     const { Resend } = await import('resend')
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
+    await withTimeout(resend.emails.send({
       from,
       to: data.email,
       subject: data.cupomCodigo
         ? `${firstName}, seu cupom especial expira em 48h — Metalab Store`
         : `${firstName}, seu carrinho ainda está aqui — Metalab Store`,
       html,
-    })
+    }), 10000, 'resend')
   } catch (error) {
     const { logger } = await import('@/lib/logger')
     logger.warn('Falha enviando email carrinho abandonado (não crítico)', { email: data.email, error })
@@ -217,12 +219,12 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   try {
     const { Resend } = await import("resend")
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const result = await resend.emails.send({
+    const result = await withTimeout(resend.emails.send({
       from,
       to: data.compradorEmail,
       subject: `Pedido ${data.numero} recebido — Metalab Store`,
       html: buildOrderEmailHtml(data),
-    })
+    }), 10000, 'resend')
     const emailId = (result as { data?: { id?: string }; id?: string })?.data?.id ?? (result as { id?: string })?.id ?? "?"
     logger.info("Email de confirmação enviado", {
       pedidoNumero: data.numero,

@@ -24,6 +24,7 @@ model Account {
   user              Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -34,6 +35,7 @@ model Session {
   expires      DateTime
   user         Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -166,6 +168,7 @@ model ImagemProduto {
   produtoId String
   produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
+  @@index([produtoId])
   @@map("imagens_produto")
 }
 
@@ -176,6 +179,7 @@ model AtributoProduto {
   produtoId String
   produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
+  @@index([produtoId])
   @@map("atributos_produto")
 }
 
@@ -191,6 +195,7 @@ model KitItem {
 
   @@unique([kitId, produtoId])
   @@index([kitId])
+  @@index([produtoId])
   @@map("kit_itens")
 }
 
@@ -211,6 +216,7 @@ model Endereco {
   usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   pedidos   Pedido[]
 
+  @@index([usuarioId])
   @@map("enderecos")
 }
 
@@ -286,6 +292,8 @@ model Pedido {
   @@index([status])
   @@index([tinySyncStatus])
   @@index([tinyPedidoId])
+  @@index([cupomId])
+  @@index([enderecoId])
   @@map("pedidos")
 }
 
@@ -338,6 +346,8 @@ model ItemPedido {
   produtoSku    String
   produtoImagem String?
 
+  @@index([pedidoId])
+  @@index([produtoId])
   @@map("itens_pedido")
 }
 
@@ -454,4 +464,95 @@ model TinyIntegrationLog {
   @@index([status])
   @@index([createdAt])
   @@map("tiny_integration_logs")
+}
+
+// ─── STRANGLER-FIG FOUNDATION — OUTBOX / INBOX ───────────────────────────────
+//
+// ADDITIVE ONLY. Estas tabelas são andaime para o padrão transactional outbox
+// (publicação de eventos de domínio na MESMA transação do agregado) e inbox
+// (deduplicação no consumo). NÃO estão ligadas a nenhuma rota/job ainda e não
+// possuem relações com tabelas existentes (apenas ids soltos) — por isso não
+// afetam nenhum fluxo atual. Zero mudança de comportamento hoje.
+
+enum OutboxStatus {
+  PENDING
+  PUBLISHED
+  FAILED
+}
+
+enum InboxStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+}
+
+/// Fila de saída: um evento por linha, gravado na transação do agregado.
+model OutboxEvent {
+  id             String       @id @default(cuid())
+  eventId        String       @unique
+  eventType      String
+  eventVersion   String
+  aggregateType  String?
+  aggregateId    String?
+  payload        Json
+  correlationId  String?
+  causationId    String?
+  idempotencyKey String?
+  producer       String
+  status         OutboxStatus @default(PENDING)
+  attempts       Int          @default(0)
+  lastError      String?      @db.Text
+  occurredAt     DateTime
+  createdAt      DateTime     @default(now())
+  publishedAt    DateTime?
+
+  @@index([status, createdAt])
+  @@index([aggregateType, aggregateId])
+  @@map("outbox_events")
+}
+
+/// Registro de deduplicação no consumo (idempotência do consumidor).
+model InboxEvent {
+  eventId     String      @id
+  eventType   String
+  consumer    String
+  status      InboxStatus @default(RECEIVED)
+  receivedAt  DateTime    @default(now())
+  processedAt DateTime?
+  attempts    Int         @default(0)
+  lastError   String?     @db.Text
+
+  @@index([consumer, status])
+  @@map("inbox_events")
+}
+
+/// Dead-letter / falhas de integração para reprocessamento e observabilidade.
+model IntegrationFailure {
+  id         String    @id @default(cuid())
+  source     String
+  eventId    String?
+  eventType  String?
+  payload    Json?
+  error      String    @db.Text
+  attempts   Int       @default(0)
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([source, resolvedAt])
+  @@map("integration_failures")
+}
+
+/// Registro de execuções de reconciliação (drift detection) por serviço.
+model ServiceReconciliation {
+  id         String   @id @default(cuid())
+  service    String
+  runAt      DateTime @default(now())
+  checked    Int      @default(0)
+  mismatches Int      @default(0)
+  repaired   Int      @default(0)
+  details    Json?
+  status     String
+
+  @@index([service, runAt])
+  @@map("service_reconciliation")
 }

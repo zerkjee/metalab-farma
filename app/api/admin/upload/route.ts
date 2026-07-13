@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/adminGuard"
 import { logger } from "@/lib/logger"
 import { auditFromSession } from "@/lib/audit"
 import { v2 as cloudinary } from "cloudinary"
+import { withTimeout } from "@/lib/withTimeout"
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -37,10 +38,10 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
     const base64 = `data:${file.type};base64,${buffer.toString("base64")}`
 
-    const result = await cloudinary.uploader.upload(base64, {
+    const result = await withTimeout(cloudinary.uploader.upload(base64, {
       folder: "metalab/produtos",
       transformation: [{ width: 1200, height: 1200, crop: "limit" }, { quality: "auto" }, { fetch_format: "auto" }],
-    })
+    }), 20000, 'cloudinary')
 
     auditFromSession(session, request, {
       acao: "upload.criado",

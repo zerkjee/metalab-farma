@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { enqueueOrderEmail, enqueueTinySync } from "@/lib/qstash"
 import { logger } from "@/lib/logger"
 import { verifyMPSignature } from "@/lib/webhookUtils"
+import { withTimeout } from "@/lib/withTimeout"
 
 export async function POST(request: NextRequest) {
   let parsedBody: { type?: string; data?: { id?: unknown } }
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
     const client = new MercadoPagoConfig({ accessToken })
 
     const paymentApi = new Payment(client)
-    const pagamento = await paymentApi.get({ id: paymentId })
+    const pagamento = await withTimeout(paymentApi.get({ id: paymentId }), 15000, 'mercadopago')
 
     if (pagamento.status === "approved") {
       // Idempotência atômica via updateMany com guard (pago=false)

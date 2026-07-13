@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { pagamentoRatelimit } from "@/lib/rateLimit"
 import { enqueueJob } from "@/lib/qstash"
 import { logger } from "@/lib/logger"
+import { withTimeout } from "@/lib/withTimeout"
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,25 +52,29 @@ export async function POST(request: NextRequest) {
     if (pedido.metodoPagamento === "PIX") {
       let result
       try {
-        result = await payment.create({
-          body: {
-            transaction_amount: Number(pedido.total),
-            payment_method_id: "pix",
-            payer: {
-              email: pedido.compradorEmail,
-              first_name: pedido.compradorNome.split(" ")[0],
-              last_name: pedido.compradorNome.split(" ").slice(1).join(" ") || ".",
-              identification: {
-                type: "CPF",
-                number: pedido.compradorCpf,
+        result = await withTimeout(
+          payment.create({
+            body: {
+              transaction_amount: Number(pedido.total),
+              payment_method_id: "pix",
+              payer: {
+                email: pedido.compradorEmail,
+                first_name: pedido.compradorNome.split(" ")[0],
+                last_name: pedido.compradorNome.split(" ").slice(1).join(" ") || ".",
+                identification: {
+                  type: "CPF",
+                  number: pedido.compradorCpf,
+                },
               },
+              external_reference: pedido.id,
+              notification_url: `${process.env.NEXT_PUBLIC_URL}/api/pagamento/webhook`,
+              description: `Pedido ${pedido.numero} - Metalab`,
+              date_of_expiration: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30min
             },
-            external_reference: pedido.id,
-            notification_url: `${process.env.NEXT_PUBLIC_URL}/api/pagamento/webhook`,
-            description: `Pedido ${pedido.numero} - Metalab`,
-            date_of_expiration: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30min
-          },
-        })
+          }),
+          15000,
+          'mercadopago',
+        )
       } catch (mpError) {
         // PIX falhou após o pedido já existir e o estoque já ter sido decrementado.
         // Rollback imediato e idempotente: cancela o pedido e devolve o estoque.

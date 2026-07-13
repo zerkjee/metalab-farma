@@ -86,6 +86,11 @@ export async function cotarFrete({ cep, itens }: { cep: string; itens: FreteItem
     services: "1,2",
   }
 
+  // Timeout defensivo: sem isto, uma resposta pendurada do Melhor Envio travaria
+  // a função serverless. No abort, o fetch rejeita e cai no catch existente (500).
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 8000)
+
   try {
     const res = await fetch(MELHOR_ENVIO_URL, {
       method: "POST",
@@ -97,6 +102,7 @@ export async function cotarFrete({ cep, itens }: { cep: string; itens: FreteItem
       },
       body: JSON.stringify(body),
       next: { revalidate: 0 },
+      signal: controller.signal,
     })
 
     if (!res.ok) {
@@ -142,6 +148,8 @@ export async function cotarFrete({ cep, itens }: { cep: string; itens: FreteItem
   } catch (err) {
     logger.error("Falha calculando frete", err)
     return { ok: false, status: 500, erro: "Erro interno ao calcular frete" }
+  } finally {
+    clearTimeout(timeout)
   }
 }
 
