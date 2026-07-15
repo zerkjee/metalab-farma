@@ -1,11 +1,13 @@
 /**
  * Cliente isolado para o ERP Tiny (Olist) — API v2.
  *
- * ⚠️ WAVE 1 (Fundação): este módulo NÃO é invocado por nenhum fluxo de produção.
- * O webhook do Mercado Pago, os jobs e o admin permanecem inalterados.
- * A integração só passa a enviar pedidos reais quando:
- *   1. TINY_API_TOKEN estiver configurado no ambiente, E
- *   2. um job/gatilho (Wave 2/3) chamar estas funções.
+ * Wave 3 (ativação) já está no código: o webhook do Mercado Pago
+ * (app/api/pagamento/webhook/route.ts) chama enqueueTinySync após pagamento
+ * confirmado, mas só dispara de verdade quando AMBOS estiverem configurados:
+ *   1. TINY_API_TOKEN no ambiente, E
+ *   2. TINY_AUTO_SEND_ORDERS=true
+ * Sem qualquer um dos dois, tinyConfigurado() ou o gate do webhook mantém o
+ * fluxo como no-op — nenhuma chamada real ao Tiny acontece.
  *
  * Particularidades da API Tiny v2 tratadas aqui:
  *   - Sempre responde HTTP 200; o erro vem em `retorno.status === "Erro"`.

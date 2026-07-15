@@ -61,10 +61,11 @@ enum TinySyncStatus {
   em erro grava `ERRO` + responde 500 (QStash retenta); Tiny desligado → volta a `PENDENTE`
   e responde 200 (sem retry).
 - **Webhook Mercado Pago** — `app/api/pagamento/webhook/route.ts`. **JÁ chama
-  `enqueueTinySync(pedido.id)` (linha 94)** após pagamento aprovado e `updated.count > 0`,
-  como fire-and-forget (`void`). Ou seja: o "passo 1 da Wave 3" **já está no código**; a
-  integração continua inerte apenas porque `TINY_API_TOKEN`/`QSTASH_TOKEN` não estão no
-  ambiente.
+  `enqueueTinySync(pedido.id)`** após pagamento aprovado e `updated.count > 0`,
+  como fire-and-forget (`void`) — no caminho outbox e no legado. Ou seja: o "passo 1 da
+  Wave 3" **já está no código**; a integração continua inerte porque faltam **três** flags
+  simultâneos no ambiente: `TINY_API_TOKEN`, `QSTASH_TOKEN` **e `TINY_AUTO_SEND_ORDERS=true`**
+  (esse terceiro gate é checado direto no webhook, além do `tinyConfigurado()` do cliente).
 - **Re-sync manual** — `app/api/admin/pedidos/[id]/resync/route.ts`. `requireAdmin`,
   exige `pedido.pago`, re-enfileira via `enqueueTinySync`. Botão já existe na UI.
 - **Logging** — usa `AuditLog` via `logAudit()` (`lib/audit.ts`). Ações já usadas:
