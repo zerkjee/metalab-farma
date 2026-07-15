@@ -115,35 +115,35 @@ describe('calcularDesconto', () => {
 
 describe('calcularTotal', () => {
   it('subtotal − desconto + frete', () => {
-    expect(calcularTotal({ subtotal: 100, desconto: 10, freteGratis: false, fretePrco: 20 }))
+    expect(calcularTotal({ subtotal: 100, desconto: 10, freteGratis: false, fretePreco: 20 }))
       .toEqual({ valorFrete: 20, total: 110 })
   })
 
-  it('frete grátis zera o frete mesmo que fretePrco seja positivo', () => {
-    expect(calcularTotal({ subtotal: 100, desconto: 0, freteGratis: true, fretePrco: 25 }))
+  it('frete grátis zera o frete mesmo que fretePreco seja positivo', () => {
+    expect(calcularTotal({ subtotal: 100, desconto: 0, freteGratis: true, fretePreco: 25 }))
       .toEqual({ valorFrete: 0, total: 100 })
   })
 
   it('combinação: desconto percentual + frete normal', () => {
     // 10% de 200 = 20; frete = 15; total = 200 - 20 + 15 = 195
-    expect(calcularTotal({ subtotal: 200, desconto: 20, freteGratis: false, fretePrco: 15 }))
+    expect(calcularTotal({ subtotal: 200, desconto: 20, freteGratis: false, fretePreco: 15 }))
       .toEqual({ valorFrete: 15, total: 195 })
   })
 
   it('combinação: desconto fixo + frete grátis', () => {
     // desconto = 30; frete = 0; total = 100 - 30 + 0 = 70
-    expect(calcularTotal({ subtotal: 100, desconto: 30, freteGratis: true, fretePrco: 20 }))
+    expect(calcularTotal({ subtotal: 100, desconto: 30, freteGratis: true, fretePreco: 20 }))
       .toEqual({ valorFrete: 0, total: 70 })
   })
 
   it('desconto igual ao subtotal resulta em total = frete (não negativo)', () => {
-    const { total } = calcularTotal({ subtotal: 50, desconto: 50, freteGratis: false, fretePrco: 10 })
+    const { total } = calcularTotal({ subtotal: 50, desconto: 50, freteGratis: false, fretePreco: 10 })
     expect(total).toBe(10)
     expect(total).toBeGreaterThanOrEqual(0)
   })
 
   it('pedido sem frete e sem desconto: total = subtotal', () => {
-    expect(calcularTotal({ subtotal: 89.9, desconto: 0, freteGratis: false, fretePrco: 0 }))
+    expect(calcularTotal({ subtotal: 89.9, desconto: 0, freteGratis: false, fretePreco: 0 }))
       .toEqual({ valorFrete: 0, total: 89.9 })
   })
 })

@@ -43,9 +43,9 @@ export function calcularTotal(params: {
   subtotal: number
   desconto: number
   freteGratis: boolean
-  fretePrco: number
+  fretePreco: number
 }): { valorFrete: number; total: number } {
-  const valorFrete = params.freteGratis ? 0 : params.fretePrco
+  const valorFrete = params.freteGratis ? 0 : params.fretePreco
   const total = params.subtotal - params.desconto + valorFrete
   return { valorFrete, total }
 }

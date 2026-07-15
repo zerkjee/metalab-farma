@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
 
     // Frete recalculado no servidor — NUNCA confiar em preço vindo do cliente.
     // Cliente envia só o servicoId; servidor cota no Melhor Envio com dimensões do banco.
-    let fretePrco = 0
+    let fretePreco = 0
     if (!freteGratis) {
       if (!frete?.servicoId) {
         return NextResponse.json({ erro: "Selecione uma opção de frete" }, { status: 400 })
@@ -175,14 +175,14 @@ export async function POST(request: NextRequest) {
       if (!opcao) {
         return NextResponse.json({ erro: "Opção de frete indisponível para este endereço" }, { status: 422 })
       }
-      fretePrco = opcao.price
+      fretePreco = opcao.price
     }
 
     const { valorFrete, total } = calcularTotal({
       subtotal,
       desconto: descontoTotal,
       freteGratis,
-      fretePrco,
+      fretePreco,
     })
 
     // Transação atômica: criar pedido + decrementar estoque (com guard) + incrementar uso de cupons
