@@ -6,6 +6,7 @@ import { ShoppingCart, Shield, Lock, Truck } from 'lucide-react';
 import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
 import { fmtCurrency } from '@/utils/formatters';
+import { calculateVolumePrice } from '@/lib/volume-pricing';
 
 interface ProductDetailHeroProps {
   product: Product;
@@ -24,18 +25,14 @@ export default function ProductDetailHero({
 
   const [selectedQty, setSelectedQty] = useState<1 | 2 | 3>(1);
 
-  const descPct = selectedQty === 3 ? 15 : selectedQty === 2 ? 10 : 0;
-  const precoComDesconto = descPct > 0 ? Math.round(preco * (1 - descPct / 100) * 100) / 100 : preco;
-
-  const precoAtual = precoComDesconto;
+  const selectedPrice = calculateVolumePrice(preco, selectedQty);
+  const descPct = selectedPrice.discountPercent;
+  const precoAtual = selectedPrice.unitPrice;
   const precoOriginalAtual = descPct > 0 ? preco : precoOriginal;
   const temEstoqueAtual = product.estoque > 0;
 
   function handleAddToCart() {
-    const produtoParaCarrinho = descPct > 0
-      ? { ...product, preco: precoComDesconto }
-      : product;
-    addItem(produtoParaCarrinho, selectedQty);
+    addItem(product, selectedQty);
   }
 
   function scrollToDescricao() {
@@ -168,8 +165,8 @@ export default function ProductDetailHero({
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {([1, 2, 3] as const).map((qty) => {
-                  const pct = qty === 2 ? 10 : qty === 3 ? 15 : 0;
-                  const unitPrice = pct > 0 ? Math.round(preco * (1 - pct / 100) * 100) / 100 : preco;
+                  const price = calculateVolumePrice(preco, qty);
+                  const pct = price.discountPercent;
                   const isSelected = selectedQty === qty;
                   return (
                     <button
@@ -195,7 +192,7 @@ export default function ProductDetailHero({
                       <span className="text-xs font-bold leading-tight">
                         {qty === 1 ? '1 unidade' : `${qty} unidades`}
                       </span>
-                      <span className="text-sm font-black mt-0.5">{fmtCurrency(unitPrice)}</span>
+                      <span className="text-sm font-black mt-0.5">{fmtCurrency(price.unitPrice)}</span>
                       <span className="text-[10px] text-ink-muted leading-none">/un</span>
                     </button>
                   );
@@ -206,7 +203,7 @@ export default function ProductDetailHero({
                 <p className="mt-2 text-xs font-bold text-success flex items-center gap-1">
                   <span className="text-success">✓</span>
                   Você economiza{' '}
-                  {fmtCurrency(Math.round((preco - precoComDesconto) * selectedQty * 100) / 100)} levando{' '}
+                  {fmtCurrency(selectedPrice.discountTotal)} levando{' '}
                   {selectedQty} unidades
                 </p>
               )}

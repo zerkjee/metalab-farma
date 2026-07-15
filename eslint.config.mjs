@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     // Artefatos locais/preview fora do app versionado
     ".claude/**",
     ".design-preview/**",
+    "Vetoriz*/**",
     // Coverage output
     "coverage/**",
   ]),

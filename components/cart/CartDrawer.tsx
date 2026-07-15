@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { IconButton } from '@/components/ui';
 import { useCart } from '@/context/CartContext';
+import { maxPurchasableUnits, MAX_UNITS_PER_PRODUCT } from '@/lib/volume-pricing';
 import { fmtCurrency as formatCurrency } from '@/utils/formatters';
 
 export default function CartDrawer() {
@@ -160,7 +161,7 @@ export default function CartDrawer() {
                             <span className="min-w-8 text-center text-sm font-semibold text-navy">{item.quantity}</span>
                             <button
                               onClick={() => increaseItem(item.productId)}
-                              disabled={item.quantity >= item.stock}
+                              disabled={item.quantity >= maxPurchasableUnits(item.stock)}
                               className="flex h-9 w-9 items-center justify-center text-ink-secondary transition-colors hover:text-navy disabled:cursor-not-allowed disabled:opacity-35"
                               aria-label={`Aumentar quantidade de ${item.name}`}
                             >
@@ -169,9 +170,24 @@ export default function CartDrawer() {
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-semibold text-ink">{formatCurrency(item.unitPrice * item.quantity)}</p>
-                            <p className="text-[10px] text-ink-muted">{formatCurrency(item.unitPrice)} cada</p>
+                            {item.volumeDiscountPercent > 0 ? (
+                              <>
+                                <p className="text-[10px] text-success">
+                                  -{item.volumeDiscountPercent}% por quantidade
+                                </p>
+                                <p className="text-[10px] text-ink-muted">
+                                  <span className="line-through">{formatCurrency(item.baseUnitPrice)}</span>{' '}
+                                  {formatCurrency(item.unitPrice)} cada
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-[10px] text-ink-muted">{formatCurrency(item.unitPrice)} cada</p>
+                            )}
                           </div>
                         </div>
+                        {item.quantity >= MAX_UNITS_PER_PRODUCT && (
+                          <p className="mt-1.5 text-[10px] text-ink-muted">Máx. {MAX_UNITS_PER_PRODUCT} unidades por pedido</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -243,8 +259,14 @@ export default function CartDrawer() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-ink-secondary">Subtotal</span>
-                  <span className="font-semibold text-ink">{formatCurrency(totals.subtotal)}</span>
+                  <span className="font-semibold text-ink">{formatCurrency(totals.itemsSubtotal)}</span>
                 </div>
+                {totals.volumeDiscountTotal > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-success">Desconto por quantidade</span>
+                    <span className="font-semibold text-success">- {formatCurrency(totals.volumeDiscountTotal)}</span>
+                  </div>
+                )}
                 {totals.discountTotal > 0 && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-success">Desconto</span>

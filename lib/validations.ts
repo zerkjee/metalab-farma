@@ -1,4 +1,11 @@
 import { z } from "zod"
+import { normalizeHexColor } from "@/lib/product-color"
+
+const colorSchema = z.preprocess((value) => {
+  if (value == null || value === "") return null
+  if (typeof value !== "string") return value
+  return normalizeHexColor(value) ?? value
+}, z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional())
 
 export const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -104,8 +111,8 @@ export const produtoSchema = z.object({
   // Descoberta
   tags: z.array(z.string()).optional().default([]),
   // Visual
-  corPrincipal: z.string().nullable().optional(),
-  corSecundaria: z.string().nullable().optional(),
+  corPrincipal: colorSchema,
+  corSecundaria: colorSchema,
   imagemUrl: z.string().nullable().optional(),
   // SEO
   metaTitulo: z.string().nullable().optional(),

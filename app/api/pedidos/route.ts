@@ -10,12 +10,13 @@ import { gerarNumeroPedido, cupomValido, calcularDesconto, calcularTotal } from 
 import type { CupomLike } from "@/lib/orderUtils"
 import { cotarFrete, selecionarOpcaoFrete } from "@/lib/frete"
 import { CUSTOMER_ORDER_SELECT } from "@/lib/orderSelect"
+import { calculateVolumePrice, roundMoney } from "@/lib/volume-pricing"
 
 const pedidoSchema = z.object({
   itens: z.array(z.object({
     produtoId: z.string().optional(),
     slug: z.string().optional(),
-    quantidade: z.number().int().min(1).max(99),
+    quantidade: z.number().int().min(1).max(3),
   })).min(1).max(50),
   cliente: z.object({
     nome: z.string().min(2).max(80),
@@ -88,29 +89,48 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    const aggregatedItems = new Map<string, { item: { quantidade: number }; prod: (typeof produtos)[number] }>()
+
     for (const item of itens) {
-      const prod = produtos.find(
-        (p) => p.id === item.produtoId || p.slug === item.slug
-      )
-      if (!prod) {
+      const byId = item.produtoId ? produtos.find((p) => p.id === item.produtoId) : null
+      const bySlug = item.slug ? produtos.find((p) => p.slug === item.slug) : null
+      if (byId && bySlug && byId.id !== bySlug.id) {
         return NextResponse.json(
-          { erro: `Produto ${item.produtoId} não encontrado` },
+          { erro: "Produto com identificadores conflitantes" },
           { status: 400 }
         )
       }
-      if (prod.estoque < item.quantidade) {
+      const prod = byId ?? bySlug
+      if (!prod) {
+        return NextResponse.json(
+          { erro: `Produto ${item.produtoId ?? item.slug ?? "informado"} não encontrado` },
+          { status: 400 }
+        )
+      }
+      const current = aggregatedItems.get(prod.id)
+      const quantidade = (current?.item.quantidade ?? 0) + item.quantidade
+      if (quantidade > 3) {
+        return NextResponse.json(
+          { erro: `${prod.nome}: limite de 3 unidades por pedido` },
+          { status: 400 }
+        )
+      }
+      if (prod.estoque < quantidade) {
         return NextResponse.json(
           { erro: `${prod.nome}: estoque insuficiente` },
           { status: 400 }
         )
       }
+      aggregatedItems.set(prod.id, { prod, item: { quantidade } })
     }
 
-    // Calcular subtotal
-    const subtotal = itens.reduce((acc: number, item) => {
-      const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
-      return acc + Number(prod.preco) * item.quantidade
-    }, 0)
+    const orderItems = Array.from(aggregatedItems.values()).map(({ item, prod }) => {
+      const price = calculateVolumePrice(Number(prod.preco), item.quantidade)
+      return { item, prod, price }
+    })
+
+    // Calcular subtotal autoritativo com desconto por quantidade server-side.
+    const subtotal = roundMoney(orderItems.reduce((acc: number, line) => acc + line.price.subtotal, 0))
 
     // Resolver cupons com revalidação completa (ativo, validade, usoMaximo)
     let descontoTotal = 0
@@ -146,10 +166,7 @@ export async function POST(request: NextRequest) {
       }
       const cotacao = await cotarFrete({
         cep: endereco.cep,
-        itens: itens.map((item) => {
-          const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
-          return { produtoId: prod.id, quantidade: item.quantidade }
-        }),
+        itens: orderItems.map(({ item, prod }) => ({ produtoId: prod.id, quantidade: item.quantidade })),
       })
       if (!cotacao.ok) {
         return NextResponse.json({ erro: cotacao.erro }, { status: cotacao.status })
@@ -178,8 +195,7 @@ export async function POST(request: NextRequest) {
       try {
         pedido = await prisma.$transaction(async (tx) => {
           // Decrementa estoque com guard atômico (rejeita se faltar)
-          for (const item of itens) {
-            const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
+          for (const { item, prod } of orderItems) {
             const result = await tx.produto.updateMany({
               where: { id: prod.id, estoque: { gte: item.quantidade } },
               data: { estoque: { decrement: item.quantidade } },
@@ -217,13 +233,12 @@ export async function POST(request: NextRequest) {
               usuarioId: session?.user?.id ?? null,
               cupomId: cupomIdPrincipal ?? null,
               itens: {
-                create: itens.map((item) => {
-                  const prod = produtos.find((p) => p.id === item.produtoId || p.slug === item.slug)!
+                create: orderItems.map(({ item, prod, price }) => {
                   return {
                     produtoId: prod.id,
                     quantidade: item.quantidade,
-                    precoUnit: Number(prod.preco),
-                    subtotal: Number(prod.preco) * item.quantidade,
+                    precoUnit: price.unitPrice,
+                    subtotal: price.subtotal,
                     produtoNome: prod.nome,
                     produtoSku: prod.sku,
                     produtoImagem: prod.imagemUrl,

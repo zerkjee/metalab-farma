@@ -146,6 +146,95 @@ describe('POST /api/pedidos — happy path', () => {
     expect(data?.total).toBe(110)
   })
 
+  it('aplica desconto por quantidade no servidor e persiste preço unitário líquido', async () => {
+    mockTx.pedido.create.mockResolvedValue({
+      ...MOCK_ORDER,
+      total: 190,
+      itens: [{ produtoNome: 'Whey Protein 900g', quantidade: 2, precoUnit: 90 }],
+    })
+
+    const res = await POST(makeRequest({
+      ...VALID_BODY,
+      itens: [{ slug: 'whey-protein', quantidade: 2 }],
+    }))
+
+    expect(res.status).toBe(201)
+    const data = mockTx.pedido.create.mock.calls[0]?.[0]?.data
+    expect(data?.subtotal).toBe(180)
+    expect(data?.frete).toBe(10)
+    expect(data?.total).toBe(190)
+    expect(data?.itens.create[0]).toMatchObject({
+      quantidade: 2,
+      precoUnit: 90,
+      subtotal: 180,
+    })
+    expect(mockCotarFrete).toHaveBeenCalledWith({
+      cep: VALID_BODY.endereco.cep,
+      itens: [{ produtoId: MOCK_PRODUCT.id, quantidade: 2 }],
+    })
+  })
+
+  it('agrega linhas duplicadas do mesmo produto antes de precificar e baixar estoque', async () => {
+    mockTx.pedido.create.mockResolvedValue({
+      ...MOCK_ORDER,
+      total: 265,
+      itens: [{ produtoNome: 'Whey Protein 900g', quantidade: 3, precoUnit: 85 }],
+    })
+
+    const res = await POST(makeRequest({
+      ...VALID_BODY,
+      itens: [
+        { slug: 'whey-protein', quantidade: 1 },
+        { produtoId: MOCK_PRODUCT.id, quantidade: 2 },
+      ],
+    }))
+
+    expect(res.status).toBe(201)
+    const data = mockTx.pedido.create.mock.calls[0]?.[0]?.data
+    expect(data?.subtotal).toBe(255)
+    expect(data?.total).toBe(265)
+    expect(data?.itens.create).toHaveLength(1)
+    expect(data?.itens.create[0]).toMatchObject({
+      quantidade: 3,
+      precoUnit: 85,
+      subtotal: 255,
+    })
+    expect(mockTx.produto.updateMany).toHaveBeenCalledWith({
+      where: { id: MOCK_PRODUCT.id, estoque: { gte: 3 } },
+      data: { estoque: { decrement: 3 } },
+    })
+  })
+
+  it('rejeita mais de 3 unidades consolidadas do mesmo produto', async () => {
+    const res = await POST(makeRequest({
+      ...VALID_BODY,
+      itens: [
+        { slug: 'whey-protein', quantidade: 2 },
+        { produtoId: MOCK_PRODUCT.id, quantidade: 2 },
+      ],
+    }))
+
+    expect(res.status).toBe(400)
+    expect((await res.json()).erro).toMatch(/limite de 3 unidades/i)
+    expect(mockTx.pedido.create).not.toHaveBeenCalled()
+  })
+
+  it('rejeita produtoId e slug conflitantes no mesmo item', async () => {
+    mockPrisma.produto.findMany.mockResolvedValue([
+      MOCK_PRODUCT,
+      { ...MOCK_PRODUCT, id: 'prod-uuid-2', slug: 'outro-produto', sku: 'WP-002' },
+    ])
+
+    const res = await POST(makeRequest({
+      ...VALID_BODY,
+      itens: [{ produtoId: MOCK_PRODUCT.id, slug: 'outro-produto', quantidade: 1 }],
+    }))
+
+    expect(res.status).toBe(400)
+    expect((await res.json()).erro).toMatch(/identificadores conflitantes/i)
+    expect(mockTx.pedido.create).not.toHaveBeenCalled()
+  })
+
   it('NÃO envia e-mail para PIX na criação — webhook dispara após confirmação', async () => {
     // Para PIX: o e-mail é enviado pelo webhook /api/pagamento/webhook quando
     // payment.status === "approved". Enviar aqui seria prematuro (pagamento pendente).

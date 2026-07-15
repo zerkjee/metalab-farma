@@ -11,6 +11,7 @@ import {
 import { calculateCartTotals } from '@/services/cartTotals';
 import { couponSlot, emptyCouponState, validateCoupon } from '@/services/coupons';
 import { trackAddToCart, trackCouponApplied } from '@/lib/analytics';
+import { calculateVolumePrice, maxPurchasableUnits } from '@/lib/volume-pricing';
 import type {
   AddCartProductInput,
   ApplyCouponFn,
@@ -49,7 +50,8 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 function productToCartItem(product: AddCartProductInput, quantity: number): CartItem {
-  const unitPrice = typeof product.preco === 'string' ? parseFloat(product.preco) : product.preco;
+  const baseUnitPrice = typeof product.preco === 'string' ? parseFloat(product.preco) : product.preco;
+  const price = calculateVolumePrice(baseUnitPrice, quantity);
 
   return {
     productId: product.id,
@@ -57,10 +59,23 @@ function productToCartItem(product: AddCartProductInput, quantity: number): Cart
     name: product.nome,
     brand: product.marca,
     imageUrl: product.imagemUrl ?? null,
-    unitPrice,
-    quantity,
+    baseUnitPrice: price.baseUnitPrice,
+    unitPrice: price.unitPrice,
+    volumeDiscountPercent: price.discountPercent,
+    quantity: price.quantity,
     stock: product.estoque,
     color: product.corPrincipal ?? '#6b21a8',
+  };
+}
+
+function repriceCartItem(item: CartItem, quantity: number): CartItem {
+  const price = calculateVolumePrice(item.baseUnitPrice, quantity);
+  return {
+    ...item,
+    baseUnitPrice: price.baseUnitPrice,
+    unitPrice: price.unitPrice,
+    volumeDiscountPercent: price.discountPercent,
+    quantity: price.quantity,
   };
 }
 
@@ -90,12 +105,19 @@ function sanitizeCartState(value: unknown): CartState {
   };
 
   return {
-    items: items.map((item) => ({
-      ...item,
-      slug: item.slug ?? '',
-      quantity: Math.max(1, Math.min(item.quantity, item.stock || item.quantity)),
-      color: item.color || '#6b21a8',
-    })),
+    items: items.map((item) => {
+      const stockCap = maxPurchasableUnits(item.stock || item.quantity);
+      const quantity = Math.max(1, Math.min(item.quantity, stockCap || item.quantity));
+      const baseItem: CartItem = {
+        ...item,
+        slug: item.slug ?? '',
+        baseUnitPrice: item.baseUnitPrice ?? item.unitPrice,
+        volumeDiscountPercent: item.volumeDiscountPercent ?? 0,
+        quantity,
+        color: item.color || '#6b21a8',
+      };
+      return repriceCartItem(baseItem, quantity);
+    }),
     coupons: {
       discount: isAppliedCoupon(maybeCoupons?.discount) ? maybeCoupons.discount : null,
       freeShipping: isAppliedCoupon(maybeCoupons?.freeShipping) ? maybeCoupons.freeShipping : null,
@@ -146,9 +168,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (existing) {
         return {
           ...current,
-          items: current.items.map((item) => item.productId === product.id
-            ? { ...item, quantity: Math.min(item.stock, item.quantity + quantity) }
-            : item),
+          items: current.items.map((item) => {
+            if (item.productId !== product.id) return item;
+            return repriceCartItem(item, Math.min(maxPurchasableUnits(item.stock), item.quantity + quantity));
+          }),
         };
       }
 
@@ -156,7 +179,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ...current,
         items: [
           ...current.items,
-          productToCartItem(product, Math.max(1, Math.min(quantity, product.estoque))),
+          productToCartItem(product, Math.max(1, Math.min(quantity, maxPurchasableUnits(product.estoque)))),
         ],
       };
     });
@@ -168,7 +191,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart((current) => ({
       ...current,
       items: current.items.map((item) => item.productId === productId
-        ? { ...item, quantity: Math.min(item.stock, item.quantity + 1) }
+        ? repriceCartItem(item, Math.min(maxPurchasableUnits(item.stock), item.quantity + 1))
         : item),
     }));
   }, []);
@@ -177,9 +200,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart((current) => ({
       ...current,
       items: current.items
-        .map((item) => item.productId === productId
-          ? { ...item, quantity: item.quantity - 1 }
-          : item)
+        .map((item) => {
+          if (item.productId !== productId) return item;
+          const nextQuantity = item.quantity - 1;
+          return nextQuantity > 0 ? repriceCartItem(item, nextQuantity) : { ...item, quantity: 0 };
+        })
         .filter((item) => item.quantity > 0),
     }));
   }, []);

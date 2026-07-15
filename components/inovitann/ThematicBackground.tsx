@@ -257,7 +257,7 @@ function AntioxidanteBackground({ cor }: { cor: string }) {
       <polygon
         points="50,37 61,43.5 61,56.5 50,63 39,56.5 39,43.5"
         fill="none" stroke={cor} strokeWidth="0.8" strokeOpacity="0.1"
-        transform="translate(calc(50% - 50px), calc(50% - 50px)) scale(1.5)"
+        transform="translate(50 50) scale(1.5) translate(-50 -50)"
       />
     </svg>
   )

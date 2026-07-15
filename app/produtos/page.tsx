@@ -6,6 +6,7 @@ import { Product } from "@/types/product"
 import { prisma } from "@/lib/prisma"
 import { publicStock } from "@/lib/publicProduct"
 import { products as localProducts } from "@/data/products"
+import { safeJsonLd } from "@/lib/json-ld"
 
 export const revalidate = 60
 
@@ -117,7 +118,7 @@ export default async function ProdutosPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <Header />
       <main className="min-h-screen bg-surface-page">

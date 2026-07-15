@@ -7,6 +7,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
 import Analytics from "@/components/analytics/Analytics";
 import CookieBanner from "@/components/cookies/CookieBanner";
+import { safeJsonLd } from "@/lib/json-ld";
 import "./globals.css";
 
 // Display (headings, nomes de produto, números de destaque)
@@ -90,11 +91,11 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(orgJsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
         />
       </head>
       <body className="min-h-full flex flex-col bg-[#fafafa]">

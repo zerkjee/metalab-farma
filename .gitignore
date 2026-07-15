@@ -75,3 +75,7 @@ metalab-backup-*
 MetaLab Design System.zip
 MetaLab Design System (1).zip
 *.zip
+
+# Configuração local do Claude Code e pastas de trabalho de assets (não versionar)
+.claude/
+Vetorização de imagens e páginas de produtos/

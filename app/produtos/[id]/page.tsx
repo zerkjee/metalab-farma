@@ -14,6 +14,8 @@ import { Product } from '@/types/product';
 import { prisma } from '@/lib/prisma';
 import { publicStock } from '@/lib/publicProduct';
 import { getInovitannTheme } from '@/lib/inovitann-themes';
+import { getInovitannDesignImage } from '@/lib/inovitann-design';
+import { safeJsonLd } from '@/lib/json-ld';
 import InovitannProductPage from '@/components/inovitann/InovitannProductPage';
 import DermatroxProductPage from '@/components/maxma/DermatroxProductPage';
 import MelasunProductPage from '@/components/maxma/MelasunProductPage';
@@ -116,6 +118,12 @@ async function getRelacionados(categoriaId: string | null | undefined, excluirId
 
 const BASE = process.env.NEXT_PUBLIC_URL || 'https://metalab-farma.vercel.app'
 
+function absoluteImageUrl(image: string | null | undefined) {
+  if (!image) return null
+  if (/^https?:\/\//i.test(image)) return image
+  return `${BASE}${image.startsWith('/') ? image : `/${image}`}`
+}
+
 export async function generateMetadata({ params }: ProductPageProps) {
   const { id: idParam } = await params
   const produto = await getProduto(idParam)
@@ -123,6 +131,10 @@ export async function generateMetadata({ params }: ProductPageProps) {
   if (!produto) return { title: 'Produto não encontrado' }
 
   const description = produto.descricaoCurta ?? `${produto.nome} — Suplemento alimentar de qualidade e procedência garantida.`
+  const inovitannTheme = getInovitannTheme(produto.slug)
+  const image = inovitannTheme
+    ? getInovitannDesignImage(inovitannTheme.slug) ?? produto.imagemUrl
+    : produto.imagemUrl
 
   return {
     title: produto.nome,
@@ -135,13 +147,13 @@ export async function generateMetadata({ params }: ProductPageProps) {
       description,
       type: 'website' as const,
       url: `${BASE}/produtos/${produto.slug}`,
-      ...(produto.imagemUrl ? { images: [{ url: produto.imagemUrl, alt: produto.nome }] } : {}),
+      ...(image ? { images: [{ url: image, alt: produto.nome }] } : {}),
     },
     twitter: {
       card: 'summary_large_image' as const,
       title: produto.nome,
       description,
-      ...(produto.imagemUrl ? { images: [produto.imagemUrl] } : {}),
+      ...(image ? { images: [image] } : {}),
     },
   }
 }
@@ -178,13 +190,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
     6,
   )
 
+  const selectedProductImage = inovitannTheme
+    ? getInovitannDesignImage(inovitannTheme.slug) ?? produto.imagemUrl
+    : produto.imagemUrl
+  const productJsonLdImage = absoluteImageUrl(selectedProductImage)
+
   const productJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: produto.nome,
     description: produto.descricaoCurta ?? produto.nome,
     brand: { '@type': 'Brand', name: produto.marca },
-    ...(produto.imagemUrl ? { image: produto.imagemUrl } : {}),
+    ...(productJsonLdImage ? { image: productJsonLdImage } : {}),
     offers: {
       '@type': 'Offer',
       priceCurrency: 'BRL',
@@ -207,25 +224,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
       <TrackViewItem id={produto.id} name={produto.nome} price={produto.preco} />
       <Header />
 
-      <ProductDetailHero product={produto} corPrincipal={corPrincipal} />
-
-      {produto.slug === 'dermatrox' ? (
-        <DermatroxProductPage imagemUrl={produto.imagemUrl} />
-      ) : produto.slug === 'melasun' ? (
-        <MelasunProductPage imagemUrl={produto.imagemUrl} />
-      ) : inovitannTheme ? (
+      {inovitannTheme ? (
         <InovitannProductPage
           theme={inovitannTheme}
-          productName={produto.nome}
-          imagemUrl={produto.imagemUrl}
+          product={produto}
         />
       ) : (
         <>
+          <ProductDetailHero product={produto} corPrincipal={corPrincipal} />
+
+          {produto.slug === 'dermatrox' ? (
+            <DermatroxProductPage imagemUrl={produto.imagemUrl} />
+          ) : produto.slug === 'melasun' ? (
+            <MelasunProductPage imagemUrl={produto.imagemUrl} />
+          ) : (
+            <>
           {/* ── SPLIT: descrição + ingredientes | imagem ─── */}
           <section id="descricao" className="py-14 bg-surface-card border-b border-line">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -345,6 +363,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
             </div>
           </section>
+            </>
+          )}
         </>
       )}
 

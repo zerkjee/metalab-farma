@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, LogOut, Package } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -19,6 +19,8 @@ const navItems = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hiddenOnScroll, setHiddenOnScroll] = useState(false);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -26,6 +28,36 @@ export default function Header() {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [menuOpen]);
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+
+      window.requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY.current;
+
+        if (currentY < 24 || menuOpen) {
+          setHiddenOnScroll(false);
+        } else if (delta > 8) {
+          setHiddenOnScroll(true);
+        } else if (delta < -8) {
+          setHiddenOnScroll(false);
+        }
+
+        lastScrollY.current = currentY;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [menuOpen]);
+
   const { hydrated, totals, toggleCart } = useCart();
   const cartCount = hydrated ? totals.itemCount : 0;
   const { data: session } = useSession();
@@ -33,7 +65,11 @@ export default function Header() {
   const userInitial = session?.user?.name?.[0]?.toUpperCase() ?? '?';
 
   return (
-    <header className="sticky top-0 z-50 bg-surface-card border-b border-line shadow-sm">
+    <header
+      className={`sticky top-0 z-50 bg-surface-card border-b border-line shadow-sm transition-transform duration-300 ease-out ${
+        hiddenOnScroll ? '-translate-y-full' : 'translate-y-0'
+      }`}
+    >
       {/* Faixa institucional — confiança e qualidade */}
       <div className="hidden md:block bg-navy text-on-navy">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between">

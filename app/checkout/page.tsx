@@ -624,6 +624,8 @@ export default function CheckoutPage() {
             formId={checkoutFormId}
             items={items}
             subtotal={totals.subtotal}
+            itemsSubtotal={totals.itemsSubtotal}
+            volumeDiscountTotal={totals.volumeDiscountTotal}
             shippingTotal={selectedShipping.price}
             discountTotal={totals.discountTotal}
             shippingDiscountTotal={totals.shippingDiscountTotal}

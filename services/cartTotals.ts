@@ -1,8 +1,11 @@
 import type { CartItem } from '@/types/cart';
 import type { CouponState } from '@/types/coupon';
+import { roundMoney } from '@/lib/volume-pricing';
 
 export interface CalculatedCartTotals {
   itemCount: number;
+  itemsSubtotal: number;
+  volumeDiscountTotal: number;
   subtotal: number;
   discountTotal: number;
   shippingTotal: number;
@@ -39,21 +42,28 @@ export function calculateCartTotals({
   const base = items.reduce(
     (acc, item) => ({
       itemCount: acc.itemCount + item.quantity,
-      subtotal: acc.subtotal + item.unitPrice * item.quantity,
+      itemsSubtotal: acc.itemsSubtotal + roundMoney((item.baseUnitPrice ?? item.unitPrice) * item.quantity),
+      subtotal: acc.subtotal + roundMoney(item.unitPrice * item.quantity),
     }),
-    { itemCount: 0, subtotal: 0 },
+    { itemCount: 0, itemsSubtotal: 0, subtotal: 0 },
   );
 
-  const discountTotal = Math.min(base.subtotal, calculateDiscount(base.subtotal, coupons));
-  const shippingDiscountTotal = coupons.freeShipping ? shippingPrice : 0;
-  const payableShippingTotal = Math.max(0, shippingPrice - shippingDiscountTotal);
-  const total = Math.max(0, base.subtotal - discountTotal + payableShippingTotal);
+  const subtotal = roundMoney(base.subtotal);
+  const itemsSubtotal = roundMoney(base.itemsSubtotal);
+  const discountTotal = roundMoney(Math.min(subtotal, calculateDiscount(subtotal, coupons)));
+  const volumeDiscountTotal = roundMoney(Math.max(0, itemsSubtotal - subtotal));
+  const shippingTotal = roundMoney(shippingPrice);
+  const shippingDiscountTotal = coupons.freeShipping ? shippingTotal : 0;
+  const payableShippingTotal = roundMoney(Math.max(0, shippingTotal - shippingDiscountTotal));
+  const total = roundMoney(Math.max(0, subtotal - discountTotal + payableShippingTotal));
 
   return {
     itemCount: base.itemCount,
-    subtotal: base.subtotal,
+    itemsSubtotal,
+    volumeDiscountTotal,
+    subtotal,
     discountTotal,
-    shippingTotal: shippingPrice,
+    shippingTotal,
     shippingDiscountTotal,
     payableShippingTotal,
     total,

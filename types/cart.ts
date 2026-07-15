@@ -8,7 +8,9 @@ export interface CartItem {
   name: string;
   brand: string;
   imageUrl: string | null;
+  baseUnitPrice: number;
   unitPrice: number;
+  volumeDiscountPercent: number;
   quantity: number;
   stock: number;
   color: string;

@@ -12,6 +12,8 @@ interface OrderSummaryProps {
   formId: string;
   items: CartItem[];
   subtotal: number;
+  itemsSubtotal: number;
+  volumeDiscountTotal: number;
   shippingTotal: number;
   discountTotal: number;
   shippingDiscountTotal: number;
@@ -26,6 +28,8 @@ export default function OrderSummary({
   formId,
   items,
   subtotal,
+  itemsSubtotal,
+  volumeDiscountTotal,
   shippingTotal,
   discountTotal,
   shippingDiscountTotal,
@@ -59,6 +63,11 @@ export default function OrderSummary({
             <div className="min-w-0 flex-1">
               <p className="line-clamp-2 font-display text-sm font-semibold leading-snug text-navy">{item.name}</p>
               <p className="mt-1 text-xs text-ink-secondary">{item.quantity} x {fmtCurrency(item.unitPrice)}</p>
+              {item.volumeDiscountPercent > 0 && (
+                <p className="mt-0.5 text-[10px] font-bold text-success">
+                  -{item.volumeDiscountPercent}% por quantidade
+                </p>
+              )}
             </div>
             <p className="text-sm font-semibold text-ink">{fmtCurrency(item.unitPrice * item.quantity)}</p>
           </div>
@@ -68,8 +77,20 @@ export default function OrderSummary({
       <div className="mt-5 space-y-3 border-t border-line pt-5">
         <div className="flex items-center justify-between text-sm">
           <span className="text-ink-secondary">Subtotal</span>
-          <span className="font-semibold text-ink">{fmtCurrency(subtotal)}</span>
+          <span className="font-semibold text-ink">{fmtCurrency(itemsSubtotal)}</span>
         </div>
+        {volumeDiscountTotal > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-success">Desconto por quantidade</span>
+            <span className="font-semibold text-success">- {fmtCurrency(volumeDiscountTotal)}</span>
+          </div>
+        )}
+        {volumeDiscountTotal > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-ink-secondary">Subtotal com promoção</span>
+            <span className="font-semibold text-ink">{fmtCurrency(subtotal)}</span>
+          </div>
+        )}
         {discountTotal > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-success">Desconto {coupons.discount ? `(${coupons.discount.code})` : ''}</span>

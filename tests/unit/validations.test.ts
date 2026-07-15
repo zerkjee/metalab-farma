@@ -51,7 +51,7 @@ describe('enderecoSchema', () => {
   })
 
   it('aceita sem complemento (opcional)', () => {
-    const { complemento: _, ...sem } = { ...VALIDO, complemento: undefined }
+    const sem = { ...VALIDO, complemento: undefined }
     expect(enderecoSchema.safeParse(sem).success).toBe(true)
   })
 
