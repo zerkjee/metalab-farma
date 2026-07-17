@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { purchaseNotifications } from '@/data/reviews';
 import { PurchaseNotif } from '@/types/review';
+import ProductImage from '@/components/ProductImage';
 
 export default function PurchaseNotification() {
   const [notif, setNotif] = useState<PurchaseNotif | null>(null);
@@ -51,11 +51,11 @@ export default function PurchaseNotification() {
       <div className="flex items-center gap-3 bg-surface-card rounded-lg shadow-lg border border-line p-4 max-w-xs w-full">
         {/* Product image or color dot */}
         <div
-          className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center bg-surface-sunken"
+          className="w-12 h-12 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center bg-surface-sunken p-1"
           style={{ border: `2px solid ${notif.productColor}20` }}
         >
           {notif.productImage ? (
-            <Image src={notif.productImage} alt={notif.productName} width={48} height={48} className="w-full h-full object-contain p-1" />
+            <ProductImage src={notif.productImage} alt={notif.productName} sizes="48px" frameClassName="h-full w-full" />
           ) : (
             <div className="w-8 h-8 rounded-md" style={{ backgroundColor: notif.productColor }} />
           )}

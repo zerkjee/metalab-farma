@@ -7,6 +7,7 @@ import {
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Modal from '@/components/admin/Modal';
 import StatusBadge from '@/components/admin/StatusBadge';
+import ProductImage from '@/components/ProductImage';
 import { fmtCurrency, productStatusColors, type ProductStatus } from '@/data/admin';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -180,9 +181,11 @@ function ProductCardPreview({ product }: { product: ProductForm }) {
       <div className="relative flex h-44 items-center justify-center overflow-hidden" style={{ background: `${product.color}18` }}>
         <div className="absolute inset-0 opacity-[0.08]"
           style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #323C64 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        {product.image
-          ? <div className="h-32 w-32 rounded-3xl border border-line bg-surface-sunken bg-contain bg-center bg-no-repeat p-4" style={{ backgroundImage: `url(${product.image})` }} />
-          : <Package className="h-16 w-16 text-navy-200" />}
+        {product.image ? (
+          <div className="h-32 w-32 rounded-3xl border border-line bg-surface-sunken p-4">
+            <ProductImage src={product.image} alt={product.name || 'Produto'} sizes="128px" frameClassName="h-full w-full" />
+          </div>
+        ) : <Package className="h-16 w-16 text-navy-200" />}
       </div>
       <div className="p-4">
         <div className="mb-2 flex items-center justify-between gap-2">
@@ -515,9 +518,11 @@ export default function AdminProdutos() {
                         className={`transition-colors hover:bg-surface-sunken ${index < filtered.length - 1 ? 'border-b border-line' : ''}`}>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 flex-shrink-0 rounded-xl border border-line bg-contain bg-center bg-no-repeat"
-                              style={{ backgroundColor: `${product.color}18`, backgroundImage: product.image ? `url(${product.image})` : undefined }}>
-                              {!product.image && <Package className="h-5 w-5 m-auto mt-3 text-navy-300" />}
+                            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-line p-1"
+                              style={{ backgroundColor: `${product.color}18` }}>
+                              {product.image
+                                ? <ProductImage src={product.image} alt={product.name} sizes="48px" frameClassName="h-full w-full" />
+                                : <Package className="h-5 w-5 text-navy-300" />}
                             </div>
                             <div className="min-w-0">
                               <p className="truncate text-sm font-bold text-navy">{product.name}</p>

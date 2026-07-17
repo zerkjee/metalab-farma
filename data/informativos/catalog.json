@@ -1,0 +1,422 @@
+{
+  "syncedAt": "2026-07-15T17:01:39.811Z",
+  "source": "production-catalog",
+  "products": [
+    {
+      "id": "b9c79ac1-1a5b-4c76-8b1f-0642e28c35f0",
+      "nome": "Água Inglesa",
+      "slug": "agua-inglesa",
+      "marca": "Metalab",
+      "imagemUrl": "/products/agua_inglesa.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "3b011f01-a794-45cc-b202-71fa7b1b8dfc",
+      "nome": "Apetimax",
+      "slug": "apetimax",
+      "marca": "Metalab",
+      "imagemUrl": "/products/apetimax.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "fca04441-82cc-4e70-8414-d6ba3c651cd6",
+      "nome": "Articulice 30 Comprimidos",
+      "slug": "articulice-30-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/articulice.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "061b33a5-8e2d-4036-bc69-3950128493e1",
+      "nome": "Articulice Cúrcuma 30 Comprimidos",
+      "slug": "articulice-curcuma-30-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/articulice-curcuma.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "abc3bd08-53df-451c-991f-a0f4f725370c",
+      "nome": "Carve Active Carvão Vegetal 30 Comprimidos",
+      "slug": "carve-active-carvao-vegetal-30-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/carve_active.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "969d4f31-4da3-45ae-8f97-b44e3c30cb66",
+      "nome": "Cloreto de Magnésio P.A. 60 Comprimidos",
+      "slug": "cloreto-magnesio-pa-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/cloreto_de_magnesio.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "c3dceadb-73b9-48b9-80b5-6dbe77a3acbc",
+      "nome": "Cogniflex 60 Cápsulas",
+      "slug": "cogniflex-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/cogniflex.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "bfdfd0be-4449-486d-8910-200ef3d5a96e",
+      "nome": "Condroless 30 Comprimidos",
+      "slug": "condroless-30-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/condroless.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "efd6fd93-42f8-493e-af8f-255fb2b51ab1",
+      "nome": "Condroless Complex Cúrcuma 30 Comprimidos",
+      "slug": "condroless-complex-curcuma-30-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/condroless-curcuma.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "35f4b9e8-29a7-4154-9ac4-9cbef17579c8",
+      "nome": "Dermatrox 10 Cápsulas",
+      "slug": "dermatrox",
+      "marca": "Metalab",
+      "imagemUrl": "/products/dermatrox.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "2645589e-f605-4e44-b1ca-661f083e4fa7",
+      "nome": "Elixir Santa Raiz",
+      "slug": "elixir-santa-raiz",
+      "marca": "Metalab",
+      "imagemUrl": "/products/elixir_santa_raiz.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "59451e27-47ab-4e9e-a171-f7757beeb8bd",
+      "nome": "Enzicoba Vitamina B12 60 Comprimidos",
+      "slug": "enzicoba-vitamina-b12-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/enzicoba.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "72875d73-586a-4fc7-ac80-013553625861",
+      "nome": "Epanon Amargo",
+      "slug": "epanon-amargo",
+      "marca": "Metalab",
+      "imagemUrl": "/products/epanon_amargo.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "9efaa7cb-94eb-4aaf-8209-7a8bdd277f7d",
+      "nome": "Epatinon Comprimido",
+      "slug": "epatinon-comprimido",
+      "marca": "Metalab",
+      "imagemUrl": "/products/epatinon_comprimido.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "adc512a1-aaf1-4e44-aebc-bd498023a489",
+      "nome": "Epatinon Comprimido 200mg",
+      "slug": "epatinon-comprimido-200mg",
+      "marca": "Metalab",
+      "imagemUrl": "/products/epatinon_comprimido_200.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "5c387e42-e815-409b-9900-c9e8eb45043e",
+      "nome": "Epatinon Flaconete",
+      "slug": "epatinon-flaconete",
+      "marca": "Metalab",
+      "imagemUrl": "/products/epatinon_flaconete.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "6769f825-2483-450f-a37b-c0ea7e567591",
+      "nome": "Epatinon Xarope",
+      "slug": "epatinon-xarope",
+      "marca": "Metalab",
+      "imagemUrl": "/products/epatinon_xarope.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "80810777-644e-4139-925c-99e95be18b8f",
+      "nome": "Fleboderm",
+      "slug": "fleboderm",
+      "marca": "Metalab",
+      "imagemUrl": "/products/fleboderm.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "cmp6xd4co000mzy4slrk5kg3s",
+      "nome": "Flebogenol 30 Comprimidos",
+      "slug": "flebogenol-30-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/flebogenol.png",
+      "corPrincipal": "#1e40af"
+    },
+    {
+      "id": "44062b41-ae17-4b76-a514-cc335c835def",
+      "nome": "Flebogenol 60 Comprimidos",
+      "slug": "flebogenol-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/flebogenol_60.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "cmp6xd7fm000qzy4sugzns9am",
+      "nome": "Flex-A-Mim 60 Comprimidos",
+      "slug": "flex-a-mim-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/flex-a-mim.png",
+      "corPrincipal": "#0f766e"
+    },
+    {
+      "id": "0cd74e46-bd42-40e8-8d84-323033edc437",
+      "nome": "Inovitann Biotina Plus 60 Cápsulas",
+      "slug": "inovitann-biotina-plus-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/9.png",
+      "corPrincipal": "#db2777"
+    },
+    {
+      "id": "5badbaa6-e9bb-44ae-9054-d0dbf005c752",
+      "nome": "Inovitann Cloreto de Magnésio PA 60 Cápsulas",
+      "slug": "inovitann-cloreto-de-magnesio-pa-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/1.png",
+      "corPrincipal": "#7c3aed"
+    },
+    {
+      "id": "c14935fa-7ae6-411d-abb8-db1b4f534e09",
+      "nome": "Inovitann Coenzima Q10 Plus 60 Cápsulas",
+      "slug": "inovitann-coenzima-q10-plus-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/5.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "e00bda71-85c5-4cbd-9cd2-9e9a49eeebdd",
+      "nome": "Inovitann Cúrcuma Plus 60 Cápsulas",
+      "slug": "inovitann-curcuma-plus-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/11.png",
+      "corPrincipal": "#d97706"
+    },
+    {
+      "id": "4d569b28-c07e-4bde-9612-7835c73d2cc9",
+      "nome": "Inovitann Luteína + Zeaxantina 60 Cápsulas",
+      "slug": "inovitann-luteina-zeaxantina-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/2.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "673fa12b-9d7c-463e-87b7-c5f690e74140",
+      "nome": "Inovitann Magnésio L-Treonato 60 Cápsulas",
+      "slug": "inovitann-magnesio-l-treonato-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/3.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "c4c842a8-c11e-4cc2-ba00-7bae687813db",
+      "nome": "Inovitann Metilcobalamina B12 60 Cápsulas",
+      "slug": "inovitann-metilcobalamina-b12-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/4.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "4181a002-e7b9-4857-9878-a726e66fae18",
+      "nome": "Inovitann NAC 600mg 60 Cápsulas",
+      "slug": "inovitann-nac-600mg-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/7.png",
+      "corPrincipal": "#1e3a8a"
+    },
+    {
+      "id": "856239da-48d5-4051-88e0-46cbbce40585",
+      "nome": "Inovitann Penta Magnésio 60 Cápsulas",
+      "slug": "inovitann-penta-magnesio-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/6.png",
+      "corPrincipal": "#2d7d6a"
+    },
+    {
+      "id": "e1495fda-ba61-476d-85f7-9b35c85bbf42",
+      "nome": "Inovitann Trimagnésio Ultra 60 Cápsulas",
+      "slug": "inovitann-trimagnesio-ultra-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/8.png",
+      "corPrincipal": "#c2540a"
+    },
+    {
+      "id": "c16a61ce-bd19-4f42-89a5-95f9c6a96941",
+      "nome": "Inovitann Vitamina K Ultra 60 Cápsulas",
+      "slug": "inovitann-vitamina-k-ultra-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/inovitann/10.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "f190a561-5e2c-4c0e-94b0-e6393f261de0",
+      "nome": "LacIntesty 10 Cápsulas",
+      "slug": "lacintesty-10-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/lacintesty_10.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "aef884cc-76e6-48ae-a213-262eeae3a66d",
+      "nome": "LacIntesty 30 Cápsulas",
+      "slug": "lacintesty-30-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/lacintesty_30.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "2946ffb0-84ed-4073-88d7-4cff0eec7767",
+      "nome": "LacIntesty 60 Cápsulas",
+      "slug": "lacintesty-60-capsulas",
+      "marca": "Metalab",
+      "imagemUrl": "/products/lacintesty_60.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "cmp6xd554000nzy4srftq2e1q",
+      "nome": "Laxtrine Geleia 250g",
+      "slug": "laxtrine-geleia-250g",
+      "marca": "Metalab",
+      "imagemUrl": "/products/laxtrine-geleia.jpg",
+      "corPrincipal": "#15803d"
+    },
+    {
+      "id": "2ccb41f6-2e58-4710-9183-08d9a39fecf6",
+      "nome": "Melasun 30 Cápsulas",
+      "slug": "melasun",
+      "marca": "Metalab",
+      "imagemUrl": "/products/melasun.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "d1891046-3f0b-4cc1-aa89-16cb7312411d",
+      "nome": "Meltrat Spray",
+      "slug": "meltrat-spray",
+      "marca": "Metalab",
+      "imagemUrl": "/products/meltrat_spray.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "a9c5d0c3-e663-4172-8f14-f0f646a058c4",
+      "nome": "Meltrat Xarope",
+      "slug": "meltrat-xarope",
+      "marca": "Metalab",
+      "imagemUrl": "/products/meltrat_xarope.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "53bcd0d4-2483-4beb-8062-a7e567bd0cb3",
+      "nome": "Mucolisil 20mg",
+      "slug": "mucolisil-20mg",
+      "marca": "Metalab",
+      "imagemUrl": "/products/mucolisil_20mg.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "83a0bdc9-9359-42b7-b7a2-a63f9e6182c4",
+      "nome": "Mucolisil 40mg",
+      "slug": "mucolisil-40mg",
+      "marca": "Metalab",
+      "imagemUrl": "/products/mucolisil_40mg.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "3b824db7-a133-4217-9cde-201d1f9d3c5e",
+      "nome": "Muricalm Comprimidos",
+      "slug": "muricalm-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/muricalm_comprimidos.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "f6670213-6e50-4855-8e04-729a7252a64e",
+      "nome": "Muricalm Gotas 30ml",
+      "slug": "muricalm-gotas-30ml",
+      "marca": "Metalab",
+      "imagemUrl": "/products/muricalm_gotas.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "cmp6xd5xk000ozy4s7cedeja5",
+      "nome": "Muricalm Xarope 120ml",
+      "slug": "muricalm-xarope-120ml",
+      "marca": "Metalab",
+      "imagemUrl": "/products/muricalm-xarope.png",
+      "corPrincipal": "#5b21b6"
+    },
+    {
+      "id": "dc9bcaa4-64b0-4dc6-a990-b89abb793318",
+      "nome": "Osteocorp Cálcio 500mg + Vitamina D 400UI 60 Comprimidos",
+      "slug": "osteocorp-500mg-vitamina-d-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/osteocorp_500__400.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "c66a1d8d-b5eb-46da-97d0-f946c1267936",
+      "nome": "Osteocorp Cálcio 500mg 60 Comprimidos",
+      "slug": "osteocorp-calcio-500mg-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/osteocorp.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "f610c605-6742-4d9f-aa92-a2da258affef",
+      "nome": "Osteocorp Cálcio 600mg + Vitamina D 400UI 60 Comprimidos",
+      "slug": "osteocorp-600mg-vitamina-d-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/osteocorp_600__400.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "939bbdbd-1382-4ea5-b20c-071fa46a9970",
+      "nome": "Osteocorp MDK 60 Comprimidos",
+      "slug": "osteocorp-mdk-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/osteocorp_mdk.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "70523708-0784-4590-9848-cd6096321249",
+      "nome": "Purofer Gotas 30ml",
+      "slug": "purofer-gotas-30ml",
+      "marca": "Metalab",
+      "imagemUrl": "/products/purofer_gotas.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "06c6a2ed-f8ec-4b0c-944a-7422344b7401",
+      "nome": "Reporgermina",
+      "slug": "reporgermina",
+      "marca": "Metalab",
+      "imagemUrl": "/products/reporgermina.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "d4ceee62-c8fa-46b5-bd69-1062e82f8028",
+      "nome": "Sulfato Ferroso 60 Comprimidos",
+      "slug": "sulfato-ferroso-60-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/sulfato_ferroso_60.png",
+      "corPrincipal": null
+    },
+    {
+      "id": "94d9cd86-80c4-48b2-8626-5734015f548d",
+      "nome": "Vi-Syneral Folato 30 Comprimidos",
+      "slug": "vi-syneral-folato-30-comprimidos",
+      "marca": "Metalab",
+      "imagemUrl": "/products/visyneral_folato.png",
+      "corPrincipal": null
+    }
+  ]
+}

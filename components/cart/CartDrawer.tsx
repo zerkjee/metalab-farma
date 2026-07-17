@@ -1,13 +1,13 @@
 'use client';
 
 import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { IconButton } from '@/components/ui';
 import { useCart } from '@/context/CartContext';
 import { maxPurchasableUnits, MAX_UNITS_PER_PRODUCT } from '@/lib/volume-pricing';
 import { fmtCurrency as formatCurrency } from '@/utils/formatters';
+import ProductImage from '@/components/ProductImage';
 
 export default function CartDrawer() {
   const [couponCode, setCouponCode] = useState('');
@@ -112,16 +112,14 @@ export default function CartDrawer() {
                       <Link
                         href={`/produtos/${item.slug || item.productId}`}
                         onClick={closeCart}
-                        className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-surface-card"
+                        className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-surface-card p-2"
                       >
                         {item.imageUrl ? (
-                          <Image
+                          <ProductImage
                             src={item.imageUrl}
                             alt={item.name}
-                            width={80}
-                            height={80}
                             sizes="80px"
-                            className="h-full w-full object-contain p-2"
+                            frameClassName="h-full w-full"
                           />
                         ) : (
                           <ShoppingBag className="h-7 w-7 text-neutral-300" strokeWidth={1.5} />

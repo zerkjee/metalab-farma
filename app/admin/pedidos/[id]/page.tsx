@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import StatusBadge from '@/components/admin/StatusBadge';
+import ProductImage from '@/components/ProductImage';
 import TinyInvoiceActions from '@/components/admin/tiny/TinyInvoiceActions';
 import TinyOrderActions from '@/components/admin/tiny/TinyOrderActions';
 import { fmtCurrency } from '@/data/admin';
@@ -344,7 +345,9 @@ export default function AdminPedidoDetalhe() {
             <div className="space-y-3">
               {order.items.map((item) => (
                 <div key={item.sku} className="grid gap-3 rounded-2xl border border-line bg-surface-sunken p-4 sm:grid-cols-[56px_1fr_80px_120px] sm:items-center">
-                  <div className="h-14 w-14 rounded-xl bg-surface-card bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${item.image})` }} />
+                  <div className="h-14 w-14 rounded-xl bg-surface-card p-1">
+                    <ProductImage src={item.image} alt={item.name} sizes="56px" frameClassName="h-full w-full" />
+                  </div>
                   <div>
                     <p className="text-sm font-bold text-navy">{item.name}</p>
                     <p className="text-xs text-ink-muted">{item.sku}</p>

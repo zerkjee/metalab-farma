@@ -1,12 +1,12 @@
 'use client';
 
 import { LockKeyhole, ShoppingBag } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import type { CartItem } from '@/types/cart';
 import type { CouponState } from '@/types/coupon';
 import type { FreteStatus } from '@/types/checkout';
 import { fmtCurrency } from '@/utils/formatters';
+import ProductImage from '@/components/ProductImage';
 
 interface OrderSummaryProps {
   formId: string;
@@ -52,10 +52,10 @@ export default function OrderSummary({
           <div key={item.productId} className="flex gap-3 rounded-2xl bg-surface-sunken p-3">
             <Link
               href={`/produtos/${item.slug || item.productId}`}
-              className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-surface-card"
+              className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-surface-card p-2"
             >
               {item.imageUrl ? (
-                <Image src={item.imageUrl} alt={item.name} width={64} height={64} sizes="64px" className="h-full w-full object-contain p-2" />
+                <ProductImage src={item.imageUrl} alt={item.name} sizes="64px" frameClassName="h-full w-full" />
               ) : (
                 <ShoppingBag className="h-6 w-6 text-neutral-300" strokeWidth={1.6} />
               )}

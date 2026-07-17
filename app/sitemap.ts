@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { informativeProducts } from '@/data/informativos'
 
 export const revalidate = 3600
 
@@ -26,7 +27,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }))
 
-    return [...staticUrls, ...productUrls]
+    const informativeUrls: MetadataRoute.Sitemap = informativeProducts
+      .filter((product) => product.status === 'published')
+      .map((product) => ({
+        url: `${BASE}/informativos/${product.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.5,
+      }))
+
+    return [...staticUrls, ...productUrls, ...informativeUrls]
   } catch (error) {
     logger.warn('Sitemap: falha buscando produtos — retornando URLs estáticas', { error })
     return staticUrls

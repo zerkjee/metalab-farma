@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { AlertTriangle, ChevronDown, ChevronUp, PackageSearch, ShoppingBag } from 'lucide-react';
 import { fmtCurrency, fmtDate } from '@/utils/formatters';
 import { lerPedidosLocais } from '@/lib/pedidosLocais';
+import ProductImage from '@/components/ProductImage';
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
@@ -106,13 +106,14 @@ function OrderCard({ order }: { order: Order }) {
             {order.itens.map((item) => (
               <li key={item.id} className="flex items-center gap-3">
                 {item.produtoImagem ? (
-                  <Image
-                    src={item.produtoImagem}
-                    alt={item.produtoNome}
-                    width={48}
-                    height={48}
-                    className="h-12 w-12 rounded-xl object-cover border border-line shrink-0"
-                  />
+                  <span className="h-12 w-12 shrink-0 rounded-xl border border-line bg-surface-sunken p-1">
+                    <ProductImage
+                      src={item.produtoImagem}
+                      alt={item.produtoNome}
+                      sizes="48px"
+                      frameClassName="h-full w-full"
+                    />
+                  </span>
                 ) : (
                   <div className="h-12 w-12 rounded-xl bg-surface-sunken shrink-0 flex items-center justify-center">
                     <ShoppingBag className="h-5 w-5 text-neutral-300" strokeWidth={1.5} />

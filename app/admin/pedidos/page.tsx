@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/admin/Modal';
 import StatusBadge from '@/components/admin/StatusBadge';
+import ProductImage from '@/components/ProductImage';
 import { fmtCurrency } from '@/data/admin';
 import {
   AdminOrderDetail,
@@ -513,7 +514,9 @@ export default function AdminPedidos() {
               <div className="space-y-2">
                 {quickOrder.items.map((item) => (
                   <div key={item.sku} className="flex items-center gap-3 rounded-xl border border-line bg-surface-sunken p-3">
-                    <div className="h-12 w-12 rounded-xl bg-surface-card bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${item.image})` }} />
+                    <div className="h-12 w-12 rounded-xl bg-surface-card p-1">
+                      <ProductImage src={item.image} alt={item.name} sizes="48px" frameClassName="h-full w-full" />
+                    </div>
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-navy">{item.name}</p>
                       <p className="text-xs text-ink-muted">{item.sku}</p>

@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Loader2 } from 'lucide-react';
 import { fmtCurrency } from '@/utils/formatters';
+import ProductImage from '@/components/ProductImage';
 
 interface SearchHit {
   id: string;
@@ -117,9 +117,9 @@ export default function SearchBar({ compact = false, onNavigate }: SearchBarProp
                           : 'hover:bg-surface-sunken'
                       }`}
                     >
-                      <div className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-line bg-surface-sunken ${semEstoque ? 'opacity-50 grayscale' : ''}`}>
+                      <div className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-line bg-surface-sunken p-1 ${semEstoque ? 'opacity-50 grayscale' : ''}`}>
                         {p.imagemUrl ? (
-                          <Image src={p.imagemUrl} alt={p.nome} fill sizes="48px" className="object-contain p-1" />
+                          <ProductImage src={p.imagemUrl} alt={p.nome} sizes="48px" frameClassName="h-full w-full" />
                         ) : (
                           <div className="flex h-full items-center justify-center text-[9px] text-ink-muted">sem foto</div>
                         )}

@@ -1,5 +1,6 @@
-import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductDetailHero from '@/components/ProductDetailHero';
@@ -20,7 +21,14 @@ import InovitannProductPage from '@/components/inovitann/InovitannProductPage';
 import DermatroxProductPage from '@/components/maxma/DermatroxProductPage';
 import MelasunProductPage from '@/components/maxma/MelasunProductPage';
 import IngredientResearchCards from '@/components/IngredientResearchCards';
+import ProductFaq from '@/components/informativos/ProductFaq';
+import ProductVisualStory from '@/components/informativos/ProductVisualStory';
+import ComingSoonStoreButton from '@/components/informativos/ComingSoonStoreButton';
 import { matchResearch } from '@/lib/ingredient-research';
+import { getInformativeProduct } from '@/data/informativos';
+import { buildProductFaq, buildProductVisualStory } from '@/data/informativos/product-experience';
+import { buildProductTechnicalOverview } from '@/data/informativos/technical-explanations';
+import ProductImage from '@/components/ProductImage';
 
 // Converte o texto de composição do banco em Ingrediente[] para o ComposicaoSection
 function composicaoFromText(text: string): Ingrediente[] {
@@ -173,23 +181,60 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // Inovitann: tema exclusivo por produto
   const inovitannTheme = getInovitannTheme(produto.slug)
 
-  // Composição: preferir dado do banco, fallback para dado estático legado
+  // Conteúdo comercial deve ceder lugar à ficha técnica quando há fonte rastreável.
+  // Isso impede que descrições antigas do banco contradigam o SKU e o rótulo atual.
+  const informativeProduct = getInformativeProduct(produto.slug)
+  const informativeOverview = informativeProduct?.profile
+    ? buildProductTechnicalOverview(informativeProduct.slug, informativeProduct.profile)
+    : null
+  const safeTechnicalDescription = informativeProduct
+    ? informativeProduct.profile && informativeOverview?.status === 'available'
+      ? informativeOverview.purpose
+      : 'A composição técnica deste SKU está em validação documental. Consulte o folheto e o rótulo físico vigente antes de consumir.'
+    : null
+  const displayProduct: Product = safeTechnicalDescription
+    ? {
+        ...produto,
+        descricaoCurta: safeTechnicalDescription,
+        descricaoHtml: null,
+        composicao: informativeProduct?.profile?.ingredients.join('; ') ?? null,
+        modoDeUso: null,
+      }
+    : produto
+
+  // Composição: ficha técnica/OCR conciliada > banco > dado estático legado.
   const composicaoIngredientes: Ingrediente[] | null =
-    produto.composicao
+    informativeProduct?.profile
+      ? informativeProduct.profile.ingredients.map((nome) => ({ nome, descricao: '', icone: 'Sparkles' }))
+      : informativeProduct
+      ? null
+      : produto.composicao
       ? composicaoFromText(produto.composicao)
       : detail?.composicao ?? null
 
-  // Modo de uso: preferir dado do banco, fallback para dado estático legado
+  // Porção nutricional não vira posologia automática.
   const modoDeUsoText =
-    produto.modoDeUso ??
-    detail?.modo_uso ??
-    'Conforme orientação do fabricante ou de um profissional habilitado. Não auto-medicar.'
+    informativeProduct
+      ? informativeProduct.profile?.serving
+        ? `A ficha informa a porção nutricional de referência ${informativeProduct.profile.serving}. Confirme o modo de uso exclusivamente no rótulo físico vigente.`
+        : informativeProduct.profile
+        ? 'O modo de uso não foi identificado de forma inequívoca na ficha processada. Confirme exclusivamente no rótulo físico vigente.'
+        : 'A ficha deste SKU ainda está em validação. Não reutilizamos o modo de uso do banco comercial; confira exclusivamente o rótulo físico vigente.'
+      : produto.modoDeUso ??
+        detail?.modo_uso ??
+        'Conforme orientação do fabricante ou de um profissional habilitado. Não auto-medicar.'
 
-  const researchCards = matchResearch(
-    (composicaoIngredientes ?? []).filter(i => i.nome.length <= 80).map(i => i.nome),
-    6,
-  )
+  const researchCards = informativeProduct
+    ? []
+    : matchResearch(
+        (composicaoIngredientes ?? []).filter(i => i.nome.length <= 80).map(i => i.nome),
+        6,
+      )
 
+  const informativeFaq = informativeProduct ? buildProductFaq(informativeProduct, informativeOverview) : []
+  const informativeVisual = informativeProduct
+    ? buildProductVisualStory(informativeProduct, informativeOverview)
+    : null
   const selectedProductImage = inovitannTheme
     ? getInovitannDesignImage(inovitannTheme.slug) ?? produto.imagemUrl
     : produto.imagemUrl
@@ -199,7 +244,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: produto.nome,
-    description: produto.descricaoCurta ?? produto.nome,
+    description: displayProduct.descricaoCurta ?? produto.nome,
     brand: { '@type': 'Brand', name: produto.marca },
     ...(productJsonLdImage ? { image: productJsonLdImage } : {}),
     offers: {
@@ -229,18 +274,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <TrackViewItem id={produto.id} name={produto.nome} price={produto.preco} />
       <Header />
 
-      {inovitannTheme ? (
+      {inovitannTheme && !informativeProduct ? (
         <InovitannProductPage
           theme={inovitannTheme}
-          product={produto}
+          product={displayProduct}
         />
       ) : (
         <>
-          <ProductDetailHero product={produto} corPrincipal={corPrincipal} />
+          <ProductDetailHero product={displayProduct} corPrincipal={corPrincipal} />
 
-          {produto.slug === 'dermatrox' ? (
+          {produto.slug === 'dermatrox' && !informativeProduct ? (
             <DermatroxProductPage imagemUrl={produto.imagemUrl} />
-          ) : produto.slug === 'melasun' ? (
+          ) : produto.slug === 'melasun' && !informativeProduct ? (
             <MelasunProductPage imagemUrl={produto.imagemUrl} />
           ) : (
             <>
@@ -262,7 +307,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </h2>
                   <p className="text-ink-secondary text-base sm:text-lg leading-relaxed mb-5">
                     {(() => {
-                      const raw = produto.descricaoCurta ?? ''
+                      const raw = displayProduct.descricaoCurta ?? ''
                       const isTableData = /tabela nutricional|vd não|porção \d|mg =|ins \d/i.test(raw)
                       return !isTableData && raw.length > 20
                         ? raw
@@ -271,8 +316,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </p>
 
                   {/* Benefícios / descrição rica em HTML */}
-                  {produto.descricaoHtml && (() => {
-                    const isTableData = /tabela nutricional|vd não|porção \d|mg =|ins \d/i.test(produto.descricaoHtml!)
+                  {displayProduct.descricaoHtml && (() => {
+                    const isTableData = /tabela nutricional|vd não|porção \d|mg =|ins \d/i.test(displayProduct.descricaoHtml!)
                     if (isTableData) return null
                     return (
                       <div
@@ -282,7 +327,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                           [&_li]:before:content-['▸'] [&_li]:before:shrink-0 [&_li]:before:mt-0.5 [&_li]:before:font-bold
                           [&_p]:mb-2 [&_strong]:text-navy [&_strong]:font-semibold"
                         style={{ '--li-color': corPrincipal } as React.CSSProperties}
-                        dangerouslySetInnerHTML={{ __html: produto.descricaoHtml }}
+                        dangerouslySetInnerHTML={{ __html: displayProduct.descricaoHtml }}
                       />
                     )
                   })()}
@@ -319,13 +364,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {/* Direita: imagem flutuante */}
                 {produto.imagemUrl && (
                   <div className="flex items-center justify-center">
-                    <div className="relative w-72 h-72 sm:w-96 sm:h-96">
-                      <Image
+                    <div className="h-72 w-72 sm:h-96 sm:w-96">
+                      <ProductImage
                         src={produto.imagemUrl}
                         alt={produto.nome}
-                        fill
                         sizes="(max-width: 640px) 288px, 384px"
-                        className="object-contain"
+                        frameClassName="h-full w-full"
                         style={{ filter: `drop-shadow(0 16px 48px ${corPrincipal}35)` }}
                       />
                     </div>
@@ -366,6 +410,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </>
           )}
         </>
+      )}
+
+      {informativeProduct && (
+        <section id="perguntas-frequentes" className="border-b border-line bg-surface-page py-14 sm:py-16">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-700">Entenda antes de escolher</p>
+              <h2 className="mt-3 font-display text-3xl font-black text-ink sm:text-4xl">Origem, fórmula e respostas rápidas</h2>
+              <p className="mt-4 text-base leading-relaxed text-ink-secondary">
+                Informações técnicas curtas, ligadas ao folheto documental deste produto e separadas da oferta comercial.
+              </p>
+            </div>
+
+            {informativeVisual && <ProductVisualStory story={informativeVisual} />}
+
+            <div className="mt-8 rounded-lg border border-line bg-surface-card p-5 shadow-sm sm:p-7">
+              <h3 className="font-display text-2xl font-black text-ink">Perguntas frequentes</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-secondary">Composição, porção de referência, origem e conferência do rótulo em respostas diretas.</p>
+              <ProductFaq items={informativeFaq} />
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href={`/informativos/${informativeProduct.slug}`}
+                className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-black text-on-brand transition hover:bg-brand-hover"
+              >
+                Abrir folheto técnico <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <ComingSoonStoreButton productName={informativeProduct.nome} />
+            </div>
+          </div>
+        </section>
       )}
 
       {relacionados.length > 0 && (

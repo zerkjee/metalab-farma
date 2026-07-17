@@ -10,6 +10,21 @@ import CookieBanner from "@/components/cookies/CookieBanner";
 import { safeJsonLd } from "@/lib/json-ld";
 import "./globals.css";
 
+const themeInitializationScript = `
+  (function () {
+    try {
+      var saved = window.localStorage.getItem('metalab-theme');
+      var theme = saved === 'light' || saved === 'dark'
+        ? saved
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    } catch (_) {
+      document.documentElement.dataset.theme = 'light';
+    }
+  })();
+`;
+
 // Display (headings, nomes de produto, números de destaque)
 const fredoka = Fredoka({
   variable: "--font-display",
@@ -34,6 +49,11 @@ export const viewport: Viewport = {
   minimumScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FBFBFA" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B1120" },
+  ],
 }
 
 export const metadata: Metadata = {
@@ -87,8 +107,11 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${fredoka.variable} ${nunitoSans.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitializationScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLd(orgJsonLd) }}
@@ -98,7 +121,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#fafafa]">
+      <body className="min-h-full flex flex-col bg-background text-foreground transition-colors">
         <ScrollToTop />
         <SessionProviderWrapper>
           <CartProvider>

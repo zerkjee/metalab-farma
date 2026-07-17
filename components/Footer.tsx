@@ -4,10 +4,10 @@ import Image from 'next/image';
 export default function Footer() {
   const nav: Record<string, { label: string; href: string }[]> = {
     Produtos: [
-      { label: 'Suplementos', href: '/#produtos' },
+      { label: 'Todos os produtos', href: '/produtos' },
+      { label: 'Informativos técnicos', href: '/informativos' },
       { label: 'Vitaminas', href: '/#produtos' },
       { label: 'Minerais', href: '/#produtos' },
-      { label: 'Fitoterápicos', href: '/#produtos' },
     ],
     Institucional: [
       { label: 'Sobre a Metalab', href: '/sobre' },
@@ -164,7 +164,7 @@ export default function Footer() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-xs text-on-navy/60 leading-relaxed">
-              Este site comercializa exclusivamente suplementos alimentares. Os produtos aqui vendidos não são medicamentos e não substituem alimentos ou uma dieta equilibrada. Não possuem indicação terapêutica e não se destinam ao diagnóstico, tratamento, cura ou prevenção de doenças. Leia o rótulo com atenção antes de consumir. Consulte um profissional de saúde habilitado.
+              A classificação, composição, modo de uso e advertências variam conforme o produto. As informações da embalagem vigente prevalecem sobre o conteúdo digital. Não utilize este site para diagnóstico, tratamento ou substituição de orientação profissional. Leia o rótulo com atenção e consulte um profissional habilitado quando necessário.
             </p>
           </div>
         </div>

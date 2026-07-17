@@ -8,10 +8,12 @@ import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/context/CartContext';
 import SearchBar from '@/components/SearchBar';
 import CategoryMenu from '@/components/CategoryMenu';
+import ThemeToggle from '@/components/theme/ThemeToggle';
 
 const navItems = [
   { label: 'Início', href: '/' },
   { label: 'Produtos', href: '/produtos' },
+  { label: 'Informativos', href: '/informativos' },
   { label: 'Avaliações', href: '/avaliacoes' },
   { label: 'VIP', href: '/vip', highlight: true },
   { label: 'Contato', href: '/#contato' },
@@ -73,10 +75,10 @@ export default function Header() {
       {/* Faixa institucional — confiança e qualidade */}
       <div className="hidden md:block bg-navy text-on-navy">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between">
-          <p className="text-[11px] text-on-navy/70 font-medium tracking-wide">
+          <p className="text-[11px] text-on-navy/80 font-medium tracking-wide">
             Referência em Suplementação Alimentar · Confiança, Precisão, Excelência
           </p>
-          <div className="flex items-center gap-5 text-[11px] text-on-navy/60">
+          <div className="flex items-center gap-5 text-[11px] text-on-navy/75">
             <span className="flex items-center gap-1.5">
               <svg className="w-3 h-3 text-success" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -108,7 +110,7 @@ export default function Header() {
           </Link>
 
           {/* Nav desktop */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navItems.map((item) =>
               item.highlight ? (
                 <Link
@@ -133,6 +135,7 @@ export default function Header() {
 
           {/* Carrinho + hamburger */}
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {isLoggedIn ? (
               <div className="relative group hidden md:block">
                 <button className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-brand-subtle text-navy text-sm font-black hover:bg-brand-subtle-hover transition-all">

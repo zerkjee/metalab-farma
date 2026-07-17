@@ -1,12 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import { useRef, useEffect, useState } from 'react';
 import { ShoppingCart, Shield, Lock, Truck } from 'lucide-react';
 import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
 import { fmtCurrency } from '@/utils/formatters';
 import { calculateVolumePrice } from '@/lib/volume-pricing';
+import ProductImage from '@/components/ProductImage';
 
 interface ProductDetailHeroProps {
   product: Product;
@@ -30,7 +30,6 @@ export default function ProductDetailHero({
   const precoAtual = selectedPrice.unitPrice;
   const precoOriginalAtual = descPct > 0 ? preco : precoOriginal;
   const temEstoqueAtual = product.estoque > 0;
-
   function handleAddToCart() {
     addItem(product, selectedQty);
   }
@@ -65,20 +64,19 @@ export default function ProductDetailHero({
           {/* Imagem */}
           <div className="relative flex items-center justify-center" style={{ minHeight: 380 }}>
             {product.imagemUrl ? (
-              <Image
-                src={product.imagemUrl}
-                alt={product.nome}
-                width={480}
-                height={480}
-                className="w-full object-contain max-h-[420px] p-6"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-                placeholder="blur"
-                blurDataURL={`data:image/svg+xml;base64,${btoa(
-                  `<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='${corPrincipal}' opacity='0.15'/></svg>`
-                )}`}
-                style={{ filter: `drop-shadow(0 12px 36px ${corPrincipal}30)` }}
-              />
+              <div className="w-full max-w-[480px] p-6">
+                <ProductImage
+                  src={product.imagemUrl}
+                  alt={product.nome}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                  placeholder="blur"
+                  blurDataURL={`data:image/svg+xml;base64,${btoa(
+                    `<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='${corPrincipal}' opacity='0.15'/></svg>`
+                  )}`}
+                  style={{ filter: `drop-shadow(0 12px 36px ${corPrincipal}30)` }}
+                />
+              </div>
             ) : (
               <div className="flex flex-col items-center gap-4 py-16">
                 <div className="w-24 h-24 rounded-3xl flex items-center justify-center"

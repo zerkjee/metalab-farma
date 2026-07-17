@@ -31,7 +31,9 @@
     "test:e2e:auth": "playwright test e2e/tests/auth.spec.ts --project=chromium",
     "test:e2e:admin": "playwright test e2e/tests/admin.spec.ts --project=chromium",
     "test:e2e:mobile": "playwright test e2e/tests/mobile.spec.ts --project=mobile-android",
-    "playwright:install": "playwright install chromium firefox"
+    "playwright:install": "playwright install chromium firefox",
+    "informativos:sync": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/sync-informativos-catalog.ts",
+    "informativos:prompts": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/generate-higgsfield-prompts.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

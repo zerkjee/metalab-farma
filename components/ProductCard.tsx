@@ -1,12 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { memo, useCallback } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/types/product';
 import { useCart } from '@/context/CartContext';
 import { fmtCurrency } from '@/utils/formatters';
+import ProductImage from '@/components/ProductImage';
 
 interface ProductCardProps {
   product: Product;
@@ -19,7 +19,6 @@ function ProductCard({ product }: ProductCardProps) {
   const desconto = precoOriginal ? Math.round((1 - preco / precoOriginal) * 100) : 0;
   const temEstoque = product.estoque > 0;
   const cor = product.corPrincipal ?? 'var(--navy-500)';
-
   const handleAdd = useCallback(() => addItem(product), [addItem, product]);
 
   return (
@@ -27,14 +26,14 @@ function ProductCard({ product }: ProductCardProps) {
       className="group relative flex flex-col bg-surface-card rounded-lg border border-line shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
     >
       {/* Imagem */}
-      <Link href={`/produtos/${product.slug}`} className="block relative w-full h-72 bg-surface-card overflow-hidden">
+      <Link href={`/produtos/${product.slug}`} className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-surface-card p-5">
         {product.imagemUrl ? (
-          <Image
+          <ProductImage
             src={product.imagemUrl}
             alt={product.nome}
-            fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-5 transition-transform duration-500 group-hover:scale-105"
+            frameClassName="h-full max-w-full"
+            imageClassName="drop-shadow-[0_12px_18px_rgba(8,18,38,0.18)] transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-3">
